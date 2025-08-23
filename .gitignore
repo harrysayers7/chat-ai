@@ -53,6 +53,9 @@ next-env.d.ts
 
 local-data
 
+# custom MCP server compiled files
+custom-mcp-server/dist/
+
 .cursorrules
 .cursor
 *.ignore
