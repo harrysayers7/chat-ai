@@ -1,48 +1,22 @@
-FROM node:23-alpine AS builder
-ARG DOCKER_BUILD="1"
-WORKDIR /app
-
-COPY . . 
-
-# Install pnpm
-RUN corepack enable pnpm
-
-RUN pnpm install --frozen-lockfile
-
-# Makes the next output standalone
-# https://github.com/vercel/next.js/discussions/65511
-ENV NEXT_STANDALONE_OUTPUT="true"
-
-RUN pnpm build
-
-FROM node:23-alpine AS runner
+FROM node:18-alpine
 
 WORKDIR /app
 
-ENV NODE_ENV=production
-# disable telemetry during runtime.
-ENV NEXT_TELEMETRY_DISABLED=1
+# Copy source code first
+COPY . .
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+# Install pnpm and dependencies
+RUN npm install -g pnpm && pnpm install
 
-COPY --from=builder /app/public ./public
+# Set memory limit for Node.js
+ENV NODE_OPTIONS="--max-old-space-size=2048 --max-semi-space-size=512"
 
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Copy migrations content
-COPY --from=builder /app/src/lib/db/migrations ./src/lib/db/migrations
-
-USER nextjs
-
+# Set environment variables
+ENV NODE_ENV=development
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 EXPOSE 3000
 
-# server.js is created by next build from the standalone output
-# https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
-CMD ["node", "server.js"]
+# Start in development mode
+CMD ["pnpm", "dev", "--hostname", "0.0.0.0"]

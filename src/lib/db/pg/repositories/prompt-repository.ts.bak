@@ -1,0 +1,191 @@
+// import { eq, and, like, inArray, desc, asc, or, sql } from "drizzle-orm";
+// import { db } from "../db.pg";
+// import { PromptSchema, PromptCategorySchema } from "../schema.pg";
+// import { Prompt, CreatePromptRequest, UpdatePromptRequest, PromptCategory } from "@/types/prompt";
+
+export class PromptRepository {
+  // Create a new prompt
+  async create(userId: string, data: CreatePromptRequest): Promise<Prompt> {
+    const [prompt] = await db
+      .insert(PromptSchema)
+      .values({
+        ...data,
+        userId,
+        tags: data.tags || [],
+        isPublic: data.isPublic || false,
+      })
+      .returning();
+
+    return {
+      ...prompt,
+      createdAt: prompt.createdAt,
+      updatedAt: prompt.updatedAt,
+    };
+  }
+
+  // Get prompt by ID
+  async getById(id: string, userId: string): Promise<Prompt | null> {
+    const [prompt] = await db
+      .select()
+      .from(PromptSchema)
+      .where(
+        and(
+          eq(PromptSchema.id, id),
+          or(
+            eq(PromptSchema.userId, userId),
+            eq(PromptSchema.isPublic, true)
+          )
+        )
+      );
+
+    if (!prompt) return null;
+
+    return {
+      ...prompt,
+      createdAt: prompt.createdAt,
+      updatedAt: prompt.updatedAt,
+    };
+  }
+
+  // Get all prompts for a user (including public ones)
+  async getByUserId(userId: string, filters?: {
+    category?: string;
+    tags?: string[];
+    query?: string;
+  }): Promise<Prompt[]> {
+    let query = db
+      .select()
+      .from(PromptSchema)
+      .where(
+        or(
+          eq(PromptSchema.userId, userId),
+          eq(PromptSchema.isPublic, true)
+        )
+      );
+
+    if (filters?.category) {
+      query = query.where(eq(PromptSchema.category, filters.category));
+    }
+
+    if (filters?.tags && filters.tags.length > 0) {
+      query = query.where(inArray(PromptSchema.tags, filters.tags));
+    }
+
+    if (filters?.query) {
+      query = query.where(
+        or(
+          like(PromptSchema.name, `%${filters.query}%`),
+          like(PromptSchema.description, `%${filters.query}%`),
+          like(PromptSchema.content, `%${filters.query}%`)
+        )
+      );
+    }
+
+    const prompts = await query.orderBy(desc(PromptSchema.updatedAt));
+
+    return prompts.map(prompt => ({
+      ...prompt,
+      createdAt: prompt.createdAt,
+      updatedAt: prompt.updatedAt,
+    }));
+  }
+
+  // Update a prompt
+  async update(id: string, userId: string, data: UpdatePromptRequest): Promise<Prompt | null> {
+    const [prompt] = await db
+      .update(PromptSchema)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(PromptSchema.id, id),
+          eq(PromptSchema.userId, userId)
+        )
+      )
+      .returning();
+
+    if (!prompt) return null;
+
+    return {
+      ...prompt,
+      createdAt: prompt.createdAt,
+      updatedAt: prompt.updatedAt,
+    };
+  }
+
+  // Delete a prompt
+  async delete(id: string, userId: string): Promise<boolean> {
+    const [prompt] = await db
+      .delete(PromptSchema)
+      .where(
+        and(
+          eq(PromptSchema.id, id),
+          eq(PromptSchema.userId, userId)
+        )
+      )
+      .returning();
+
+    return !!prompt;
+  }
+
+  // Increment usage count
+  async incrementUsage(id: string): Promise<void> {
+    await db
+      .update(PromptSchema)
+      .set({
+        usageCount: sql`${PromptSchema.usageCount} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(PromptSchema.id, id));
+  }
+
+  // Get prompt categories for a user
+  async getCategories(userId: string): Promise<PromptCategory[]> {
+    const categories = await db
+      .select()
+      .from(PromptCategorySchema)
+      .where(eq(PromptCategorySchema.userId, userId))
+      .orderBy(asc(PromptCategorySchema.name));
+
+    return categories.map(category => ({
+      ...category,
+      createdAt: category.createdAt,
+      updatedAt: category.updatedAt,
+    }));
+  }
+
+  // Create a new category
+  async createCategory(userId: string, name: string, color?: string): Promise<PromptCategory> {
+    const [category] = await db
+      .insert(PromptCategorySchema)
+      .values({
+        name,
+        color,
+        userId,
+      })
+      .returning();
+
+    return {
+      ...category,
+      createdAt: category.createdAt,
+      updatedAt: category.updatedAt,
+    };
+  }
+
+  // Delete a category
+  async deleteCategory(id: string, userId: string): Promise<boolean> {
+    const [category] = await db
+      .delete(PromptCategorySchema)
+      .where(
+        and(
+          eq(PromptCategorySchema.id, id),
+          eq(PromptCategorySchema.userId, userId)
+        )
+      )
+      .returning();
+
+    return !!category;
+  }
+}

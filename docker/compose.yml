@@ -17,6 +17,8 @@ services:
     depends_on:
       - postgres
     restart: unless-stopped
+    mem_limit: 2g
+    mem_reservation: 1g
 
   postgres:
     image: postgres:17
@@ -27,6 +29,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+    mem_limit: 512m
+    mem_reservation: 256m
 
 volumes:
   postgres_data:

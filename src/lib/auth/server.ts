@@ -24,7 +24,12 @@ const {
 
 export const auth = betterAuth({
   plugins: [nextCookies()],
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL,
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL || "https://chat.sayers.app",
+  trustedOrigins: [
+    "https://chat.sayers.app",
+    "http://localhost:3000",
+    "http://localhost:3001",
+  ],
   database: drizzleAdapter(pgDb, {
     provider: "pg",
     schema: {

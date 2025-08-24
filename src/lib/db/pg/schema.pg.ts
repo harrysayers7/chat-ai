@@ -304,6 +304,40 @@ export const McpOAuthSessionSchema = pgTable(
   ],
 );
 
+// export const PromptSchema = pgTable("prompt", {
+//   id: uuid("id").primaryKey().notNull().defaultRandom(),
+//   name: text("name").notNull(),
+//   content: text("content").notNull(),
+//   description: text("description"),
+//   category: text("category"),
+//   tags: json("tags").$type<string[]>().default([]),
+//   isPublic: boolean("is_public").notNull().default(false),
+//   userId: uuid("id")
+//     .notNull()
+//     .references(() => UserSchema.id, { onDelete: "cascade" }),
+//   usageCount: integer("usage_count").notNull().default(0),
+//   createdAt: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+//   updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+// }, (t) => [
+//   index("prompt_user_id_idx").on(t.userId),
+//   index("prompt_category_idx").on(t.category),
+//   index("prompt_tags_idx").on(t.tags),
+//   index("prompt_public_idx").on(t.isPublic),
+// ]);
+
+// export const PromptCategorySchema = pgTable("prompt_category", {
+//   id: uuid("id").primaryKey().notNull().defaultRandom(),
+//   name: text("name").notNull(),
+//   color: text("color"),
+//   userId: uuid("id")
+//     .notNull()
+//     .references(() => UserSchema.id, { onDelete: "cascade" }),
+//   types: timestamp("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+//   updatedAt: timestamp("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+// }, (t) => [
+//   index("prompt_category_user_id_idx").on(t.userId),
+// ]);
+
 export type McpServerEntity = typeof McpServerSchema.$inferSelect;
 export type ChatThreadEntity = typeof ChatThreadSchema.$inferSelect;
 export type ChatMessageEntity = typeof ChatMessageSchema.$inferSelect;
@@ -318,3 +352,5 @@ export type McpServerCustomizationEntity =
 export type ArchiveEntity = typeof ArchiveSchema.$inferSelect;
 export type ArchiveItemEntity = typeof ArchiveItemSchema.$inferSelect;
 export type BookmarkEntity = typeof BookmarkSchema.$inferSelect;
+// export type PromptEntity = typeof PromptSchema.$inferSelect;
+// export type PromptCategoryEntity = typeof PromptCategorySchema.$inferSelect;
