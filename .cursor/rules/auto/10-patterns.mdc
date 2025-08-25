@@ -1,0 +1,302 @@
+---
+description: Auto-generated patterns (do not edit by hand)
+globs: ["**/*"]
+alwaysApply: false
+---
+
+# 🤖 Auto Patterns Summary
+Generated: 2025-08-24T05:47:24.936Z
+
+
+## ai-providers
+- **anthropic** 
+  - `src/app/api/chat/route.ts:193`
+  - `src/components/prompt-input.tsx:417`
+  - `src/components/select-model.tsx:148`
+  - `src/lib/ai/models.ts:6`
+  - `src/lib/ai/models.ts:39`
+  - `src/lib/ai/models.ts:40`
+  - `src/lib/ai/models.ts:41`
+  - `src/lib/ai/models.ts:42`
+  - `src/lib/ai/workflow/examples/baby-research.ts:1111`
+- **google-ai** 
+  - `src/components/chat-bot-voice.tsx:43`
+  - `src/components/chat-bot-voice.tsx:315`
+  - `src/components/prompt-input.tsx:36`
+  - `src/components/select-model.tsx:20`
+  - `src/lib/ai/models.ts:5`
+  - `src/lib/ai/models.ts:35`
+  - `src/lib/ai/models.ts:36`
+  - `src/lib/ai/models.ts:37`
+  - `src/lib/ai/models.ts:57`
+  - `src/lib/ai/models.ts:63`
+- **mcp** 
+  - `src/app/(auth)/sign-up/page.tsx:140`
+  - `src/app/(chat)/mcp/create/page.tsx:1`
+  - `src/app/(chat)/mcp/create/page.tsx:12`
+  - `src/app/(chat)/mcp/create/page.tsx:20`
+  - `src/app/(chat)/mcp/create/page.tsx:23`
+  - `src/app/(chat)/mcp/modify/[id]/page.tsx:1`
+  - `src/app/(chat)/mcp/modify/[id]/page.tsx:17`
+  - `src/app/(chat)/mcp/modify/[id]/page.tsx:24`
+  - `src/app/(chat)/mcp/modify/[id]/page.tsx:32`
+  - `src/app/(chat)/mcp/modify/[id]/page.tsx:35`
+  - `src/app/(chat)/mcp/modify/[id]/page.tsx:47`
+  - `src/app/(chat)/mcp/page.tsx:1`
+  - `src/app/(chat)/mcp/test/[id]/page.tsx:6`
+  - `src/app/(chat)/mcp/test/[id]/page.tsx:63`
+  - `src/app/(chat)/mcp/test/[id]/page.tsx:311`
+  - `src/app/(chat)/mcp/test/[id]/page.tsx:314`
+  - `src/app/(chat)/mcp/test/[id]/page.tsx:361`
+  - `src/app/(chat)/mcp/test/[id]/page.tsx:398`
+  - `src/app/(chat)/mcp/test/[id]/page.tsx:507`
+  - `src/app/(chat)/mcp/test/[id]/page.tsx:529`
+  - …and 297 more
+- **ollama** 
+  - `src/lib/ai/models.ts:3`
+  - `src/lib/ai/models.ts:16`
+  - `src/lib/ai/models.ts:48`
+  - `src/lib/ai/models.ts:49`
+  - `src/lib/ai/models.ts:50`
+  - `src/lib/ai/models.ts:51`
+  - `src/lib/ai/models.ts:64`
+  - `src/lib/ai/models.ts:65`
+  - `src/lib/ai/models.ts:66`
+- **openai** 
+  - `src/app/api/chat/openai-realtime/route.ts:25`
+  - `src/app/api/chat/openai-realtime/route.ts:96`
+  - `src/app/api/chat/route.ts:193`
+  - `src/app/store/index.ts:5`
+  - `src/app/store/index.ts:81`
+  - `src/components/chat-bot-voice.tsx:9`
+  - `src/components/chat-bot-voice.tsx:45`
+  - `src/components/chat-bot-voice.tsx:81`
+  - `src/components/chat-bot-voice.tsx:285`
+  - `src/components/prompt-input.tsx:33`
+  - `src/components/prompt-input.tsx:413`
+  - `src/components/select-model.tsx:22`
+  - `src/components/select-model.tsx:144`
+  - `src/components/select-model.tsx:160`
+  - `src/components/select-model.tsx:161`
+  - `src/components/ui/openai-icon.tsx:11`
+  - `src/lib/ai/azure-openai-compatible.test.ts:3`
+  - `src/lib/ai/azure-openai-compatible.test.ts:4`
+  - `src/lib/ai/azure-openai-compatible.test.ts:8`
+  - `src/lib/ai/azure-openai-compatible.test.ts:9`
+  - …and 73 more
+- **openrouter** 
+  - `src/lib/ai/models.ts:8`
+  - `src/lib/ai/models.ts:53`
+  - `src/lib/ai/models.ts:54`
+  - `src/lib/ai/models.ts:55`
+  - `src/lib/ai/models.ts:56`
+  - `src/lib/ai/models.ts:57`
+  - `src/lib/ai/models.ts:67`
+  - `src/lib/ai/models.ts:68`
+- **xai** 
+  - `src/components/prompt-input.tsx:34`
+  - `src/components/prompt-input.tsx:415`
+  - `src/components/prompt-input.tsx:416`
+  - `src/components/select-model.tsx:21`
+  - `src/components/select-model.tsx:146`
+  - `src/components/select-model.tsx:147`
+  - `src/components/ui/grok-icon.tsx:1`
+  - `src/lib/ai/models.ts:7`
+  - `src/lib/ai/models.ts:44`
+  - `src/lib/ai/models.ts:45`
+  - `src/lib/ai/models.ts:46`
+
+## backend
+- **drizzle** 
+  - `src/lib/db/pg/db.pg.ts:1`
+  - `src/lib/db/pg/migrate.pg.ts:1`
+  - `src/lib/db/pg/repositories/agent-repository.pg.ts:4`
+  - `src/lib/db/pg/repositories/archive-repository.pg.ts:9`
+  - `src/lib/db/pg/repositories/bookmark-repository.pg.ts:1`
+  - `src/lib/db/pg/repositories/chat-repository.pg.ts:11`
+  - `src/lib/db/pg/repositories/mcp-oauth-repository.pg.ts:4`
+  - `src/lib/db/pg/repositories/mcp-repository.pg.ts:3`
+  - `src/lib/db/pg/repositories/mcp-server-customization-repository.pg.ts:4`
+  - `src/lib/db/pg/repositories/mcp-tool-customization-repository.pg.ts:3`
+  - `src/lib/db/pg/repositories/user-repository.pg.ts:4`
+  - `src/lib/db/pg/repositories/workflow-repository.pg.ts:1`
+  - `src/lib/db/pg/schema.pg.ts:5`
+  - `src/lib/db/pg/schema.pg.ts:16`
+  - `src/lib/db/pg/schema.pg.ts:17`
+- **next-route** 
+  - `src/app/api/agent/[id]/route.ts:8`
+  - `src/app/api/agent/[id]/route.ts:29`
+  - `src/app/api/agent/[id]/route.ts:76`
+  - `src/app/api/agent/ai/route.ts:22`
+  - `src/app/api/agent/route.ts:8`
+  - `src/app/api/agent/route.ts:53`
+  - `src/app/api/archive/[id]/items/[itemId]/route.ts:4`
+  - `src/app/api/archive/[id]/items/route.ts:9`
+  - `src/app/api/archive/[id]/items/route.ts:41`
+  - `src/app/api/archive/[id]/route.ts:6`
+  - `src/app/api/archive/[id]/route.ts:43`
+  - `src/app/api/archive/[id]/route.ts:89`
+  - `src/app/api/archive/route.ts:6`
+  - `src/app/api/archive/route.ts:24`
+  - `src/app/api/bookmark/route.ts:10`
+  - `src/app/api/bookmark/route.ts:55`
+  - `src/app/api/chat/openai-realtime/route.ts:28`
+  - `src/app/api/chat/route.ts:57`
+  - `src/app/api/chat/temporary/route.ts:9`
+  - `src/app/api/chat/title/route.ts:16`
+  - …and 22 more
+- **redis** 
+  - `src/lib/cache/redis-cache.ts:1`
+  - `src/lib/cache/redis-cache.ts:6`
+  - `src/lib/cache/redis-cache.ts:14`
+  - `src/lib/cache/redis-cache.ts:20`
+  - `src/lib/cache/redis-cache.ts:21`
+  - `src/lib/cache/redis-cache.ts:23`
+  - `src/lib/cache/redis-cache.ts:25`
+  - `src/lib/cache/redis-cache.ts:37`
+  - `src/lib/cache/redis-cache.ts:52`
+  - `src/lib/cache/redis-cache.ts:54`
+  - `src/lib/cache/redis-cache.ts:59`
+  - `src/lib/cache/redis-cache.ts:64`
+  - `src/lib/cache/redis-cache.ts:69`
+  - `src/lib/cache/redis-cache.ts:71`
+  - `src/lib/cache/redis-cache.ts:74`
+  - `src/lib/cache/redis-cache.ts:81`
+  - `src/lib/cache/redis-cache.ts:85`
+  - `src/lib/cache/redis-cache.ts:105`
+  - `src/lib/cache/safe-redis-cache.test.ts:2`
+  - `src/lib/cache/safe-redis-cache.test.ts:4`
+  - …and 6 more
+
+## frontend
+- **radix** 
+  - `src/components/chat-bot-temporary.tsx:33`
+  - `src/components/ui/accordion.tsx:4`
+  - `src/components/ui/avatar.tsx:4`
+  - `src/components/ui/badge.tsx:2`
+  - `src/components/ui/breadcrumb.tsx:2`
+  - `src/components/ui/button.tsx:2`
+  - `src/components/ui/checkbox.tsx:4`
+  - `src/components/ui/context-menu.tsx:4`
+  - `src/components/ui/dialog.tsx:4`
+  - `src/components/ui/dropdown-menu.tsx:4`
+  - `src/components/ui/hover-card.tsx:4`
+  - `src/components/ui/label.tsx:4`
+  - `src/components/ui/popover.tsx:4`
+  - `src/components/ui/radio-group.tsx:4`
+  - `src/components/ui/scroll-area.tsx:4`
+  - `src/components/ui/select.tsx:4`
+  - `src/components/ui/separator.tsx:4`
+  - `src/components/ui/sheet.tsx:4`
+  - `src/components/ui/sidebar.tsx:4`
+  - `src/components/ui/switch.tsx:4`
+  - …and 3 more
+- **shadcn** 
+  - `src/app/(auth)/sign-up/page.tsx:5`
+  - `src/app/(auth)/sign-up/page.tsx:6`
+  - `src/app/(auth)/sign-up/page.tsx:7`
+  - `src/app/(auth)/sign-up/page.tsx:14`
+  - `src/app/(chat)/mcp/test/[id]/page.tsx:36`
+  - `src/components/mcp-dashboard.tsx:4`
+  - `src/components/sign-in.tsx:5`
+  - `src/components/sign-in.tsx:6`
+  - `src/components/sign-in.tsx:7`
+  - `src/components/sign-in.tsx:14`
+  - `src/components/tool-invocation/bar-chart.tsx:19`
+  - `src/components/tool-invocation/bar-chart.tsx:25`
+  - `src/components/tool-invocation/interactive-table.tsx:20`
+  - `src/components/tool-invocation/interactive-table.tsx:21`
+  - `src/components/tool-invocation/interactive-table.tsx:22`
+  - `src/components/tool-invocation/interactive-table.tsx:30`
+  - `src/components/tool-invocation/interactive-table.tsx:37`
+  - `src/components/tool-invocation/line-chart.tsx:21`
+  - `src/components/tool-invocation/line-chart.tsx:27`
+  - `src/components/tool-invocation/pie-chart.tsx:12`
+  - …and 10 more
+- **tiptap** 
+  - `src/components/chat-mention-input.tsx:24`
+  - `src/components/mention-input.tsx:2`
+  - `src/components/mention-input.tsx:9`
+  - `src/components/mention-input.tsx:10`
+  - `src/components/prompt-input.tsx:26`
+
+## security
+- **api-without-zod** — API route exports HTTP method but no Zod validation detected in file
+  - `src/app/api/agent/[id]/route.ts:1`
+  - `src/app/api/agent/ai/route.ts:1`
+  - `src/app/api/agent/route.ts:1`
+  - `src/app/api/archive/[id]/items/[itemId]/route.ts:1`
+  - `src/app/api/archive/[id]/route.ts:1`
+  - `src/app/api/archive/route.ts:1`
+  - `src/app/api/chat/openai-realtime/route.ts:1`
+  - `src/app/api/chat/route.ts:1`
+  - `src/app/api/chat/temporary/route.ts:1`
+  - `src/app/api/chat/title/route.ts:1`
+  - `src/app/api/mcp/list/route.ts:1`
+  - `src/app/api/mcp/oauth/callback/route.ts:1`
+  - `src/app/api/mcp/route.ts:1`
+  - `src/app/api/mcp/server-customizations/[server]/route.ts:1`
+  - `src/app/api/mcp/tool-customizations/[server]/[tool]/route.ts:1`
+  - `src/app/api/mcp/tool-customizations/[server]/route.ts:1`
+  - `src/app/api/thread/route.ts:1`
+  - `src/app/api/user/preferences/route.ts:1`
+  - `src/app/api/workflow/[id]/execute/route.ts:1`
+  - `src/app/api/workflow/[id]/route.ts:1`
+  - …and 3 more
+- **possible-secret** — Potential secret in code
+  - `src/lib/ai/azure-openai-compatible.test.ts:21`
+  - `src/lib/ai/azure-openai-compatible.test.ts:30`
+  - `src/lib/ai/azure-openai-compatible.test.ts:39`
+  - `src/lib/ai/azure-openai-compatible.test.ts:57`
+  - `src/lib/ai/azure-openai-compatible.test.ts:75`
+  - `src/lib/ai/azure-openai-compatible.test.ts:85`
+  - `src/lib/ai/create-openai-compatiable.test.ts:33`
+  - `src/lib/ai/create-openai-compatiable.test.ts:62`
+  - `src/lib/ai/create-openai-compatiable.test.ts:74`
+  - `src/lib/ai/create-openai-compatiable.test.ts:99`
+  - `src/lib/ai/create-openai-compatiable.test.ts:137`
+  - `src/lib/ai/create-openai-compatiable.test.ts:170`
+  - `src/lib/auth/config.test.ts:87`
+  - `src/lib/auth/config.test.ts:99`
+  - `src/lib/auth/config.test.ts:112`
+  - `src/lib/auth/config.test.ts:124`
+  - `src/lib/auth/config.test.ts:136`
+  - `src/lib/auth/config.test.ts:149`
+  - `src/lib/auth/config.test.ts:176`
+  - `src/lib/auth/config.test.ts:180`
+  - …and 1 more
+- **rate-limit** — Rate limiting referenced
+  - `src/lib/cache/safe-redis-cache.test.ts:56`
+  - `src/lib/cache/safe-redis-cache.test.ts:60`
+  - `src/lib/cache/safe-redis-cache.ts:90`
+  - `src/lib/cache/safe-redis-cache.ts:92`
+  - `src/lib/cache/safe-redis-cache.ts:98`
+- **zod** — Zod validation present
+  - `src/app/api/archive/[id]/items/route.ts:5`
+  - `src/app/api/archive/[id]/items/route.ts:6`
+  - `src/app/api/bookmark/route.ts:5`
+  - `src/app/api/bookmark/route.ts:6`
+  - `src/app/api/mcp/actions.ts:36`
+  - `src/components/archive-dialog.tsx:28`
+  - `src/components/archive-dialog.tsx:29`
+  - `src/components/archive-dialog.tsx:30`
+  - `src/components/mcp-customization-popup.tsx:89`
+  - `src/components/mcp-editor.tsx:78`
+  - `src/components/tool-detail-popup.tsx:98`
+  - `src/components/workflow/edit-workflow-popup.tsx:57`
+  - `src/components/workflow/edit-workflow-popup.tsx:58`
+  - `src/components/workflow/edit-workflow-popup.tsx:63`
+  - `src/components/workflow/edit-workflow-popup.tsx:64`
+  - `src/components/workflow/edit-workflow-popup.tsx:66`
+  - `src/components/workflow/edit-workflow-popup.tsx:69`
+  - `src/lib/ai/create-openai-compatiable.ts:76`
+  - `src/lib/ai/create-openai-compatiable.ts:77`
+  - `src/lib/ai/create-openai-compatiable.ts:78`
+  - …and 178 more
+
+---
+### Cursor Guardrails (suggestions)
+- Keep secrets in env; never commit tokens.
+- Ensure Zod validation at API boundaries.
+- Prefer Drizzle (parameterized) for DB access.
+- Limit tool chains; ask before side-effects.

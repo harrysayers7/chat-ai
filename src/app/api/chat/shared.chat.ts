@@ -102,7 +102,7 @@ export function excludeToolExecution(
 }
 
 export function appendAnnotations(
-  annotations: any[] = [],
+  annotations: ChatMessageAnnotation[] = [],
   annotationsToAppend: ChatMessageAnnotation[] | ChatMessageAnnotation,
 ): ChatMessageAnnotation[] {
   const newAnnotations = Array.isArray(annotationsToAppend)
@@ -181,14 +181,17 @@ export function manualToolExecuteByLastMessage(
     .unwrap();
 }
 
-export function handleError(error: any) {
+export function handleError(error: unknown) {
   if (LoadAPIKeyError.isInstance(error)) {
     return error.message;
   }
 
   logger.error(error);
-  logger.error(error.name);
-  return errorToString(error.message);
+  if (error instanceof Error) {
+    logger.error(error.name);
+    return errorToString(error.message);
+  }
+  return errorToString("An unknown error occurred");
 }
 
 export function convertToMessage(message: ChatMessage): Message {
@@ -369,7 +372,10 @@ export const workflowToVercelAITool = ({
           });
           return executor.run(
             {
-              query: query ?? ({} as any),
+              query:
+                query && typeof query === "object"
+                  ? (query as Record<string, unknown>)
+                  : {},
             },
             {
               disableHistory: true,

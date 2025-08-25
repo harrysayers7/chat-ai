@@ -57,7 +57,6 @@ local-data
 custom-mcp-server/dist/
 
 .cursorrules
-.cursor
 *.ignore
 .mcp-config.json
 openai-compatible.config.ts

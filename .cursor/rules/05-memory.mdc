@@ -1,0 +1,13 @@
+# Memory — Hybrid Model (Rules Only)
+- **Working memory**: Keep last N turns client-side; reset on session end.
+- **Persistent memory**:
+  - Postgres → chat history, action logs, metadata.
+  - Redis → short-term volatile state (low-latency).
+  - Vector DB (future) → embeddings for docs, semantic RAG.
+- **Knowledge graphs (optional)**: Use if multi-hop reasoning is needed.
+- **Retention**: 30d raw chat, 90d summaries.
+- **Consent**: Long-term memory must be opt-in; default = off.
+description: Memory architecture and data retention policies
+globs: ["**/*.{ts,tsx,js,jsx}"]
+alwaysApply: false
+---

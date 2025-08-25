@@ -25,7 +25,7 @@ import { Session, User } from "better-auth";
 
 export function AppSidebar({
   session,
-}: { session?: { session: Session; user: User } }) {
+}: { session?: { session: Session; user: User } | undefined }) {
   const { toggleSidebar, setOpenMobile } = useSidebar();
   const router = useRouter();
   const isMobile = useIsMobile();

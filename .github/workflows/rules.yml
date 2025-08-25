@@ -1,0 +1,16 @@
+name: rules
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate merged Cursor rules
+        shell: bash
+        run: |
+          bash scripts/rules-guard.sh
+

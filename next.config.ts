@@ -42,12 +42,6 @@ export default () => {
       },
       // Disable heavy features
       resolveExtensions: [".js", ".jsx", ".ts", ".tsx"],
-      moduleRules: [
-        {
-          test: /\.(png|jpe?g|gif|svg)$/i,
-          type: "asset/resource",
-        },
-      ],
     },
     allowedDevOrigins: ["chat.sayers.app", "localhost:3000", "localhost:3001"],
     // Optimize webpack for development

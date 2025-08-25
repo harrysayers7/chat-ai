@@ -1,0 +1,12 @@
+# Security — Personal Rules
+- **Secrets**: Never commit secrets. Use `.env` only.
+- **Allowed providers**: OPENAI, ANTHROPIC, GOOGLE, XAI, OPENROUTER, OLLAMA.
+- **Input validation**: Zod at all API boundaries.
+- **Error handling**: User-facing errors must be generic; details only in logs.
+- **Auth**: Use existing better-auth + OAuth; never roll custom crypto.
+- **Fetch/tooling**: Only allow-listed hosts; block arbitrary SSRF.
+- **Sign-up control**: Use `DISABLE_SIGN_UP=1` for solo mode.
+description: Security best practices and provider restrictions
+globs: ["**/*.{ts,tsx,js,jsx,md,json}"]
+alwaysApply: true
+---

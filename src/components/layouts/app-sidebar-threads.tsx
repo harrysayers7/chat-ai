@@ -1,7 +1,6 @@
 "use client";
 
 import { SidebarGroupLabel, SidebarMenuSub } from "ui/sidebar";
-import Link from "next/link";
 import {
   SidebarMenuAction,
   SidebarMenuButton,
@@ -31,7 +30,7 @@ import { useShallow } from "zustand/shallow";
 import { useRouter } from "next/navigation";
 import useSWR, { mutate } from "swr";
 import { handleErrorWithToast } from "ui/shared-toast";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 
 import { useTranslations } from "next-intl";
 import { TextShimmer } from "ui/text-shimmer";
@@ -41,7 +40,7 @@ import { ChatThread } from "app-types/chat";
 
 type ThreadGroup = {
   label: string;
-  threads: any[];
+  threads: ChatThread[];
 };
 
 const MAX_THREADS_COUNT = 40;
@@ -59,8 +58,15 @@ export function AppSidebarThreads() {
   );
   // State to track if expanded view is active
   const [isExpanded, setIsExpanded] = useState(false);
+  const [navigatingThreadId, setNavigatingThreadId] = useState<string | null>(
+    null,
+  );
 
-  const { data: threadList, isLoading } = useSWR("/api/thread", fetcher, {
+  const {
+    data: threadList,
+    isLoading,
+    error,
+  } = useSWR("/api/thread", fetcher, {
     onError: handleErrorWithToast,
     fallbackData: [],
     onSuccess: (data) => {
@@ -90,7 +96,37 @@ export function AppSidebarThreads() {
         };
       });
     },
+    // Add retry configuration
+    errorRetryCount: 3,
+    errorRetryInterval: 1000,
   });
+
+  // Handle thread navigation with loading state
+  const handleThreadClick = useCallback(
+    async (threadId: string) => {
+      console.log("Navigating to thread:", threadId);
+      setNavigatingThreadId(threadId);
+      try {
+        await router.push(`/chat/${threadId}`);
+      } catch (error) {
+        console.error("Navigation error:", error);
+        toast.error("Failed to navigate to chat");
+      } finally {
+        setNavigatingThreadId(null);
+      }
+    },
+    [router],
+  );
+
+  // Debug logging
+  useEffect(() => {
+    if (error) {
+      console.error("Thread loading error:", error);
+    }
+    if (threadList) {
+      console.log("Threads loaded:", threadList.length);
+    }
+  }, [error, threadList]);
 
   // Check if we have 40 or more threads to display "View All" button
   const hasExcessThreads = threadList && threadList.length >= MAX_THREADS_COUNT;
@@ -185,6 +221,20 @@ export function AppSidebarThreads() {
                 Array.from({ length: 12 }).map(
                   (_, index) => mounted && <SidebarMenuSkeleton key={index} />,
                 )
+              ) : error ? (
+                <div className="px-2 py-4 text-center">
+                  <p className="text-sm text-destructive mb-2">
+                    Failed to load chats
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => mutate("/api/thread")}
+                    className="text-xs"
+                  >
+                    Retry
+                  </Button>
+                </div>
               ) : (
                 <div className="px-2 py-4 text-center">
                   <p className="text-sm text-muted-foreground">
@@ -262,13 +312,21 @@ export function AppSidebarThreads() {
                                   className="group-hover/thread:bg-transparent!"
                                   isActive={currentThreadId === thread.id}
                                 >
-                                  <Link
-                                    href={`/chat/${thread.id}`}
-                                    className="flex items-center"
+                                  <button
+                                    onClick={() => handleThreadClick(thread.id)}
+                                    className="flex items-center w-full text-left"
+                                    disabled={navigatingThreadId === thread.id}
                                   >
-                                    {generatingTitleThreadIds.includes(
-                                      thread.id,
-                                    ) ? (
+                                    {navigatingThreadId === thread.id ? (
+                                      <div className="flex items-center gap-2">
+                                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary"></div>
+                                        <span className="text-muted-foreground">
+                                          Loading...
+                                        </span>
+                                      </div>
+                                    ) : generatingTitleThreadIds.includes(
+                                        thread.id,
+                                      ) ? (
                                       <TextShimmer className="truncate min-w-0">
                                         {thread.title || "New Chat"}
                                       </TextShimmer>
@@ -277,7 +335,7 @@ export function AppSidebarThreads() {
                                         {thread.title || "New Chat"}
                                       </p>
                                     )}
-                                  </Link>
+                                  </button>
                                 </SidebarMenuButton>
                               </TooltipTrigger>
                               <TooltipContent className="max-w-[200px] p-4 break-all overflow-y-auto max-h-[200px]">

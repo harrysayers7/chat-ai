@@ -1,0 +1,13 @@
+# Observability — Lean Metrics
+- **Latency SLOs**: p95 < 2s, p99 < 5s for chat responses.
+- **Error budget**: <2% 5xx errors in 1h window.
+- **Metrics to track**:
+  - Tokens in/out per request.
+  - Latency per LLM call and MCP tool call.
+  - Cache hits/misses (if Redis enabled).
+- **Logs**: Redact secrets/PII. Include request id + coarse timings only.
+- **Alerting**: Future → GitHub/Discord webhook integration on sustained errors.
+description: Performance metrics and SLO guidelines
+globs: ["**/*.{ts,tsx,js,jsx}"]
+alwaysApply: false
+---

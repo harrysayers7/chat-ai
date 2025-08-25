@@ -48,6 +48,7 @@ import { colorize } from "consola/utils";
 import { isVercelAIWorkflowTool } from "app-types/workflow";
 import { SequentialThinkingToolName } from "lib/ai/tools";
 import { sequentialThinkingTool } from "lib/ai/tools/thinking/sequential-thinking";
+import { ChatMessageAnnotation } from "app-types/chat";
 
 const logger = globalLogger.withDefaults({
   message: colorize("blackBright", `Chat API: `),
@@ -254,15 +255,18 @@ export async function POST(request: Request) {
                 parts: message.parts,
                 attachments: message.experimental_attachments,
                 id: message.id,
-                annotations: appendAnnotations(message.annotations, {
-                  usageTokens: usage.promptTokens,
-                }),
+                annotations: appendAnnotations(
+                  (message.annotations as ChatMessageAnnotation[]) || [],
+                  {
+                    usageTokens: usage.promptTokens,
+                  },
+                ),
               });
             }
             const assistantMessage = appendMessages.at(-1);
             if (assistantMessage) {
               const annotations = appendAnnotations(
-                assistantMessage.annotations,
+                (assistantMessage.annotations as ChatMessageAnnotation[]) || [],
                 {
                   usageTokens: usage.completionTokens,
                   toolChoice,
@@ -320,9 +324,8 @@ export async function POST(request: Request) {
               });
             }
             if (agent) {
-              await agentRepository.updateAgent(agent.id, session.user.id, {
-                updatedAt: new Date(),
-              } as any);
+              // Update agent last used timestamp
+              await agentRepository.updateAgent(agent.id, session.user.id, {});
             }
           },
         });
@@ -338,8 +341,10 @@ export async function POST(request: Request) {
       },
       onError: handleError,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(error);
-    return Response.json({ message: error.message }, { status: 500 });
+    const errorMessage =
+      error instanceof Error ? error.message : "An unknown error occurred";
+    return Response.json({ message: errorMessage }, { status: 500 });
   }
 }

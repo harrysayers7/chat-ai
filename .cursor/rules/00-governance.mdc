@@ -1,0 +1,11 @@
+# Governance (better-chatbot) — Personal Project
+- **Source of truth**: Next.js 15 + React 19 + TS strict mode + AI SDK v4 + MCP.
+- **Branching**: feature/* → PR → main. Avoid direct pushes to main.
+- **Deploy target**: Vercel for prod (Docker optional for MCP STDIO).
+- **PRs**: Keep small, typed, and tested. Include screenshots for UI.
+- **Env**: Update `.env.example` whenever env vars change.
+- **Docs**: README stays current with setup steps.
+description: Project workflow and development guidelines
+globs: ["**/*.{ts,tsx,js,jsx,md,pr,yml}"]
+alwaysApply: false
+---

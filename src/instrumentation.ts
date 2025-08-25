@@ -7,10 +7,7 @@ export async function register() {
       const runMigrate = await import("./lib/db/pg/migrate.pg").then(
         (m) => m.runMigrate,
       );
-      await runMigrate().catch((e) => {
-        console.error(e);
-        process.exit(1);
-      });
+      await runMigrate();
       const initMCPManager = await import("./lib/ai/mcp/mcp-manager").then(
         (m) => m.initMCPManager,
       );

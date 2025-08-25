@@ -1,3 +1,7 @@
 import { drizzle as drizzlePg } from "drizzle-orm/node-postgres";
 
-export const pgDb = drizzlePg(process.env.POSTGRES_URL!);
+if (!process.env.POSTGRES_URL) {
+  throw new Error("POSTGRES_URL environment variable is required but not set");
+}
+
+export const pgDb = drizzlePg(process.env.POSTGRES_URL);

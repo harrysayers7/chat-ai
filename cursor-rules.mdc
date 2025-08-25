@@ -1,0 +1,64 @@
+# Cursor Rules – chat-ai (Vercel-first, personal)
+
+## Role & Scope
+- You are an AI assistant helping build and maintain a Next.js 15 + React 19 + TS app.
+- Priorities (in order): **security > correctness > UX > speed > novelty**.
+- Deploy target: **Vercel for prod**, Docker only for self-host/MCP STDIO experiments.
+
+## Absolute DO / DON'T
+- ✅ **DO**: Keep secrets out of prompts and code. Use placeholders and `process.env.*`.
+- ✅ **DO**: Prefer typed, small PRs; add tests when touching core logic.
+- ✅ **DO**: Use parameterized queries or Drizzle ORM; validate all inputs with Zod.
+- ❌ **DON'T**: Paste API keys, PII, or tokens into Cursor chats, commits, or logs.
+- ❌ **DON'T**: Introduce new deps without a one‑line justification and license check (MIT/Apache preferred).
+
+## Providers & Models
+- Primary providers available: OpenAI, Anthropic, Google, XAI, OpenRouter, Ollama (local).
+- Pick the **cheapest model that passes tests** for each task; note any provider‑specific features used.
+- When uncertain, generate provider‑agnostic code using AI SDK v4 patterns.
+
+## Prompting & Context
+- Keep system prompts short, explicit, and **sanitized**. Use `<context>...</context>` or `---` blocks.
+- No training or storage of user content outside the app's DB; ground answers via app state or RAG only.
+
+## Security Rules (must follow)
+1) **Secrets**: Use env vars; never hardcode. Commit `.env.example` only.
+2) **Auth**: Use existing better-auth flows; never roll your own crypto.
+3) **DB**: Prefer Drizzle schema + parameterization. No string‑built SQL.
+4) **Input Validation**: Zod at API boundaries; return typed errors.
+5) **Error Messages**: Be generic to users, detailed in server logs only.
+6) **HTTP**: Use secure headers via Next.js config/middleware when possible.
+
+## Coding Standards
+- TypeScript **strict**; no `any` unless wrapped and explained.
+- Keep functions small; single responsibility; early returns welcome.
+- UI: Tailwind v4 + shadcn/ui; keep components accessible (labels, roles).
+- State: Zustand for client; server actions or tRPC-style patterns for API boundaries.
+
+## Tests & CI expectations
+- Add/adjust **unit tests (Vitest)** for changed logic; **Playwright** for critical flows only.
+- Lint and typecheck must pass. Keep CI under ~5 minutes.
+
+## PR Requirements (what to include)
+- Summary (what/why), screenshots (UI), checklist ticks for security + tests.
+- Note any new environment variables or migration steps (Drizzle).
+
+## Observability (lean)
+- Log warnings/errors with request id; do not log secrets or PII.
+- For now: rules only. Future: 30d raw logs, 90d summaries (see docs/OBSERVABILITY.md).
+
+## RAG / Memory Roadmap (rules only)
+- Defer implementation; if adding later, prefer **PG for history**, **vector store for docs**.
+
+## Vercel-first Deployment
+- Optimize for Vercel edge/functions; avoid Node-only APIs where possible.
+- Keep build minimal; gate heavy providers or MCP STDIO to Docker mode.
+
+## Style Nits
+- Imports: path aliases (`@/…`) where configured.
+- No silent catches; annotate expected failures.
+- Explain heuristics in comments where applicable.
+description: Core development rules for chat-ai project
+globs: ["**/*.{ts,tsx,js,jsx,md,json}"]
+alwaysApply: true
+---

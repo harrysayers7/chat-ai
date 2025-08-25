@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       },
 
       body: JSON.stringify({
-        model: "gpt-4o-realtime-preview",
+        model: "gpt-5",
         voice: voice || "alloy",
         input_audio_transcription: {
           model: "whisper-1",

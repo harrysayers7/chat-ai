@@ -1,0 +1,27 @@
+---
+description: Auto-generated providers view (env vs code)
+globs: ["**/*"]
+alwaysApply: false
+---
+
+# 🔌 Providers (Env ↔ Code)
+Generated: 2025-08-24T05:47:24.977Z
+
+## Environment Keys
+- **openai** → `OPENAI_API_KEY`: set (example: present)
+- **anthropic** → `ANTHROPIC_API_KEY`: set (example: present)
+- **google-ai** → `GOOGLE_GENERATIVE_AI_API_KEY`: set (example: present)
+- **xai** → `XAI_API_KEY`: set (example: present)
+- **openrouter** → `OPENROUTER_API_KEY`: set (example: present)
+- **ollama** → `OLLAMA_BASE_URL`: set (example: present)
+
+## Providers Referenced in Code
+- **anthropic**
+- **google-ai**
+- **ollama**
+- **openai**
+- **openrouter**
+- **xai**
+
+## Suggestions
+- Looks consistent ✅

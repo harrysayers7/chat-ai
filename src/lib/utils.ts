@@ -60,7 +60,7 @@ export const isObject = (value: any): value is Record<string, any> =>
 export const isNull = (value: any): value is null | undefined => value == null;
 
 export const isPromiseLike = (x: unknown): x is PromiseLike<unknown> =>
-  isFunction((x as any)?.then);
+  isFunction((x as { then?: unknown })?.then);
 
 export const isJson = (value: any): value is Record<string, any> => {
   try {
@@ -316,7 +316,7 @@ export function convertToUIMessage(message: ChatMessage): UIMessage {
 }
 
 export async function nextTick() {
-  return new Promise((resolve) => setTimeout(resolve, 0));
+  return new Promise<void>((resolve) => queueMicrotask(resolve));
 }
 
 export function cleanVariableName(input: string = ""): string {

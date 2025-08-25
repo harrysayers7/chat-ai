@@ -21,24 +21,17 @@ import { useShallow } from "zustand/shallow";
 import { UIMessage } from "ai";
 
 import { safe } from "ts-safe";
-import { mutate } from "swr";
 import {
   ChatApiSchemaRequestBody,
   ChatModel,
   ClientToolInvocation,
 } from "app-types/chat";
 import { useToRef } from "@/hooks/use-latest";
-import { isShortcutEvent, Shortcuts } from "lib/keyboard-shortcuts";
+
 import { Button } from "ui/button";
 import { deleteThreadAction } from "@/app/api/chat/actions";
 import { useRouter } from "next/navigation";
-import {
-  ArrowDown,
-  Loader,
-  MessageSquare,
-  BookOpen,
-  PlusIcon,
-} from "lucide-react";
+import { ArrowDown, Loader, BookOpen } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -54,8 +47,7 @@ import dynamic from "next/dynamic";
 import { useMounted } from "@/hooks/use-mounted";
 import { getStorageManager } from "lib/browser-stroage";
 import { AnimatePresence, motion } from "framer-motion";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "ui/tabs";
-import { PromptLibrary } from "./prompt-library";
+import { PromptLibrarySidePanel } from "./prompt-library-side-panel";
 import { PromptEditor } from "./prompt-editor";
 
 type Props = {
@@ -67,10 +59,6 @@ type Props = {
     inputBottomSlot?: ReactNode;
   };
 };
-
-const LightRays = dynamic(() => import("ui/light-rays"), {
-  ssr: false,
-});
 
 const Particles = dynamic(() => import("ui/particles"), {
   ssr: false,
@@ -85,7 +73,8 @@ firstTimeStorage.set(false);
 export default function ChatBot({ threadId, initialMessages, slots }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
-  const [activeTab, setActiveTab] = useState<"chat" | "prompts">("chat");
+  const [isPromptLibraryOpen, setIsPromptLibraryOpen] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   const [thinking, setThinking] = useState(false);
 
@@ -180,11 +169,20 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
         if (part.length > 0) {
           generateTitle(part.join("\n\n"));
         }
-      } else if (latestRef.current.threadList[0]?.id !== threadId) {
-        mutate("/api/thread");
       }
     },
+    onError: (error) => {
+      console.error("Chat error:", error);
+      setIsInitializing(false);
+    },
   });
+
+  // Set initializing to false once messages are loaded
+  useEffect(() => {
+    if (initialMessages.length > 0 || messages.length > 0) {
+      setIsInitializing(false);
+    }
+  }, [initialMessages.length, messages.length]);
 
   const [isDeleteThreadPopupOpen, setIsDeleteThreadPopupOpen] = useState(false);
 
@@ -276,36 +274,31 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
   }, [isLoading, messages.at(-1)]);
 
   const particle = useMemo(() => {
-    return (
-      <AnimatePresence>
-        {showParticles && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 5 }}
-          >
-            <div className="absolute top-0 left-0 w-full h-full z-10">
-              <LightRays />
-            </div>
-            <div className="absolute top-0 left-0 w-full h-full z-10">
-              <Particles particleCount={400} particleBaseSize={10} />
-            </div>
-
-            <div className="absolute top-0 left-0 w-full h-full z-10">
-              <div className="w-full h-full bg-gradient-to-t from-background to-50% to-transparent z-20" />
-            </div>
-            <div className="absolute top-0 left-0 w-full h-full z-10">
-              <div className="w-full h-full bg-gradient-to-l from-background to-20% to-transparent z-20" />
-            </div>
-            <div className="absolute top-0 left-0 w-full h-full z-10">
-              <div className="w-full h-full bg-gradient-to-r from-background to-20% to-transparent z-20" />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    );
+    if (!showParticles) return null;
+    return <Particles className="absolute inset-0 pointer-events-none" />;
   }, [showParticles]);
+
+  const handleScroll = useCallback(() => {
+    if (containerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+      const isAtBottomNow = scrollTop + clientHeight >= scrollHeight - 10;
+      setIsAtBottom(isAtBottomNow);
+    }
+  }, []);
+
+  const handleKeyDown = useCallback((_e: KeyboardEvent) => {
+    // Handle keyboard shortcuts here if needed
+  }, []);
+
+  const [_isScrollingToBottom, setIsScrollingToBottom] = useState(false);
+
+  const scrollToBottom = useCallback(() => {
+    if (containerRef.current) {
+      setIsScrollingToBottom(true);
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+      setTimeout(() => setIsScrollingToBottom(false), 100);
+    }
+  }, []);
 
   const handleFocus = useCallback(() => {
     setShowParticles(false);
@@ -315,36 +308,12 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
   const handleInsertPrompt = useCallback(
     (content: string) => {
       setInput(content);
-      setActiveTab("chat");
     },
     [setInput],
   );
 
   const [isPromptEditorOpen, setIsPromptEditorOpen] = useState(false);
   const [editingPrompt, setEditingPrompt] = useState<any>(null);
-
-  const handleCreatePrompt = useCallback(() => {
-    setEditingPrompt(null);
-    setIsPromptEditorOpen(true);
-  }, []);
-
-  const handleScroll = useCallback(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = container;
-    const isScrollAtBottom = scrollHeight - scrollTop - clientHeight < 50;
-
-    setIsAtBottom(isScrollAtBottom);
-    handleFocus();
-  }, [handleFocus]);
-
-  const scrollToBottom = useCallback(() => {
-    containerRef.current?.scrollTo({
-      top: containerRef.current.scrollHeight,
-      behavior: "smooth",
-    });
-  }, []);
 
   useEffect(() => {
     appStoreMutate({ currentThreadId: threadId });
@@ -374,36 +343,31 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
   }, [isInitialThreadEntry]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const messages = latestRef.current.messages;
-      if (messages.length === 0) return;
-      const isLastMessageCopy = isShortcutEvent(e, Shortcuts.lastMessageCopy);
-      const isDeleteThread = isShortcutEvent(e, Shortcuts.deleteThread);
-      if (!isDeleteThread && !isLastMessageCopy) return;
-      e.preventDefault();
-      e.stopPropagation();
-      if (isLastMessageCopy) {
-        const lastMessage = messages.at(-1);
-        const lastMessageText = lastMessage!.parts
-          .filter((part) => part.type == "text")
-          ?.at(-1)?.text;
-        if (!lastMessageText) return;
-        navigator.clipboard.writeText(lastMessageText);
-        toast.success("Last message copied to clipboard");
-      }
-      if (isDeleteThread) {
-        setIsDeleteThreadPopupOpen(true);
-      }
-    };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [handleKeyDown]);
 
   useEffect(() => {
     if (mounted) {
       handleFocus();
     }
   }, [input]);
+
+  // Show loading state while initializing
+  if (isInitializing) {
+    return (
+      <div className="flex flex-col h-full w-full max-w-3xl mx-auto px-6 py-8">
+        <div className="flex items-center justify-center py-12">
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <p className="text-sm text-muted-foreground">
+              Initializing chat...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -414,6 +378,19 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
           "flex flex-col min-w-0 relative h-full",
         )}
       >
+        {/* Prompt Library Button - Always Visible */}
+        <div className="absolute top-4 right-4 z-10">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsPromptLibraryOpen(true)}
+            className="flex items-center gap-2 shadow-sm"
+          >
+            <BookOpen className="w-4 h-4" />
+            Prompt Library
+          </Button>
+        </div>
+
         {emptyMessage ? (
           slots?.emptySlot ? (
             slots.emptySlot
@@ -421,90 +398,54 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
             <ChatGreeting />
           )
         ) : (
-          <Tabs
-            value={activeTab}
-            onValueChange={(value) => setActiveTab(value as "chat" | "prompts")}
-            className="h-full flex flex-col"
-          >
-            <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-4">
-              <TabsTrigger value="chat" className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4" />
-                Chat
-              </TabsTrigger>
-              <TabsTrigger value="prompts" className="flex items-center gap-2">
-                <BookOpen className="w-4 h-4" />
-                Prompt Library
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="chat" className="flex-1 flex flex-col">
-              <div
-                className={"flex flex-col gap-2 overflow-y-auto py-6 flex-1"}
-                ref={containerRef}
-                onScroll={handleScroll}
-              >
-                {messages.map((message, index) => {
-                  const isLastMessage = messages.length - 1 === index;
-                  return (
-                    <PreviewMessage
-                      threadId={threadId}
-                      messageIndex={index}
-                      key={index}
-                      message={message}
-                      status={status}
-                      onPoxyToolCall={
-                        isPendingToolCall &&
-                        !isExecutingProxyToolCall &&
-                        isLastMessage
-                          ? proxyToolCall
-                          : undefined
-                      }
-                      isLoading={isLoading || isPendingToolCall}
-                      isLastMessage={isLastMessage}
-                      setMessages={setMessages}
-                      reload={reload}
-                      className={
-                        needSpaceClass(index) ? "min-h-[calc(55dvh-40px)]" : ""
-                      }
-                    />
-                  );
-                })}
-                {space && (
-                  <>
-                    <div className="w-full mx-auto max-w-3xl px-6 relative">
-                      <div className={space == "space" ? "opacity-0" : ""}>
-                        <Think />
-                      </div>
+          <div className="flex flex-col h-full relative">
+            {/* Chat Messages */}
+            <div
+              className={"flex flex-col gap-2 overflow-y-auto py-6 flex-1"}
+              ref={containerRef}
+              onScroll={handleScroll}
+            >
+              {messages.map((message, index) => {
+                const isLastMessage = messages.length - 1 === index;
+                return (
+                  <PreviewMessage
+                    threadId={threadId}
+                    messageIndex={index}
+                    key={index}
+                    message={message}
+                    status={status}
+                    onPoxyToolCall={
+                      isPendingToolCall &&
+                      !isExecutingProxyToolCall &&
+                      isLastMessage
+                        ? proxyToolCall
+                        : undefined
+                    }
+                    isLoading={isLoading || isPendingToolCall}
+                    isLastMessage={isLastMessage}
+                    setMessages={setMessages}
+                    reload={reload}
+                    className={
+                      needSpaceClass(index) ? "min-h-[calc(55dvh-40px)]" : ""
+                    }
+                  />
+                );
+              })}
+              {space && (
+                <>
+                  <div className="w-full mx-auto max-w-3xl px-6 relative">
+                    <div className={space == "space" ? "opacity-0" : ""}>
+                      <Think />
                     </div>
-                    <div className="min-h-[calc(55dvh-56px)]" />
-                  </>
-                )}
+                  </div>
+                  <div className="min-h-[calc(55dvh-56px)]" />
+                </>
+              )}
 
-                {error && <ErrorMessage error={error} />}
-                <div className="min-w-0 min-h-52" />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="prompts" className="flex-1 flex flex-col">
-              <div className="flex items-center justify-between p-4 border-b">
-                <h3 className="font-semibold text-lg">Prompt Library</h3>
-                <Button
-                  size="sm"
-                  onClick={handleCreatePrompt}
-                  className="flex items-center gap-2"
-                >
-                  <PlusIcon className="w-4 h-4" />
-                  New Prompt
-                </Button>
-              </div>
-              <div className="flex-1 overflow-y-auto">
-                <PromptLibrary
-                  onInsertPrompt={handleInsertPrompt}
-                  embedded={true}
-                />
-              </div>
-            </TabsContent>
-          </Tabs>
+              {error && <ErrorMessage error={error} />}
+              <div className="min-w-0 min-h-52" />
+            </div>
+          </div>
         )}
 
         <div
@@ -535,6 +476,13 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
           threadId={threadId}
           onClose={() => setIsDeleteThreadPopupOpen(false)}
           open={isDeleteThreadPopupOpen}
+        />
+
+        {/* Prompt Library Side Panel */}
+        <PromptLibrarySidePanel
+          isOpen={isPromptLibraryOpen}
+          onClose={() => setIsPromptLibraryOpen(false)}
+          onInsertPrompt={handleInsertPrompt}
         />
 
         {/* Prompt Editor Modal */}

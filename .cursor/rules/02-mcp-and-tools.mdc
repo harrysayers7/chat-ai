@@ -1,0 +1,11 @@
+# MCP & Tool Use — Lean Rules
+- **Tool choice**: Manual default. Auto only for idempotent tools.
+- **Whitelist**: Only MCP servers you explicitly configure.
+- **Mode**: Vercel → remote MCP; Docker/self-host → STDIO MCP.
+- **Chain limits**: Max 5 calls; stop on repeated thoughts.
+- **Side effects**: Ask before any irreversible action.
+- **Mentions**: Use `@tool` style for one-offs; presets for frequent tools.
+description: MCP server and tool usage guidelines
+globs: ["**/*.{ts,tsx,js,jsx}", "**/mcp/**/*", "**/tools/**/*"]
+alwaysApply: false
+---

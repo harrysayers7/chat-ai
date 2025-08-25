@@ -1,0 +1,9 @@
+# Audit — Lightweight Defaults
+- **Log per chat turn**: model, provider, tokens, latency, errors.
+- **Redaction**: No API keys, emails, or raw PII in logs.
+- **Retention**: Raw logs ~30 days, summaries ~90 days.
+- **Export**: Future feature → summaries only, not raw history.
+description: Logging and audit policies
+globs: ["**/*.{ts,tsx,js,jsx}"]
+alwaysApply: false
+---

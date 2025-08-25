@@ -41,7 +41,14 @@
     "docker:app": "docker build -f docker/Dockerfile -t better-chatbot . && docker run -p 3000:3000 -e NO_HTTPS=1 better-chatbot",
     "prepare": "husky",
     "playwright:install": "playwright install",
-    "check": "pnpm lint:fix && pnpm check-types && pnpm test"
+    "check": "pnpm lint:fix && pnpm check-types && pnpm test",
+    "rules:guard": "node scripts/rules-guard.cjs",
+    "rules:analyze": "node scripts/analyze-patterns.cjs",
+    "rules:providers": "node scripts/env-providers.cjs",
+    "rules:merge": "node scripts/merge-rules.cjs",
+    "rules:update": "node scripts/analyze-patterns.cjs && node scripts/env-providers.cjs && node scripts/merge-rules.cjs",
+    "rules:watch": "NODE_ENV=development node scripts/watch-patterns.cjs",
+    "rules:ci": "bash scripts/rules-guard.sh"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.12",

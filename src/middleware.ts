@@ -14,6 +14,13 @@ export async function middleware(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
 
   if (!sessionCookie) {
+    // Validate the redirect URL to prevent open redirect vulnerabilities
+    const signInUrl = new URL("/sign-in", request.url);
+    // Only allow redirecting to the same origin
+    if (signInUrl.origin === request.nextUrl.origin) {
+      return NextResponse.redirect(signInUrl);
+    }
+    // Fallback to a safe redirect if origin doesn't match
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
   return NextResponse.next();

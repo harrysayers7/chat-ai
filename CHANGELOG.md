@@ -1,5 +1,21 @@
 # Changelog
 
+## [Unreleased]
+
+### Features
+* **prompt-library:** Redesign prompt library as side panel for better UX
+  - Replace tab-based interface with collapsible side panel
+  - Cleaner prompt display showing only names initially
+  - Click to expand and view full prompt content
+  - Maintain chat context while accessing prompts
+  - Improved category organization and search functionality
+
+### Bug Fixes
+* **database:** Fix PostgreSQL connection issues causing slow sign-in
+  - Install and configure PostgreSQL database
+  - Create prompt library tables and sample data
+  - Resolve database migration errors
+
 ## [1.20.2](https://github.com/cgoinglove/better-chatbot/compare/v1.20.1...v1.20.2) (2025-08-09)
 
 

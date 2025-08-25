@@ -90,8 +90,7 @@ const createUIMessage = (m: {
 export function useOpenAIVoiceChat(
   props?: UseOpenAIVoiceChatProps,
 ): VoiceChatSession {
-  const { model = "gpt-4o-realtime-preview", voice = OPENAI_VOICE.Ash } =
-    props || {};
+  const { model = "gpt-5", voice = OPENAI_VOICE.Ash } = props || {};
 
   const [agentId, allowedAppDefaultToolkit, allowedMcpServers] = appStore(
     useShallow((state) => [

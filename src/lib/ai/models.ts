@@ -19,6 +19,10 @@ const ollama = createOllama({
 
 const staticModels = {
   openai: {
+    "gpt-5": openai("gpt-5"),
+    "gpt-5-mini": openai("gpt-5-mini"),
+    "gpt-5-nano": openai("gpt-5-nano"),
+    "gpt-5-chat-latest": openai("gpt-5-chat-latest"),
     "gpt-4.1": openai("gpt-4.1"),
     "gpt-4.1-mini": openai("gpt-4.1-mini"),
     "4o": openai("gpt-4o"),
@@ -84,7 +88,7 @@ export const isToolCallUnsupportedModel = (model: LanguageModel) => {
   return allUnsupportedModels.has(model);
 };
 
-const fallbackModel = staticModels.openai["gpt-4.1"];
+const fallbackModel = staticModels.openai["gpt-5"];
 
 export const customModelProvider = {
   modelsInfo: Object.entries(allModels).map(([provider, models]) => ({

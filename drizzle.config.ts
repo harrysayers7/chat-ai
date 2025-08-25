@@ -3,7 +3,11 @@ import "load-env";
 
 const dialect = "postgresql";
 
-const url = process.env.POSTGRES_URL!;
+if (!process.env.POSTGRES_URL) {
+  throw new Error("POSTGRES_URL environment variable is required but not set");
+}
+
+const url = process.env.POSTGRES_URL;
 
 const schema = "./src/lib/db/pg/schema.pg.ts";
 
