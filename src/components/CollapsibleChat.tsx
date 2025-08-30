@@ -5,15 +5,15 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Button } from "@/components/ui/button";
+} from "ui/collapsible";
+import { Button } from "ui/button";
 import { Pin, Star, Copy, ChevronUp } from "lucide-react";
 import { SaveButtons } from "./save-buttons";
 import { CopyButton } from "./copy-button";
 
 interface Message {
   id: string;
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system" | "data";
   content: string;
 }
 
@@ -113,7 +113,7 @@ export function CollapsibleChat({
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-gray-600">
-                      {message.role === "user" ? "User" : "Assistant"}
+                      {message.role === "user" ? "User" : message.role === "data" ? "Data" : "Assistant"}
                     </span>
                     <div className="flex items-center gap-1">
                       <Button
@@ -202,7 +202,7 @@ export function CollapsibleChat({
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium text-gray-600">
-                            {message.role === "user" ? "User" : "Assistant"}
+                            {message.role === "user" ? "User" : message.role === "data" ? "Data" : "Assistant"}
                           </span>
                           <div className="flex items-center gap-1">
                             <Button
@@ -294,7 +294,7 @@ export function CollapsibleChat({
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium text-gray-600">
-                            {message.role === "user" ? "User" : "Assistant"}
+                            {message.role === "user" ? "User" : message.role === "data" ? "Data" : "Assistant"}
                           </span>
                           <div className="flex items-center gap-1">
                             <Button

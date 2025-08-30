@@ -49,6 +49,7 @@ import { getStorageManager } from "lib/browser-stroage";
 import { AnimatePresence, motion } from "framer-motion";
 import { PromptLibrarySidePanel } from "./prompt-library-side-panel";
 import { PromptEditor } from "./prompt-editor";
+import { CollapsibleChat } from "./CollapsibleChat";
 
 type Props = {
   threadId: string;
@@ -105,6 +106,10 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
   });
 
   const [showParticles, setShowParticles] = useState(isFirstTime);
+  const collapsibleViewStorage = getStorageManager<boolean>("use-collapsible-view");
+  const [useCollapsibleView, setUseCollapsibleView] = useState(() => 
+    collapsibleViewStorage.get(false)
+  );
 
   const {
     messages,
@@ -399,52 +404,97 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
           )
         ) : (
           <div className="flex flex-col h-full relative">
-            {/* Chat Messages */}
-            <div
-              className={"flex flex-col gap-2 overflow-y-auto py-6 flex-1"}
-              ref={containerRef}
-              onScroll={handleScroll}
-            >
-              {messages.map((message, index) => {
-                const isLastMessage = messages.length - 1 === index;
-                return (
-                  <PreviewMessage
-                    threadId={threadId}
-                    messageIndex={index}
-                    key={index}
-                    message={message}
-                    status={status}
-                    onPoxyToolCall={
-                      isPendingToolCall &&
-                      !isExecutingProxyToolCall &&
-                      isLastMessage
-                        ? proxyToolCall
-                        : undefined
-                    }
-                    isLoading={isLoading || isPendingToolCall}
-                    isLastMessage={isLastMessage}
-                    setMessages={setMessages}
-                    reload={reload}
-                    className={
-                      needSpaceClass(index) ? "min-h-[calc(55dvh-40px)]" : ""
-                    }
-                  />
-                );
-              })}
-              {space && (
-                <>
-                  <div className="w-full mx-auto max-w-3xl px-6 relative">
-                    <div className={space == "space" ? "opacity-0" : ""}>
-                      <Think />
-                    </div>
-                  </div>
-                  <div className="min-h-[calc(55dvh-56px)]" />
-                </>
-              )}
-
-              {error && <ErrorMessage error={error} />}
-              <div className="min-w-0 min-h-52" />
+            {/* View Toggle */}
+            <div className="flex justify-center mb-4 pt-2">
+              <div className="flex items-center gap-2 bg-muted rounded-lg p-1">
+                <Button
+                  variant={!useCollapsibleView ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => {
+                    setUseCollapsibleView(false);
+                    collapsibleViewStorage.set(false);
+                  }}
+                  className="text-xs"
+                >
+                  Regular View
+                </Button>
+                <Button
+                  variant={useCollapsibleView ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => {
+                    setUseCollapsibleView(true);
+                    collapsibleViewStorage.set(true);
+                  }}
+                  className="text-xs"
+                >
+                  Collapsible View
+                </Button>
+              </div>
             </div>
+
+            {/* Chat Messages */}
+            {useCollapsibleView ? (
+              <div className="flex-1 overflow-y-auto px-6">
+                <CollapsibleChat
+                  messages={messages.map(msg => ({
+                    id: msg.id,
+                    role: msg.role,
+                    content: msg.parts
+                      .filter(part => part.type === 'text')
+                      .map(part => part.text)
+                      .join(' ')
+                  }))}
+                  threadId={threadId}
+                  onPoxyToolCall={isPendingToolCall && !isExecutingProxyToolCall ? proxyToolCall : undefined}
+                />
+              </div>
+            ) : (
+              <div
+                className={"flex flex-col gap-2 overflow-y-auto py-6 flex-1"}
+                ref={containerRef}
+                onScroll={handleScroll}
+              >
+                {messages.map((message, index) => {
+                  const isLastMessage = messages.length - 1 === index;
+                  return (
+                    <PreviewMessage
+                      threadId={threadId}
+                      messageIndex={index}
+                      key={index}
+                      message={message}
+                      status={status}
+                      onPoxyToolCall={
+                        isPendingToolCall &&
+                        !isExecutingProxyToolCall &&
+                        isLastMessage
+                          ? proxyToolCall
+                          : undefined
+                      }
+                      isLoading={isLoading || isPendingToolCall}
+                      isLastMessage={isLastMessage}
+                      setMessages={setMessages}
+                      reload={reload}
+                      className={
+                        needSpaceClass(index) ? "min-h-[calc(55dvh-40px)]" : ""
+                      }
+                    />
+                  );
+                })}
+                {space && (
+                  <>
+                    <div className="w-full mx-auto max-w-3xl px-6 relative">
+                      <div className={space == "space" ? "opacity-0" : ""}>
+                        <Think />
+                      </div>
+                    </div>
+                    <div className="min-h-[calc(55dvh-56px)]" />
+                  </>
+                )}
+
+                {error && <ErrorMessage error={error} />}
+                <div className="min-w-0 min-h-52" />
+              </div>
+            )}
           </div>
         )}
 

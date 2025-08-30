@@ -82,6 +82,24 @@ export const auth = betterAuth({
 
 export const getSession = async () => {
   "use server";
+  
+  // Bypass authentication if DISABLE_AUTH is true
+  if (process.env.DISABLE_AUTH === "true") {
+    // Return a mock session for development with a proper UUID
+    return {
+      user: {
+        id: "550e8400-e29b-41d4-a716-446655440000", // Valid UUID format
+        email: "dev@example.com",
+        name: "Development User",
+        image: null,
+        emailVerified: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
+    };
+  }
+  
   const session = await auth.api
     .getSession({
       headers: await headers(),
