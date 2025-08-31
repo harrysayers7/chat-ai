@@ -76,6 +76,7 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [isPromptLibraryOpen, setIsPromptLibraryOpen] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
+  const lastScrollTopRef = useRef(0);
 
   const [thinking, setThinking] = useState(false);
 
@@ -285,11 +286,12 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
     return <Particles className="absolute inset-0 pointer-events-none" />;
   }, [showParticles]);
 
-  const _handleScroll = useCallback(() => {
+  const handleScroll = useCallback(() => {
     if (containerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
       const isAtBottomNow = scrollTop + clientHeight >= scrollHeight - 10;
       setIsAtBottom(isAtBottomNow);
+      lastScrollTopRef.current = scrollTop;
     }
   }, []);
 
@@ -354,38 +356,56 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  // Listen for prompt library open event from floating bar
-  useEffect(() => {
-    const handleOpenPromptLibrary = () => {
-      setIsPromptLibraryOpen(true);
-    };
-
-    window.addEventListener("open-prompt-library", handleOpenPromptLibrary);
-    return () =>
-      window.removeEventListener(
-        "open-prompt-library",
-        handleOpenPromptLibrary,
-      );
-  }, []);
-
   useEffect(() => {
     if (mounted) {
       handleFocus();
     }
   }, [input]);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Add scroll event listener to track scroll position
+  useEffect(() => {
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+      return () => container.removeEventListener("scroll", handleScroll);
+    }
+  }, [handleScroll]);
+
+  // Auto-scroll to bottom when new messages arrive, but only if user is already at bottom
   useEffect(() => {
     if (messages.length > 0 && containerRef.current) {
-      const scrollToBottom = () => {
-        if (containerRef.current) {
-          containerRef.current.scrollTop = containerRef.current.scrollHeight;
-        }
-      };
+      const container = containerRef.current;
+      const isAtBottom =
+        container.scrollTop + container.clientHeight >=
+        container.scrollHeight - 10;
 
-      // Small delay to ensure content is rendered
-      const timer = setTimeout(scrollToBottom, 100);
-      return () => clearTimeout(timer);
+      // Only auto-scroll if user is already at the bottom
+      if (isAtBottom) {
+        const scrollToBottom = () => {
+          if (containerRef.current) {
+            // Use smooth scrolling to prevent jarring jumps
+            containerRef.current.scrollTo({
+              top: containerRef.current.scrollHeight,
+              behavior: "smooth",
+            });
+          }
+        };
+
+        // Small delay to ensure content is rendered
+        const timer = setTimeout(scrollToBottom, 100);
+        return () => clearTimeout(timer);
+      } else {
+        // If user is not at bottom, try to preserve their scroll position
+        const restoreScrollPosition = () => {
+          if (containerRef.current && lastScrollTopRef.current > 0) {
+            containerRef.current.scrollTop = lastScrollTopRef.current;
+          }
+        };
+
+        // Small delay to ensure content is rendered
+        const timer = setTimeout(restoreScrollPosition, 100);
+        return () => clearTimeout(timer);
+      }
     }
   }, [messages.length]);
 
@@ -424,7 +444,7 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
           <div className="flex flex-col h-full relative">
             {/* Chat Messages - Always Collapsible View */}
             <div
-              className="flex-1 overflow-y-auto px-6 pb-20"
+              className="flex-1 overflow-y-auto px-6 pb-40"
               ref={containerRef}
             >
               <CollapsibleChat
