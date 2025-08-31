@@ -45,6 +45,13 @@ function turnKey(t: Turn) {
   return [a, b].filter(Boolean).join(":");
 }
 
+// Helper function to truncate text to first 10 words
+function truncateToWords(text: string, maxWords: number = 10): string {
+  const words = text.trim().split(/\s+/);
+  if (words.length <= maxWords) return text;
+  return words.slice(0, maxWords).join(" ") + "...";
+}
+
 interface CollapsibleChatProps {
   messages: any[];
   isLoading?: boolean;
@@ -341,9 +348,7 @@ export function CollapsibleChat({
                                   {t.user ? "" : "🤖"}
                                   {t.user && (
                                     <div className="mt-1 text-xs text-muted-foreground truncate max-w-md">
-                                      {t.user.content.length > 60
-                                        ? `${t.user.content.substring(0, 60)}...`
-                                        : t.user.content}
+                                      {truncateToWords(t.user.content, 10)}
                                     </div>
                                   )}
                                 </div>
@@ -387,7 +392,7 @@ export function CollapsibleChat({
                                 {t.user && (
                                   <div className="space-y-2">
                                     <div className="flex justify-end">
-                                      <div className="bg-gray-700/50 rounded-2xl px-3 py-1 border border-gray-600/30 max-w-xs">
+                                      <div className="bg-gray-700/50 rounded-full px-4 py-0.5 border border-gray-600/30 max-w-xs">
                                         <Markdown>{t.user.content}</Markdown>
                                       </div>
                                     </div>
@@ -398,13 +403,13 @@ export function CollapsibleChat({
                                 )}
                                 {t.assistant && (
                                   <div className="space-y-2 border-t border-border/30 pt-4">
-                                    <div className="flex items-center justify-start mb-2">
-                                      <CopyButton
-                                        content={t.assistant.content}
-                                      />
-                                    </div>
                                     <div className="space-y-2">
                                       <Markdown>{t.assistant.content}</Markdown>
+                                      <div className="flex items-center justify-start">
+                                        <CopyButton
+                                          content={t.assistant.content}
+                                        />
+                                      </div>
                                     </div>
                                   </div>
                                 )}
@@ -429,13 +434,13 @@ export function CollapsibleChat({
           <Collapsible data-master-collapse="trigger" defaultOpen={true}>
             <CollapsibleTrigger className="w-full flex items-center justify-between p-3 rounded-lg bg-background/20 hover:bg-background/30 border border-border/20 hover:border-border/40 transition-all duration-200">
               <span className="text-sm font-medium text-muted-foreground">
-                Older Chats ({filteredTurns.length - 2})
+                Older Chats ({filteredTurns.length - 1})
               </span>
               <ChevronUp className="w-4 h-4 text-muted-foreground transform transition-transform duration-200 group-data-[state=closed]:rotate-180" />
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-4">
               <div className="space-y-4">
-                {filteredTurns.slice(0, -2).map((t, idx) => {
+                {filteredTurns.slice(0, -1).map((t, idx) => {
                   const key = turnKey(t) || String(idx);
                   const defaultOpen = shouldOpen(idx, key);
                   const isPinned = !!pinned[key];
@@ -457,9 +462,7 @@ export function CollapsibleChat({
                                 {t.user ? "" : "🤖"}
                                 {t.user && (
                                   <div className="mt-0.5 text-xs text-muted-foreground truncate max-w-md">
-                                    {t.user.content.length > 60
-                                      ? `${t.user.content.substring(0, 60)}...`
-                                      : t.user.content}
+                                    {truncateToWords(t.user.content, 10)}
                                   </div>
                                 )}
                               </div>
@@ -509,27 +512,22 @@ export function CollapsibleChat({
                             {t.user && (
                               <div className="space-y-2">
                                 <div className="flex justify-end">
-                                  <div className="bg-gray-700/50 rounded-2xl px-3 py-1 border border-gray-600/30 max-w-xs">
+                                  <div className="bg-gray-700/50 rounded-full px-4 py-0.5 border border-gray-600/30 max-w-xs">
                                     <Markdown>{t.user.content}</Markdown>
                                   </div>
                                 </div>
                                 <div className="flex items-center justify-end gap-1 mt-2">
                                   <CopyButton content={t.user.content} />
                                 </div>
-                                <div className="flex justify-end">
-                                  <div className="bg-gray-700/50 rounded-2xl px-3 py-1 border border-gray-600/30 max-w-xs">
-                                    <Markdown>{t.user.content}</Markdown>
-                                  </div>
-                                </div>
                               </div>
                             )}
                             {t.assistant && (
                               <div className="space-y-2 border-t border-border/20 pt-3">
-                                <div className="flex items-center justify-start">
-                                  <CopyButton content={t.assistant.content} />
-                                </div>
                                 <div className="space-y-2">
                                   <Markdown>{t.assistant.content}</Markdown>
+                                  <div className="flex items-center justify-start">
+                                    <CopyButton content={t.assistant.content} />
+                                  </div>
                                   {t.assistant.parts &&
                                     t.assistant.parts.length > 0 && (
                                       <div className="mt-2 space-y-2">
@@ -611,12 +609,12 @@ export function CollapsibleChat({
           </Collapsible>
         )}
 
-        {/* Last 2 messages - always visible */}
+        {/* Last message - always visible */}
         <div className="border-t border-slate-600/40 pt-4 space-y-6">
-          {filteredTurns.slice(-2).map((t, relativeIdx) => {
-            const idx = filteredTurns.length - 2 + relativeIdx;
+          {filteredTurns.slice(-1).map((t, _relativeIdx) => {
+            const idx = filteredTurns.length - 1;
             const key = turnKey(t) || String(idx);
-            const defaultOpen = shouldOpen(idx, key);
+            const _defaultOpen = shouldOpen(idx, key);
             const isPinned = !!pinned[key];
             return (
               <div
@@ -625,10 +623,7 @@ export function CollapsibleChat({
                   if (el) refs.current[idx] = el;
                 }}
               >
-                <Collapsible
-                  defaultOpen={defaultOpen}
-                  className="overflow-hidden group mb-6 bg-background/30 rounded-lg p-1 hover:bg-background/40 transition-all duration-200"
-                >
+                <div className="mb-6">
                   <div className="w-full group">
                     <div className="flex items-center justify-between px-4 py-2 bg-background/40 rounded-lg hover:bg-background/50 transition-all duration-200">
                       <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -636,9 +631,7 @@ export function CollapsibleChat({
                           {t.user ? "" : "🤖"}
                           {t.user && (
                             <div className="mt-1 text-xs text-muted-foreground truncate max-w-md">
-                              {t.user.content.length > 60
-                                ? `${t.user.content.substring(0, 60)}...`
-                                : t.user.content}
+                              {truncateToWords(t.user.content, 10)}
                             </div>
                           )}
                         </div>
@@ -674,106 +667,98 @@ export function CollapsibleChat({
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                           </svg>
                         </button>
-                        <CollapsibleTrigger
-                          data-collapsible="trigger"
-                          className="flex items-center justify-center"
-                        >
-                          <ChevronUp className="w-4 h-4 text-slate-300 transform transition-transform duration-200 group-data-[state=closed]:rotate-180" />
-                        </CollapsibleTrigger>
                       </div>
                     </div>
                   </div>
-                  <CollapsibleContent className="overflow-hidden">
-                    <div className="p-4 text-sm space-y-4 border-t border-slate-500/30 mt-1">
-                      {t.user && (
-                        <div className="space-y-2">
-                          <div className="flex justify-end">
-                            <div className="bg-gray-700/50 rounded-2xl px-3 py-1 border border-gray-600/30 max-w-xs">
-                              <Markdown>{t.user.content}</Markdown>
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-end gap-1 mt-2">
-                            <CopyButton content={t.user.content} />
+                  <div className="mb-6 p-4 text-sm space-y-4">
+                    {t.user && (
+                      <div className="space-y-2">
+                        <div className="flex justify-end">
+                          <div className="bg-gray-700/50 rounded-full px-4 py-0.5 border border-gray-600/30 max-w-xs">
+                            <Markdown>{t.user.content}</Markdown>
                           </div>
                         </div>
-                      )}
-                      {t.assistant && (
-                        <div className="space-y-2 border-t border-border/30 pt-4">
+                        <div className="flex items-center justify-end gap-1 mt-2">
+                          <CopyButton content={t.user.content} />
+                        </div>
+                      </div>
+                    )}
+                    {t.assistant && (
+                      <div className="space-y-2 border-t border-border/30 pt-4">
+                        <div className="space-y-2">
+                          <Markdown>{t.assistant.content}</Markdown>
                           <div className="flex items-center justify-start">
                             <CopyButton content={t.assistant.content} />
                           </div>
-                          <div className="space-y-2">
-                            <Markdown>{t.assistant.content}</Markdown>
-                            {t.assistant.parts &&
-                              t.assistant.parts.length > 0 && (
-                                <div className="mt-2 space-y-2">
-                                  {t.assistant.parts.map((part, idx) => {
-                                    const isLast =
-                                      idx ===
-                                      (t.assistant?.parts?.length ?? 0) - 1;
-                                    if (part.type === "tool-call") {
-                                      const isManualToolInvocation =
-                                        part.toolInvocation?.state ===
-                                        "partial-call";
-                                      return (
-                                        <div
-                                          key={idx}
-                                          className="p-3 bg-slate-800/40 rounded-lg border border-slate-600/30"
-                                        >
-                                          <div className="font-medium mb-1">
-                                            🔧 Tool:{" "}
-                                            {part.toolInvocation?.toolName ||
-                                              "Unknown"}
-                                          </div>
-                                          <div className="text-xs text-gray-400">
-                                            {part.toolInvocation?.state ===
-                                            "result"
-                                              ? "Completed"
-                                              : "Executing..."}
-                                          </div>
-                                          {isManualToolInvocation &&
-                                            isLast &&
-                                            onPoxyToolCall && (
-                                              <div className="mt-2 flex gap-2">
-                                                <button
-                                                  onClick={() =>
-                                                    onPoxyToolCall({
-                                                      action: "manual",
-                                                      result: true,
-                                                    })
-                                                  }
-                                                  className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded hover:bg-green-200"
-                                                >
-                                                  Approve
-                                                </button>
-                                                <button
-                                                  onClick={() =>
-                                                    onPoxyToolCall({
-                                                      action: "manual",
-                                                      result: false,
-                                                    })
-                                                  }
-                                                  className="px-2 text-xs bg-red-100 text-red-800 rounded hover:bg-red-200"
-                                                >
-                                                  Reject
-                                                </button>
-                                              </div>
-                                            )}
+                          {t.assistant.parts &&
+                            t.assistant.parts.length > 0 && (
+                              <div className="mt-2 space-y-2">
+                                {t.assistant.parts.map((part, idx) => {
+                                  const isLast =
+                                    idx ===
+                                    (t.assistant?.parts?.length ?? 0) - 1;
+                                  if (part.type === "tool-call") {
+                                    const isManualToolInvocation =
+                                      part.toolInvocation?.state ===
+                                      "partial-call";
+                                    return (
+                                      <div
+                                        key={idx}
+                                        className="p-3 bg-slate-800/40 rounded-lg border border-slate-600/30"
+                                      >
+                                        <div className="font-medium mb-1">
+                                          🔧 Tool:{" "}
+                                          {part.toolInvocation?.toolName ||
+                                            "Unknown"}
                                         </div>
-                                      );
-                                    } else if (part.type === "step-start") {
-                                      return null;
-                                    }
+                                        <div className="text-xs text-gray-400">
+                                          {part.toolInvocation?.state ===
+                                          "result"
+                                            ? "Completed"
+                                            : "Executing..."}
+                                        </div>
+                                        {isManualToolInvocation &&
+                                          isLast &&
+                                          onPoxyToolCall && (
+                                            <div className="mt-2 flex gap-2">
+                                              <button
+                                                onClick={() =>
+                                                  onPoxyToolCall({
+                                                    action: "manual",
+                                                    result: true,
+                                                  })
+                                                }
+                                                className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded hover:bg-green-200"
+                                              >
+                                                Approve
+                                              </button>
+                                              <button
+                                                onClick={() =>
+                                                  onPoxyToolCall({
+                                                    action: "manual",
+                                                    result: false,
+                                                  })
+                                                }
+                                                className="px-2 text-xs bg-red-100 text-red-800 rounded hover:bg-red-200"
+                                              >
+                                                Reject
+                                              </button>
+                                            </div>
+                                          )}
+                                      </div>
+                                    );
+                                  } else if (part.type === "step-start") {
                                     return null;
-                                  })}
-                                </div>
-                              )}
-                          </div>
+                                  }
+                                  return null;
+                                })}
+                              </div>
+                            )}
                         </div>
-                      )}
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             );
           })}
