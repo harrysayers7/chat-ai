@@ -69,6 +69,20 @@ export function CollapsibleChat({
   const [starred, setStarred] = React.useState<Record<string, boolean>>({});
   const [showOnlyStarred, setShowOnlyStarred] = React.useState(false);
 
+  // Scroll to bottom when component mounts
+  useEffect(() => {
+    // Small delay to ensure content is rendered
+    const timer = setTimeout(() => {
+      const container = document
+        .querySelector('[data-master-collapse="trigger"]')
+        ?.closest(".flex-1.overflow-y-auto");
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Convert messages to turns format
   const turns = useMemo(() => {
     if (!messages || !Array.isArray(messages)) return [];
@@ -431,7 +445,7 @@ export function CollapsibleChat({
       {/* Regular chats with master collapse */}
       <div className="space-y-4">
         {filteredTurns.length > 2 && (
-          <Collapsible data-master-collapse="trigger" defaultOpen={true}>
+          <Collapsible data-master-collapse="trigger" defaultOpen={false}>
             <CollapsibleTrigger className="w-full flex items-center justify-between p-3 rounded-lg bg-background/20 hover:bg-background/30 border border-border/20 hover:border-border/40 transition-all duration-200">
               <span className="text-sm font-medium text-muted-foreground">
                 Older Chats ({filteredTurns.length - 1})
