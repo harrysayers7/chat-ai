@@ -424,7 +424,7 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
           <div className="flex flex-col h-full relative">
             {/* Chat Messages - Always Collapsible View */}
             <div
-              className="flex-1 overflow-y-auto px-6 pb-32"
+              className="flex-1 overflow-y-auto px-6 pb-20"
               ref={containerRef}
             >
               <CollapsibleChat
@@ -450,7 +450,7 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
         <div
           className={clsx(
             messages.length && "absolute bottom-0",
-            "w-full bg-background/95 backdrop-blur-sm border-t",
+            "w-full bg-gradient-to-t from-background via-background/95 to-transparent pt-8 pb-4",
           )}
         >
           <div className="max-w-3xl mx-auto relative flex justify-center items-center -top-2">
