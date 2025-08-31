@@ -3,6 +3,7 @@ export enum AppDefaultToolkit {
   WebSearch = "webSearch",
   Http = "http",
   Code = "code",
+  Mokai = "mokai",
 }
 
 export enum DefaultToolName {
@@ -15,6 +16,8 @@ export enum DefaultToolName {
   Http = "http",
   JavascriptExecution = "mini-javascript-execution",
   PythonExecution = "python-execution",
+  GetRepoManifest = "getRepoManifest",
+  GetRepoFile = "getRepoFile",
 }
 
 export const SequentialThinkingToolName = "sequential-thinking";
