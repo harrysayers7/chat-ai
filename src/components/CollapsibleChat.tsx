@@ -333,9 +333,9 @@ export function CollapsibleChat({
                         >
                           <Collapsible
                             defaultOpen={defaultOpen}
-                            className="overflow-hidden group mb-4 bg-background/20 rounded-lg p-1 border border-border/20"
+                            className="overflow-hidden group mb-4 bg-background/20 rounded-lg p-1"
                           >
-                            <div className="flex items-center justify-between px-3 py-2 bg-background/30 rounded-lg border border-border/30 hover:bg-background/40 transition-all duration-200">
+                            <div className="flex items-center justify-between px-3 py-2 bg-background/30 rounded-lg hover:bg-background/40 transition-all duration-200">
                               <div className="flex items-center gap-2 min-w-0 flex-1">
                                 <div className="font-medium text-sm min-w-0 flex-1 text-foreground">
                                   {t.user ? "" : "🤖"}
@@ -448,7 +448,7 @@ export function CollapsibleChat({
                     >
                       <Collapsible
                         defaultOpen={defaultOpen}
-                        className="overflow-hidden group mb-2 bg-background/20 rounded-lg p-1 border border-border/20 hover:border-border/40 transition-all duration-200"
+                        className="overflow-hidden group mb-2 bg-background/20 rounded-lg p-1 hover:bg-background/30 transition-all duration-200"
                       >
                         <div className="w-full group">
                           <div className="flex items-center justify-between px-3 py-2 bg-background/30 rounded-lg border border-border/30 hover:bg-background/40 transition-all duration-200">
@@ -627,10 +627,10 @@ export function CollapsibleChat({
               >
                 <Collapsible
                   defaultOpen={defaultOpen}
-                  className="overflow-hidden group mb-6 bg-background/30 rounded-lg p-1 border border-border/30 hover:border-border/50 transition-all duration-200"
+                  className="overflow-hidden group mb-6 bg-background/30 rounded-lg p-1 hover:bg-background/40 transition-all duration-200"
                 >
                   <div className="w-full group">
-                    <div className="flex items-center justify-between px-4 py-2 bg-background/40 rounded-lg border border-border/40 hover:bg-background/50 transition-all duration-200">
+                    <div className="flex items-center justify-between px-4 py-2 bg-background/40 rounded-lg hover:bg-background/50 transition-all duration-200">
                       <div className="flex items-center gap-2 min-w-0 flex-1">
                         <div className="font-medium text-sm min-w-0 flex-1 text-foreground">
                           {t.user ? "" : "🤖"}
