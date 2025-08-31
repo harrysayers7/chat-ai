@@ -39,7 +39,7 @@ export default function CodeBlockCollapsed({
   return (
     <Collapsible
       defaultOpen={false}
-      className="rounded-lg overflow-hidden bg-muted/20 shadow-lg border border-border/30 hover:shadow-xl transition-all duration-300 mb-3"
+      className="group rounded-lg overflow-hidden bg-muted/20 shadow-lg border border-border/30 hover:shadow-xl transition-all duration-300 mb-3"
     >
       <div className="flex items-center justify-between bg-gradient-to-r from-muted/50 to-muted/30 px-3 py-2">
         <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -69,17 +69,47 @@ export default function CodeBlockCollapsed({
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Save button - only visible on hover */}
           {onSaveToProject && (
             <Button
               variant="ghost"
               size="sm"
               onClick={onSaveToProject}
-              className="p-2 text-xs h-auto bg-background/60 hover:bg-background/80 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105 rounded-md"
+              className="p-2 text-xs h-auto bg-background/60 hover:bg-background/80 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105 rounded-md opacity-0 group-hover:opacity-100"
               title="Save to Project"
             >
               <Save className="w-3 h-3" />
             </Button>
           )}
+          {/* Download button - only visible on hover */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={download}
+            className="p-2 text-xs h-auto bg-background/60 hover:bg-background/80 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105 rounded-md opacity-0 group-hover:opacity-100"
+            title="Download file"
+          >
+            <svg
+              className="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 3v13"
+              />
+            </svg>
+          </Button>
+          {/* Copy button - always visible */}
           {onCopy && (
             <Button
               variant="ghost"
@@ -103,33 +133,7 @@ export default function CodeBlockCollapsed({
               </svg>
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={download}
-            className="p-2 text-xs h-auto bg-background/60 hover:bg-background/80 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105 rounded-md"
-            title="Download file"
-          >
-            <svg
-              className="w-3 h-3"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 3v13"
-              />
-            </svg>
-          </Button>
+          {/* Toggle button - always visible */}
           <CollapsibleTrigger
             data-collapsible="trigger"
             className="p-2 text-xs rounded-md hover:bg-background bg-background/60 hover:bg-background/80 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105"

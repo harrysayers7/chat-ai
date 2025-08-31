@@ -412,7 +412,7 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
   // Show loading state while initializing
   if (isInitializing) {
     return (
-      <div className="flex flex-col h-full w-full max-w-3xl mx-auto px-6 py-8">
+      <div className="flex flex-col h-full w-full max-w-2xl mx-auto px-6 py-8">
         <div className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-4">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -473,7 +473,7 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
             "w-full bg-gradient-to-t from-background via-background/95 to-transparent pt-8 pb-4",
           )}
         >
-          <div className="max-w-3xl mx-auto relative flex justify-center items-center -top-2">
+          <div className="max-w-2xl mx-auto relative flex justify-center items-center -top-2">
             <ScrollToBottomButton
               show={!isAtBottom && messages.length > 0}
               onClick={scrollToBottom}
