@@ -52,6 +52,18 @@ function truncateToWords(text: string, maxWords: number = 10): string {
   return words.slice(0, maxWords).join(" ") + "...";
 }
 
+// Helper function to format timestamp
+function formatTimestamp(): string {
+  const now = new Date();
+  return now.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 interface CollapsibleChatProps {
   messages: any[];
   isLoading?: boolean;
@@ -641,46 +653,9 @@ export function CollapsibleChat({
                   <div className="w-full group">
                     <div className="flex items-center justify-between px-4 py-2 bg-background/40 rounded-lg hover:bg-background/50 transition-all duration-200">
                       <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <div className="font-medium text-sm min-w-0 flex-1 text-foreground">
-                          {t.user ? "" : "🤖"}
-                          {t.user && (
-                            <div className="mt-1 text-xs text-muted-foreground truncate max-w-md">
-                              {truncateToWords(t.user.content, 10)}
-                            </div>
-                          )}
+                        <div className="font-medium text-sm min-w-0 flex-1 text-muted-foreground">
+                          {t.user ? formatTimestamp() : "🤖"}
                         </div>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <button
-                          onClick={() => togglePin(key)}
-                          className={`p-1 rounded-md transition-all duration-200 ${
-                            isPinned
-                              ? "bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-400/30 hover:border-red-400/50"
-                              : "bg-background/40 hover:bg-background/60 text-muted-foreground border border-border/30 hover:border-border/50"
-                          }`}
-                          title={isPinned ? "Unpin" : "Pin"}
-                        >
-                          <Pin className="w-3 h-3" />
-                        </button>
-                        <button
-                          onClick={() => toggleStar(key)}
-                          className={`p-1 rounded-md transition-all duration-200 ${
-                            !!starred[key]
-                              ? "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-400/30 hover:border-yellow-400/50"
-                              : "bg-background/40 hover:bg-background/60 text-muted-foreground border border-border/30 hover:border-border/50"
-                          }`}
-                          title={!!starred[key] ? "Unstar" : "Star"}
-                        >
-                          <svg
-                            className="w-3 h-3"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                          </svg>
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -701,8 +676,37 @@ export function CollapsibleChat({
                       <div className="space-y-2 border-t border-border/30 pt-4">
                         <div className="space-y-2">
                           <Markdown>{t.assistant.content}</Markdown>
-                          <div className="flex items-center justify-start">
+                          <div className="flex items-center justify-start gap-2">
                             <CopyButton content={t.assistant.content} />
+                            <button
+                              onClick={() => togglePin(key)}
+                              className={`p-1 rounded-md transition-all duration-200 ${
+                                isPinned
+                                  ? "bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-400/30 hover:border-red-400/50"
+                                  : "bg-background/40 hover:bg-background/60 text-muted-foreground border border-border/30 hover:border-border/50"
+                              }`}
+                              title={isPinned ? "Unpin" : "Pin"}
+                            >
+                              <Pin className="w-3 h-3" />
+                            </button>
+                            <button
+                              onClick={() => toggleStar(key)}
+                              className={`p-1 rounded-md transition-all duration-200 ${
+                                !!starred[key]
+                                  ? "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-400/30 hover:border-yellow-400/50"
+                                  : "bg-background/40 hover:bg-background/60 text-muted-foreground border border-border/30 hover:border-border/50"
+                              }`}
+                              title={!!starred[key] ? "Unstar" : "Star"}
+                            >
+                              <svg
+                                className="w-3 h-3"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                              </svg>
+                            </button>
                           </div>
                           {t.assistant.parts &&
                             t.assistant.parts.length > 0 && (
