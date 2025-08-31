@@ -64,6 +64,35 @@ function formatTimestamp(): string {
   });
 }
 
+// Component for expandable user messages
+function ExpandableUserMessage({ content }: { content: string }) {
+  const [isExpanded, setIsExpanded] = React.useState(false);
+  const words = content.trim().split(/\s+/);
+  const shouldTruncate = words.length > 10;
+
+  if (!shouldTruncate) {
+    return (
+      <div className="bg-gray-700/50 rounded-full px-4 py-0.5 border border-gray-600/30 max-w-xs">
+        <span className="text-sm text-gray-200">{content}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-gray-700/50 rounded-lg px-4 py-2 border border-gray-600/30 max-w-md">
+      <span className="text-sm text-gray-200">
+        {isExpanded ? content : words.slice(0, 10).join(" ") + "..."}
+      </span>
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="mt-2 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+      >
+        {isExpanded ? "Show less" : "Show more"}
+      </button>
+    </div>
+  );
+}
+
 interface CollapsibleChatProps {
   messages: any[];
   isLoading?: boolean;
@@ -418,9 +447,9 @@ export function CollapsibleChat({
                                 {t.user && (
                                   <div className="space-y-2">
                                     <div className="flex justify-end">
-                                      <div className="bg-gray-700/50 rounded-full px-4 py-0.5 border border-gray-600/30 max-w-xs">
-                                        <Markdown>{t.user.content}</Markdown>
-                                      </div>
+                                      <ExpandableUserMessage
+                                        content={t.user.content}
+                                      />
                                     </div>
                                     <div className="flex items-center justify-end gap-1 mt-2">
                                       <CopyButton content={t.user.content} />
@@ -538,9 +567,9 @@ export function CollapsibleChat({
                             {t.user && (
                               <div className="space-y-2">
                                 <div className="flex justify-end">
-                                  <div className="bg-gray-700/50 rounded-full px-4 py-0.5 border border-gray-600/30 max-w-xs">
-                                    <Markdown>{t.user.content}</Markdown>
-                                  </div>
+                                  <ExpandableUserMessage
+                                    content={t.user.content}
+                                  />
                                 </div>
                                 <div className="flex items-center justify-end gap-1 mt-2">
                                   <CopyButton content={t.user.content} />
@@ -663,9 +692,7 @@ export function CollapsibleChat({
                     {t.user && (
                       <div className="space-y-2">
                         <div className="flex justify-end">
-                          <div className="bg-gray-700/50 rounded-full px-4 py-0.5 border border-gray-600/30 max-w-xs">
-                            <Markdown>{t.user.content}</Markdown>
-                          </div>
+                          <ExpandableUserMessage content={t.user.content} />
                         </div>
                         <div className="flex items-center justify-end gap-1 mt-2">
                           <CopyButton content={t.user.content} />
