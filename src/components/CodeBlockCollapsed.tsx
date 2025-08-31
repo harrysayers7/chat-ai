@@ -23,9 +23,13 @@ export default function CodeBlockCollapsed({
   onCopy?: () => void;
   onSaveToProject?: () => void;
 }) {
-  const lines = React.useMemo(() => code.split("\n").length, [code]);
+  const lines = React.useMemo(() => {
+    if (!code || typeof code !== "string") return 0;
+    return code.split("\n").length;
+  }, [code]);
 
   const download = () => {
+    if (!code || typeof code !== "string") return;
     const name = filename ?? `snippet.${extFor(language)}`;
     const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
     const a = document.createElement("a");
@@ -35,6 +39,11 @@ export default function CodeBlockCollapsed({
     a.click();
     a.remove();
   };
+
+  // Early return if no valid code
+  if (!code || typeof code !== "string") {
+    return null;
+  }
 
   return (
     <Collapsible
