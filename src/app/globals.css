@@ -5,8 +5,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-inter);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -77,6 +77,7 @@
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
 }
+
 .light {
   [data-theme="zinc"] {
     --background: hsl(0 0% 100%);
@@ -1438,6 +1439,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -1459,10 +1461,12 @@
     padding: 0.2rem 0.6rem;
     margin: 0 0.1rem;
   }
+
   .duration-3000 {
     --tw-duration: 3000ms;
     transition-duration: var(--tw-duration);
   }
+
   .duration-5000 {
     --tw-duration: 5000ms;
     transition-duration: var(--tw-duration);
@@ -1477,9 +1481,11 @@
     0% {
       opacity: 0;
     }
+
     80% {
       opacity: 0;
     }
+
     100% {
       opacity: 1;
     }
@@ -1490,9 +1496,11 @@
     100% {
       transform: rotate(0deg);
     }
+
     25% {
       transform: rotate(-8deg);
     }
+
     75% {
       transform: rotate(8deg);
     }
@@ -1503,10 +1511,11 @@
   }
 
   .react-flow__node-default {
-    @apply bg-transparent! text-foreground! p-0! border-none! text-sm! text-left! shadow-none!;
+    @apply bg-transparent text-foreground p-0 border-none text-sm text-left shadow-none;
   }
+
   .react-flow__panel.react-flow__attribution.bottom.right {
-    @apply hidden!;
+    @apply hidden;
   }
 
   .fade-300 {

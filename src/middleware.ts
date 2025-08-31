@@ -11,6 +11,12 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith("/ping")) {
     return new Response("pong", { status: 200 });
   }
+
+  // Bypass authentication if DISABLE_AUTH is true
+  if (process.env.DISABLE_AUTH === "true") {
+    return NextResponse.next();
+  }
+
   const sessionCookie = getSessionCookie(request);
 
   if (!sessionCookie) {

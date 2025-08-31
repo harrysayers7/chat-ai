@@ -1,25 +1,29 @@
 "use client";
 
-import { SidebarGroupLabel, SidebarMenuSub } from "ui/sidebar";
+import { SidebarGroupLabel, SidebarMenuSub } from "@/components/ui/sidebar";
 import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuSkeleton,
   SidebarMenuSubItem,
-} from "ui/sidebar";
-import { SidebarGroupContent, SidebarMenu, SidebarMenuItem } from "ui/sidebar";
-import { SidebarGroup } from "ui/sidebar";
+} from "@/components/ui/sidebar";
+import {
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import { SidebarGroup } from "@/components/ui/sidebar";
 import { ThreadDropdown } from "../thread-dropdown";
 import { ChevronDown, ChevronUp, MoreHorizontal, Trash } from "lucide-react";
 import { useMounted } from "@/hooks/use-mounted";
 import { appStore } from "@/app/store";
-import { Button } from "ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import {
   deleteThreadsAction,
   deleteUnarchivedThreadsAction,
@@ -29,12 +33,16 @@ import { toast } from "sonner";
 import { useShallow } from "zustand/shallow";
 import { useRouter } from "next/navigation";
 import useSWR, { mutate } from "swr";
-import { handleErrorWithToast } from "ui/shared-toast";
+import { handleErrorWithToast } from "@/components/ui/shared-toast";
 import { useMemo, useState, useCallback, useEffect } from "react";
 
 import { useTranslations } from "next-intl";
-import { TextShimmer } from "ui/text-shimmer";
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/tooltip";
+import { TextShimmer } from "@/components/ui/text-shimmer";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { deduplicateByKey, groupBy } from "lib/utils";
 import { ChatThread } from "app-types/chat";
 

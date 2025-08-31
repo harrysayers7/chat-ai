@@ -6,7 +6,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbopack -p 3030",
     "dev:https": "next dev --turbopack --experimental-https",
     "build": "next build",
     "start": "next start",

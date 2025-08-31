@@ -19,18 +19,25 @@
     "lineWidth": 80,
     "attributePosition": "auto"
   },
-  "organizeImports": { "enabled": true },
+  "organizeImports": {
+    "enabled": true
+  },
   "linter": {
     "enabled": true,
     "rules": {
       "recommended": false,
-      "complexity": { "noUselessTypeConstraint": "error" },
+      "complexity": {
+        "noUselessTypeConstraint": "error"
+      },
       "correctness": {
-        "noUnusedVariables": "error",
+        "noUnusedVariables": "warn",
         "useArrayLiterals": "off",
         "useExhaustiveDependencies": "off"
       },
-      "style": { "noNamespace": "error", "useAsConstAssertion": "error" },
+      "style": {
+        "noNamespace": "error",
+        "useAsConstAssertion": "error"
+      },
       "suspicious": {
         "noExplicitAny": "off",
         "noExtraNonNullAssertion": "error",
@@ -40,13 +47,19 @@
       }
     }
   },
-  "javascript": { "formatter": { "quoteStyle": "double" } },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  },
   "overrides": [
     {
       "include": ["*.ts", "*.tsx", "*.mts", "*.cts"],
       "linter": {
         "rules": {
-          "complexity": { "noWith": "off" },
+          "complexity": {
+            "noWith": "off"
+          },
           "correctness": {
             "noConstAssign": "off",
             "noGlobalObjectCalls": "off",

@@ -1,6 +1,6 @@
 "use client";
 
-import { SidebarProvider } from "ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { SWRConfigProvider } from "./swr-config";
 import { AppSidebar } from "@/components/layouts/app-sidebar";
 import { AppHeader } from "@/components/layouts/app-header";

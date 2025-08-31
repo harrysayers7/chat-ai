@@ -5,6 +5,8 @@ import { PreBlock } from "./pre-block";
 import { isJson, isString, toAny } from "lib/utils";
 import JsonView from "ui/json-view";
 import { LinkIcon } from "lucide-react";
+import CodeBlockCollapsed from "./CodeBlockCollapsed";
+import { toast } from "sonner";
 import {
   Table,
   TableHeader,
@@ -85,7 +87,7 @@ const components: Partial<Components> = {
   pre: ({ children }) => {
     return (
       <div className="px-4 py-2">
-        <PreBlock>{children}</PreBlock>
+        <EnhancedPreBlock>{children}</EnhancedPreBlock>
       </div>
     );
   },
@@ -180,6 +182,63 @@ const components: Partial<Components> = {
       <img className="mx-auto rounded-lg" src={src} alt={alt} {...rest} />
     ) : null;
   },
+};
+
+// Enhanced code block component that uses CodeBlockCollapsed
+const EnhancedPreBlock = ({ children }: { children: any }) => {
+  const code = children.props.children;
+  const language = children.props.className?.split("-")?.[1] || "text";
+
+  // Generate a filename based on language
+  const filename = `snippet.${language === "txt" ? "txt" : language}`;
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      toast.success("Code copied to clipboard");
+    } catch (err) {
+      console.error("Failed to copy code:", err);
+      toast.error("Failed to copy code");
+    }
+  };
+
+  const handleSaveToProject = () => {
+    // Save to localStorage using the same key as ProjectTray
+    try {
+      const STORAGE_KEY = "chat-ai:project";
+      const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      const newFile = {
+        id: crypto.randomUUID(),
+        filename,
+        language,
+        content: code,
+        ts: Date.now(),
+      };
+      existing.push(newFile);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
+
+      // Show a success message
+      console.log("Code saved to project:", newFile);
+      toast.success(`Code saved to project: ${filename}`);
+
+      // Trigger a custom event to notify ProjectTray to refresh
+      window.dispatchEvent(
+        new CustomEvent("project-file-added", { detail: newFile }),
+      );
+    } catch (err) {
+      console.error("Failed to save to project:", err);
+    }
+  };
+
+  return (
+    <CodeBlockCollapsed
+      code={code}
+      language={language}
+      filename={filename}
+      onCopy={handleCopy}
+      onSaveToProject={handleSaveToProject}
+    />
+  );
 };
 
 const NonMemoizedMarkdown = ({ children }: { children: string }) => {

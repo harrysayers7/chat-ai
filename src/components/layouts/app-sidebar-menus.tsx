@@ -6,18 +6,22 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   useSidebar,
-} from "ui/sidebar";
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/tooltip";
-import { SidebarMenu, SidebarMenuItem } from "ui/sidebar";
-import { SidebarGroupContent } from "ui/sidebar";
+} from "@/components/ui/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar";
+import { SidebarGroupContent } from "@/components/ui/sidebar";
 
-import { SidebarGroup } from "ui/sidebar";
+import { SidebarGroup } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { getShortcutKeyList, Shortcuts } from "lib/keyboard-shortcuts";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { MCPIcon } from "ui/mcp-icon";
-import { WriteIcon } from "ui/write-icon";
+import { MCPIcon } from "@/components/ui/mcp-icon";
+import { WriteIcon } from "@/components/ui/write-icon";
 import {
   FolderOpenIcon,
   FolderSearchIcon,
@@ -26,7 +30,7 @@ import {
   BookOpenIcon,
 } from "lucide-react";
 import { useCallback, useState } from "react";
-import { Skeleton } from "ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useArchives } from "@/hooks/queries/use-archives";
 import { ArchiveDialog } from "../archive-dialog";
 

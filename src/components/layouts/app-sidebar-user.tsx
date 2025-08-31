@@ -12,9 +12,13 @@ import {
   DropdownMenuPortal,
   DropdownMenuSubContent,
   DropdownMenuCheckboxItem,
-} from "ui/dropdown-menu";
-import { AvatarFallback, AvatarImage, Avatar } from "ui/avatar";
-import { SidebarMenuButton, SidebarMenuItem, SidebarMenu } from "ui/sidebar";
+} from "@/components/ui/dropdown-menu";
+import { AvatarFallback, AvatarImage, Avatar } from "@/components/ui/avatar";
+import {
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenu,
+} from "@/components/ui/sidebar";
 import {
   ChevronsUpDown,
   Command,
@@ -35,8 +39,8 @@ import { useTranslations } from "next-intl";
 import useSWR from "swr";
 import { getLocaleAction } from "@/i18n/get-locale";
 import { useCallback } from "react";
-import { GithubIcon } from "ui/github-icon";
-import { DiscordIcon } from "ui/discord-icon";
+import { GithubIcon } from "@/components/ui/github-icon";
+import { DiscordIcon } from "@/components/ui/discord-icon";
 import { useThemeStyle } from "@/hooks/use-theme-style";
 import { Session, User } from "better-auth";
 

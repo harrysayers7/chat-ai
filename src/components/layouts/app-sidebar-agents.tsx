@@ -1,10 +1,17 @@
 "use client";
 
-import { SidebarMenuAction } from "ui/sidebar";
+import { SidebarMenuAction } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { SidebarMenuButton, SidebarMenuSkeleton } from "ui/sidebar";
-import { SidebarGroupContent, SidebarMenu, SidebarMenuItem } from "ui/sidebar";
-import { SidebarGroup } from "ui/sidebar";
+import {
+  SidebarMenuButton,
+  SidebarMenuSkeleton,
+} from "@/components/ui/sidebar";
+import {
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import { SidebarGroup } from "@/components/ui/sidebar";
 import {
   ArrowUpRightIcon,
   ChevronDown,
@@ -15,12 +22,16 @@ import {
 
 import { useMounted } from "@/hooks/use-mounted";
 
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { useAgents } from "@/hooks/queries/use-agents";
-import { Avatar, AvatarFallback, AvatarImage } from "ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AgentDropdown } from "../agent/agent-dropdown";
 
 import { appStore } from "@/app/store";

@@ -22,6 +22,8 @@ services:
 
   postgres:
     image: postgres:17
+    ports:
+      - '5433:5432'
     env_file:
       - .env
     networks:
@@ -34,6 +36,7 @@ services:
 
 volumes:
   postgres_data:
+
 
 networks:
   better-chatbot-networks:

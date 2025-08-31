@@ -28,7 +28,12 @@ export default async function Page({
   const thread = await fetchThread(threadId);
 
   if (!thread) {
-    redirect("/", RedirectType.replace);
+    // If thread doesn't exist, start with empty messages
+    return (
+      <Suspense fallback={<Loading />}>
+        <ChatBot threadId={threadId} initialMessages={[]} />
+      </Suspense>
+    );
   }
 
   const initialMessages = thread.messages.map(convertToUIMessage);
