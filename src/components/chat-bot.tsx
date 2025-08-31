@@ -28,7 +28,7 @@ import {
 } from "app-types/chat";
 import { useToRef } from "@/hooks/use-latest";
 
-import { Button } from "ui/button";
+import { Button } from "@/components/ui/button";
 import { deleteThreadAction } from "@/app/api/chat/actions";
 import { useRouter } from "next/navigation";
 import { ArrowDown, Loader, BookOpen } from "lucide-react";
@@ -39,9 +39,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "ui/dialog";
+} from "@/components/ui/dialog";
 import { useTranslations } from "next-intl";
-import { Think } from "ui/think";
+import { Think } from "@/components/ui/think";
 import { useGenerateThreadTitle } from "@/hooks/queries/use-generate-thread-title";
 import dynamic from "next/dynamic";
 import { useMounted } from "@/hooks/use-mounted";
@@ -61,7 +61,7 @@ type Props = {
   };
 };
 
-const Particles = dynamic(() => import("ui/particles"), {
+const Particles = dynamic(() => import("@/components/ui/particles"), {
   ssr: false,
 });
 
@@ -106,10 +106,6 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
   });
 
   const [showParticles, setShowParticles] = useState(isFirstTime);
-  const collapsibleViewStorage = getStorageManager<boolean>("use-collapsible-view");
-  const [useCollapsibleView, setUseCollapsibleView] = useState(() => 
-    collapsibleViewStorage.get(false)
-  );
 
   const {
     messages,
@@ -182,10 +178,16 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
     },
   });
 
-  // Set initializing to false once messages are loaded
+  // Set initializing to false once messages are loaded or after a timeout
   useEffect(() => {
     if (initialMessages.length > 0 || messages.length > 0) {
       setIsInitializing(false);
+    } else {
+      // If no messages, set initializing to false after a short delay
+      const timer = setTimeout(() => {
+        setIsInitializing(false);
+      }, 1000);
+      return () => clearTimeout(timer);
     }
   }, [initialMessages.length, messages.length]);
 
@@ -221,7 +223,7 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
     [messages],
   );
 
-  const needSpaceClass = useCallback(
+  const _needSpaceClass = useCallback(
     (index: number) => {
       if (error || isInitialThreadEntry || index != messages.length - 1)
         return false;
@@ -268,7 +270,7 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
     setThinking(thinking);
   }, []);
 
-  const space = useMemo(() => {
+  const _space = useMemo(() => {
     if (!isLoading) return false;
     const lastMessage = messages.at(-1);
     if (lastMessage?.role == "user") return "think";
@@ -283,7 +285,7 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
     return <Particles className="absolute inset-0 pointer-events-none" />;
   }, [showParticles]);
 
-  const handleScroll = useCallback(() => {
+  const _handleScroll = useCallback(() => {
     if (containerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
       const isAtBottomNow = scrollTop + clientHeight >= scrollHeight - 10;
@@ -352,11 +354,40 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
+  // Listen for prompt library open event from floating bar
+  useEffect(() => {
+    const handleOpenPromptLibrary = () => {
+      setIsPromptLibraryOpen(true);
+    };
+
+    window.addEventListener("open-prompt-library", handleOpenPromptLibrary);
+    return () =>
+      window.removeEventListener(
+        "open-prompt-library",
+        handleOpenPromptLibrary,
+      );
+  }, []);
+
   useEffect(() => {
     if (mounted) {
       handleFocus();
     }
   }, [input]);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (messages.length > 0 && containerRef.current) {
+      const scrollToBottom = () => {
+        if (containerRef.current) {
+          containerRef.current.scrollTop = containerRef.current.scrollHeight;
+        }
+      };
+
+      // Small delay to ensure content is rendered
+      const timer = setTimeout(scrollToBottom, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [messages.length]);
 
   // Show loading state while initializing
   if (isInitializing) {
@@ -383,19 +414,6 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
           "flex flex-col min-w-0 relative h-full",
         )}
       >
-        {/* Prompt Library Button - Always Visible */}
-        <div className="absolute top-4 right-4 z-10">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsPromptLibraryOpen(true)}
-            className="flex items-center gap-2 shadow-sm"
-          >
-            <BookOpen className="w-4 h-4" />
-            Prompt Library
-          </Button>
-        </div>
-
         {emptyMessage ? (
           slots?.emptySlot ? (
             slots.emptySlot
@@ -404,102 +422,36 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
           )
         ) : (
           <div className="flex flex-col h-full relative">
-            {/* View Toggle */}
-            <div className="flex justify-center mb-4 pt-2">
-              <div className="flex items-center gap-2 bg-muted rounded-lg p-1">
-                <Button
-                  variant={!useCollapsibleView ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => {
-                    setUseCollapsibleView(false);
-                    collapsibleViewStorage.set(false);
-                  }}
-                  className="text-xs"
-                >
-                  Regular View
-                </Button>
-                <Button
-                  variant={useCollapsibleView ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => {
-                    setUseCollapsibleView(true);
-                    collapsibleViewStorage.set(true);
-                  }}
-                  className="text-xs"
-                >
-                  Collapsible View
-                </Button>
-              </div>
+            {/* Chat Messages - Always Collapsible View */}
+            <div
+              className="flex-1 overflow-y-auto px-6 pb-32"
+              ref={containerRef}
+            >
+              <CollapsibleChat
+                messages={messages.map((msg) => ({
+                  id: msg.id,
+                  role: msg.role,
+                  content: msg.parts
+                    .filter((part) => part.type === "text")
+                    .map((part) => part.text)
+                    .join(" "),
+                }))}
+                threadId={threadId}
+                onPoxyToolCall={
+                  isPendingToolCall && !isExecutingProxyToolCall
+                    ? () => proxyToolCall({ action: "manual", result: true })
+                    : undefined
+                }
+              />
             </div>
-
-            {/* Chat Messages */}
-            {useCollapsibleView ? (
-              <div className="flex-1 overflow-y-auto px-6">
-                <CollapsibleChat
-                  messages={messages.map(msg => ({
-                    id: msg.id,
-                    role: msg.role,
-                    content: msg.parts
-                      .filter(part => part.type === 'text')
-                      .map(part => part.text)
-                      .join(' ')
-                  }))}
-                  threadId={threadId}
-                  onPoxyToolCall={isPendingToolCall && !isExecutingProxyToolCall ? proxyToolCall : undefined}
-                />
-              </div>
-            ) : (
-              <div
-                className={"flex flex-col gap-2 overflow-y-auto py-6 flex-1"}
-                ref={containerRef}
-                onScroll={handleScroll}
-              >
-                {messages.map((message, index) => {
-                  const isLastMessage = messages.length - 1 === index;
-                  return (
-                    <PreviewMessage
-                      threadId={threadId}
-                      messageIndex={index}
-                      key={index}
-                      message={message}
-                      status={status}
-                      onPoxyToolCall={
-                        isPendingToolCall &&
-                        !isExecutingProxyToolCall &&
-                        isLastMessage
-                          ? proxyToolCall
-                          : undefined
-                      }
-                      isLoading={isLoading || isPendingToolCall}
-                      isLastMessage={isLastMessage}
-                      setMessages={setMessages}
-                      reload={reload}
-                      className={
-                        needSpaceClass(index) ? "min-h-[calc(55dvh-40px)]" : ""
-                      }
-                    />
-                  );
-                })}
-                {space && (
-                  <>
-                    <div className="w-full mx-auto max-w-3xl px-6 relative">
-                      <div className={space == "space" ? "opacity-0" : ""}>
-                        <Think />
-                      </div>
-                    </div>
-                    <div className="min-h-[calc(55dvh-56px)]" />
-                  </>
-                )}
-
-                {error && <ErrorMessage error={error} />}
-                <div className="min-w-0 min-h-52" />
-              </div>
-            )}
           </div>
         )}
 
         <div
-          className={clsx(messages.length && "absolute bottom-14", "w-full")}
+          className={clsx(
+            messages.length && "absolute bottom-0",
+            "w-full bg-background/95 backdrop-blur-sm border-t",
+          )}
         >
           <div className="max-w-3xl mx-auto relative flex justify-center items-center -top-2">
             <ScrollToBottomButton

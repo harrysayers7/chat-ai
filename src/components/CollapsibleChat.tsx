@@ -231,7 +231,11 @@ export function CollapsibleChat({
             <ChevronUp className="w-2.5 h-2.5" />
           </button>
           <button
-            onClick={() => (window.location.href = "/prompts")}
+            onClick={() => {
+              // Open prompt library side panel
+              const event = new CustomEvent("open-prompt-library");
+              window.dispatchEvent(event);
+            }}
             className="w-5 h-5 rounded-md bg-background/60 hover:bg-background/80 text-primary border border-primary/40 hover:border-primary/60 transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg backdrop-blur-md hover:scale-105"
             title="Prompt Library"
           >
