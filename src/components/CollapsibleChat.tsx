@@ -222,7 +222,7 @@ export function CollapsibleChat({
           <button
             onClick={() => {
               // Check if most messages are collapsed or expanded
-              const expandedCount = turns.filter((_, idx) => {
+              const expandedCount = filteredTurns.filter((_, idx) => {
                 const el = refs.current[idx];
                 const trigger = el?.querySelector<HTMLElement>(
                   '[data-collapsible="trigger"]',
@@ -232,13 +232,13 @@ export function CollapsibleChat({
 
               console.log(
                 "Total turns:",
-                turns.length,
+                filteredTurns.length,
                 "Expanded:",
                 expandedCount,
               );
 
               // If more than half are expanded, collapse all; otherwise expand all
-              if (expandedCount > turns.length / 2) {
+              if (expandedCount > filteredTurns.length / 2) {
                 console.log("Collapsing all...");
                 collapseAll();
               } else {
@@ -285,7 +285,7 @@ export function CollapsibleChat({
             </svg>
           </button>
           {/* Older Chats toggle button - floating */}
-          {turns.length > 2 && (
+          {filteredTurns.length > 2 && (
             <button
               onClick={() => {
                 // Toggle the master collapse for older chats

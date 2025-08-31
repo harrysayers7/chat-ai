@@ -362,6 +362,20 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
     }
   }, [input]);
 
+  // Add event listener for prompt library
+  useEffect(() => {
+    const handleOpenPromptLibrary = () => {
+      setIsPromptLibraryOpen(true);
+    };
+
+    window.addEventListener("open-prompt-library", handleOpenPromptLibrary);
+    return () =>
+      window.removeEventListener(
+        "open-prompt-library",
+        handleOpenPromptLibrary,
+      );
+  }, []);
+
   // Add scroll event listener to track scroll position
   useEffect(() => {
     const container = containerRef.current;
