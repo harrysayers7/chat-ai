@@ -1,376 +1,892 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useRef, useEffect, useMemo, useCallback } from "react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "ui/collapsible";
-import { Button } from "ui/button";
-import { Pin, Star, Copy, ChevronUp } from "lucide-react";
-import { SaveButtons } from "./save-buttons";
-import { CopyButton } from "./copy-button";
+} from "@radix-ui/react-collapsible";
+import {
+  Pin,
+  Save,
+  HardDrive,
+  ChevronUp,
+  BookOpen,
+  User,
+  Bot,
+  Copy,
+  Download,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Markdown } from "./markdown";
+import { ProjectTray } from "./ProjectTray";
 
-interface Message {
-  id: string;
-  role: "user" | "assistant" | "system" | "data";
-  content: string;
+// Define Turn type locally since it's not exported from types
+interface Turn {
+  user?: {
+    id: string;
+    content: string;
+    isError: boolean;
+  };
+
+  assistant?: {
+    id: string;
+    content: string;
+    isError: boolean;
+    isLastMessage: boolean;
+    parts: any[];
+  };
+}
+
+// Helper function to generate unique keys for turns
+function turnKey(t: Turn) {
+  const a = t.user?.id ?? "";
+  const b = t.assistant?.id ?? "";
+  return [a, b].filter(Boolean).join(":");
 }
 
 interface CollapsibleChatProps {
-  messages: Message[];
-  keepLast?: number;
-  threadId?: string;
-  onPoxyToolCall?: () => void;
+  messages: any[];
+  isLoading?: boolean;
+  onPoxyToolCall?: (data: any) => void;
 }
 
 export function CollapsibleChat({
   messages,
-  keepLast = 3,
-  threadId,
+  isLoading = false,
   onPoxyToolCall,
 }: CollapsibleChatProps) {
-  const [pinned, setPinned] = useState<Set<string>>(new Set());
-  const [starred, setStarred] = useState<Set<string>>(new Set());
-  const [showOnlyStarred, setShowOnlyStarred] = useState(false);
+  const refs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const togglePin = (messageId: string) => {
-    const newPinned = new Set(pinned);
-    if (newPinned.has(messageId)) {
-      newPinned.delete(messageId);
-    } else {
-      newPinned.add(messageId);
+  const [pinned, setPinned] = React.useState<Record<string, boolean>>({});
+  const [starred, setStarred] = React.useState<Record<string, boolean>>({});
+  const [showOnlyStarred, setShowOnlyStarred] = React.useState(false);
+
+  // Convert messages to turns format
+  const turns = useMemo(() => {
+    if (!messages || !Array.isArray(messages)) return [];
+
+    const result: Turn[] = [];
+    let currentTurn: Partial<Turn> = {};
+
+    messages.forEach((msg, idx) => {
+      if (msg.role === "user") {
+        // If we have a previous turn, save it
+        if (currentTurn.user || currentTurn.assistant) {
+          result.push(currentTurn as Turn);
+        }
+        // Start new turn
+        currentTurn = {
+          user: {
+            id: msg.id || `user-${idx}`,
+            content: msg.content || "",
+            isError: false,
+          },
+        };
+      } else if (msg.role === "assistant") {
+        currentTurn.assistant = {
+          id: msg.id || `assistant-${idx}`,
+          content: msg.content || "",
+          isError: false,
+          isLastMessage: idx === messages.length - 1,
+          parts: msg.parts || [],
+        };
+        // Save the turn
+        result.push(currentTurn as Turn);
+        currentTurn = {};
+      }
+    });
+
+    // Don't forget the last turn if it only has a user message
+    if (currentTurn.user && !currentTurn.assistant) {
+      result.push(currentTurn as Turn);
     }
-    setPinned(newPinned);
-  };
 
-  const toggleStar = (messageId: string) => {
-    const newStarred = new Set(starred);
-    if (newStarred.has(messageId)) {
-      newStarred.delete(messageId);
-    } else {
-      newStarred.add(messageId);
-    }
-    setStarred(newStarred);
-  };
+    return result;
+  }, [messages]);
 
-  const pinnedMessages = useMemo(() => {
-    return messages.filter((msg) => pinned.has(msg.id));
-  }, [messages, pinned]);
+  const togglePin = useCallback((key: string) => {
+    setPinned((prev) => ({ ...prev, [key]: !prev[key] }));
+  }, []);
 
+  const toggleStar = useCallback((key: string) => {
+    setStarred((prev) => ({ ...prev, [key]: !prev[key] }));
+  }, []);
+
+  // Filter turns based on starred filter
   const filteredTurns = useMemo(() => {
-    if (!showOnlyStarred) {
-      return messages;
-    }
-    
-    // When showing only starred, include starred messages and the last message
-    const starredMessages = messages.filter((msg) => starred.has(msg.id));
-    const lastMessage = messages[messages.length - 1];
-    
-    if (lastMessage && !starred.has(lastMessage.id)) {
-      starredMessages.push(lastMessage);
-    }
-    
-    return starredMessages;
-  }, [messages, starred, showOnlyStarred]);
+    if (!showOnlyStarred) return turns;
 
-  const olderMessages = filteredTurns.slice(0, -keepLast);
-  const recentMessages = filteredTurns.slice(-keepLast);
+    // When showing only starred, include:
+    // 1. All starred chats
+    // 2. The last chat (always visible)
+    const _lastChatKey =
+      turns.length > 0 ? turnKey(turns[turns.length - 1]) : "";
+
+    return turns.filter((t, idx) => {
+      const key = turnKey(t) || String(idx);
+      const isLastChat = idx === turns.length - 1;
+      const isStarred = !!starred[key];
+
+      return isStarred || isLastChat;
+    });
+  }, [turns, starred, showOnlyStarred]);
+
+  const shouldOpen = useCallback(
+    (idx: number, key: string) => {
+      // Always open pinned messages
+      if (pinned[key]) return true;
+      // Open the last message by default
+      if (idx === filteredTurns.length - 1) return true;
+      // Open messages with errors
+      const turn = filteredTurns[idx];
+      if (turn?.user?.isError || turn?.assistant?.isError) return true;
+      return false;
+    },
+    [filteredTurns, pinned],
+  );
+
+  const expandAll = useCallback(() => {
+    refs.current.forEach((el, idx) => {
+      // Skip pinned chats - they should always stay expanded
+      const key = filteredTurns[idx]
+        ? turnKey(filteredTurns[idx])
+        : String(idx);
+      if (pinned[key]) return;
+
+      const trigger = el?.querySelector<HTMLElement>(
+        '[data-collapsible="trigger"]',
+      );
+      if (trigger && trigger.getAttribute("aria-expanded") === "false") {
+        trigger.click();
+      }
+    });
+  }, [filteredTurns, pinned]);
+
+  const collapseAll = useCallback(() => {
+    refs.current.forEach((el, idx) => {
+      // Skip pinned chats - they should always stay expanded
+      const key = filteredTurns[idx]
+        ? turnKey(filteredTurns[idx])
+        : String(idx);
+      if (pinned[key]) return;
+
+      const trigger = el?.querySelector<HTMLElement>(
+        '[data-collapsible="trigger"]',
+      );
+      if (trigger && trigger.getAttribute("aria-expanded") === "true") {
+        trigger.click();
+      }
+    });
+  }, [filteredTurns, pinned]);
+
+  // Safety check for messages after all hooks
+  if (!messages || !Array.isArray(messages)) {
+    console.warn(
+      "CollapsibleChat: messages prop is not a valid array",
+      messages,
+    );
+    return (
+      <div className="w-full p-4 text-center text-muted-foreground">
+        No messages to display
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      {/* Global Controls */}
-      <div className="flex items-center gap-2 mb-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowOnlyStarred(!showOnlyStarred)}
-          className={`flex items-center gap-2 ${
-            showOnlyStarred ? "bg-yellow-100 border-yellow-300" : ""
-          }`}
-        >
-          <Star
-            className={`w-4 h-4 ${
-              showOnlyStarred ? "fill-yellow-500 text-yellow-600" : "text-gray-500"
+    <div className="w-full">
+      {/* Global controls - floating, always visible, far right */}
+      <div className="fixed top-4 right-4 z-50 flex gap-2 py-2 px-3 bg-background/80 backdrop-blur-lg border border-border/30 rounded-2xl shadow-lg">
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              // Check if most messages are collapsed or expanded
+              const expandedCount = turns.filter((_, idx) => {
+                const el = refs.current[idx];
+                const trigger = el?.querySelector<HTMLElement>(
+                  '[data-collapsible="trigger"]',
+                );
+                return trigger?.getAttribute("aria-expanded") === "true";
+              }).length;
+
+              console.log(
+                "Total turns:",
+                turns.length,
+                "Expanded:",
+                expandedCount,
+              );
+
+              // If more than half are expanded, collapse all; otherwise expand all
+              if (expandedCount > turns.length / 2) {
+                console.log("Collapsing all...");
+                collapseAll();
+              } else {
+                console.log("Expanding all...");
+                expandAll();
+              }
+            }}
+            className="w-5 h-5 rounded-md bg-background/60 hover:bg-background/80 text-primary border border-primary/40 hover:border-primary/60 transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg backdrop-blur-md hover:scale-105"
+            title="Toggle all messages (expand/collapse)"
+          >
+            <ChevronUp className="w-2.5 h-2.5" />
+          </button>
+          <button
+            onClick={() => (window.location.href = "/prompts")}
+            className="w-5 h-5 rounded-md bg-background/60 hover:bg-background/80 text-primary border border-primary/40 hover:border-primary/60 transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg backdrop-blur-md hover:scale-105"
+            title="Prompt Library"
+          >
+            <BookOpen className="w-2.5 h-2.5" />
+          </button>
+          {/* Star filter toggle button */}
+          <button
+            onClick={() => setShowOnlyStarred((prev) => !prev)}
+            className={`w-5 h-5 rounded-md transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg backdrop-blur-md hover:scale-105 ${
+              showOnlyStarred
+                ? "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-400/40 hover:border-yellow-400/60"
+                : "bg-background/60 hover:bg-background/80 text-muted-foreground border border-border/40 hover:border-border/60"
             }`}
-          />
-          {showOnlyStarred ? "Show All" : "Show Starred Only"}
-        </Button>
+            title={
+              showOnlyStarred ? "Show all chats" : "Show only starred chats"
+            }
+          >
+            <svg
+              className="w-2.5 h-2.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+          </button>
+          {/* Older Chats toggle button - floating */}
+          {turns.length > 2 && (
+            <button
+              onClick={() => {
+                // Toggle the master collapse for older chats
+                const masterTrigger = document.querySelector(
+                  '[data-master-collapse="trigger"]',
+                ) as HTMLElement;
+                if (masterTrigger) {
+                  masterTrigger.click();
+                }
+              }}
+              className="w-5 h-5 rounded-md bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-400/40 hover:border-orange-400/60 transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg backdrop-blur-md hover:scale-105"
+              title="Toggle Older Chats section"
+            >
+              <svg
+                className="w-2.5 h-2.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Pinned Chats Section */}
-      {pinnedMessages.length > 0 && (
-        <div className="border rounded-lg p-4 bg-gray-50">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-gray-700">Pinned Chats</h3>
-          </div>
-          <div className="space-y-2">
-            {pinnedMessages.map((message) => (
-              <div
-                key={message.id}
-                className="border rounded p-3 bg-white shadow-sm"
-              >
-                <div className="flex items-center justify-between mb-2">
+      {/* Pinned chats - always visible, bypass all collapse mechanisms */}
+      {(() => {
+        const pinnedTurns = turns.filter((t, idx) => {
+          const key = turnKey(t) || String(idx);
+          return !!pinned[key];
+        });
+
+        if (pinnedTurns.length > 0) {
+          return (
+            <div className="mb-6">
+              <Collapsible defaultOpen={false} className="overflow-hidden">
+                <CollapsibleTrigger className="w-full flex items-center justify-between p-3 rounded-lg bg-background/20 hover:bg-background/30 border border-border/20 hover:border-border/40 transition-all duration-200">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-600">
-                      {message.role === "user" ? "User" : message.role === "data" ? "Data" : "Assistant"}
+                    <span className="text-sm font-medium text-red-400">
+                      📌 Pinned Chats
                     </span>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => togglePin(message.id)}
-                        className="p-1 h-6 w-6"
-                      >
-                        <Pin
-                          className={`w-4 h-4 ${
-                            pinned.has(message.id)
-                              ? "fill-red-500 text-red-600"
-                              : "text-gray-400"
-                          }`}
-                        />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleStar(message.id)}
-                        className="p-1 h-6 w-6"
-                      >
-                        <svg
-                          className={`w-4 h-4 ${
-                            starred.has(message.id)
-                              ? "fill-yellow-500 text-yellow-600"
-                              : "text-gray-400"
-                          }`}
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          viewBox="0 0 24 24"
+                    <span className="text-xs text-muted-foreground">
+                      ({pinnedTurns.length})
+                    </span>
+                  </div>
+                  <ChevronUp className="w-4 h-4 text-muted-foreground transform transition-transform duration-200 group-data-[state=closed]:rotate-180" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-4">
+                  <div className="space-y-4">
+                    {pinnedTurns.map((t, idx) => {
+                      const key = turnKey(t) || String(idx);
+                      const defaultOpen = false;
+                      const isPinned = !!pinned[key];
+                      return (
+                        <div
+                          key={key}
+                          ref={(el) => {
+                            if (el) refs.current[filteredTurns.indexOf(t)] = el;
+                          }}
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                          />
-                        </svg>
-                      </Button>
+                          <Collapsible
+                            defaultOpen={defaultOpen}
+                            className="overflow-hidden group mb-4 bg-background/20 rounded-lg p-1 border border-border/20"
+                          >
+                            <div className="flex items-center justify-between px-3 py-2 bg-background/30 rounded-lg border border-border/30 hover:bg-background/40 transition-all duration-200">
+                              <div className="flex items-center gap-2 min-w-0 flex-1">
+                                <div className="font-medium text-sm min-w-0 flex-1 text-foreground">
+                                  {t.user ? "" : "🤖"}
+                                  {t.user && (
+                                    <div className="mt-1 text-xs text-muted-foreground truncate max-w-md">
+                                      {t.user.content.length > 60
+                                        ? `${t.user.content.substring(0, 60)}...`
+                                        : t.user.content}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <SaveButtons turn={t} />
+                                <button
+                                  onClick={() => togglePin(key)}
+                                  className={`p-1.5 rounded-md transition-all duration-200 ${
+                                    isPinned
+                                      ? "bg-red-500/30 hover:bg-red-500/40 text-red-300 border border-red-400/20"
+                                      : "bg-background/40 hover:bg-background/60 text-muted-foreground border border-border/30"
+                                  }`}
+                                  title={isPinned ? "Unpin" : "Pin"}
+                                >
+                                  <Pin className="w-3 h-3" />
+                                </button>
+                                <button
+                                  onClick={() => toggleStar(key)}
+                                  className={`p-1.5 rounded-md transition-all duration-200 ${
+                                    !!starred[key]
+                                      ? "bg-yellow-500/30 hover:bg-yellow-500/40 text-yellow-300 border border-yellow-400/20"
+                                      : "bg-background/40 hover:bg-background/60 text-muted-foreground border border-border/30"
+                                  }`}
+                                  title={!!starred[key] ? "Unstar" : "Star"}
+                                >
+                                  <svg
+                                    className="w-3 h-3"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                            <CollapsibleContent className="overflow-hidden">
+                              <div className="p-4 text-sm space-y-4">
+                                {t.user && (
+                                  <div className="space-y-2">
+                                    <div className="flex justify-end">
+                                      <div className="bg-gray-700/50 rounded-2xl px-3 py-1 border border-gray-600/30 max-w-xs">
+                                        <Markdown>{t.user.content}</Markdown>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center justify-end gap-1 mt-2">
+                                      <CopyButton content={t.user.content} />
+                                    </div>
+                                  </div>
+                                )}
+                                {t.assistant && (
+                                  <div className="space-y-2 border-t border-border/30 pt-4">
+                                    <div className="flex items-center justify-start mb-2">
+                                      <CopyButton
+                                        content={t.assistant.content}
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Markdown>{t.assistant.content}</Markdown>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+          );
+        }
+        return null;
+      })()}
+
+      {/* Regular chats with master collapse */}
+      <div className="space-y-4">
+        {filteredTurns.length > 2 && (
+          <Collapsible data-master-collapse="trigger" defaultOpen={true}>
+            <CollapsibleTrigger className="w-full flex items-center justify-between p-3 rounded-lg bg-background/20 hover:bg-background/30 border border-border/20 hover:border-border/40 transition-all duration-200">
+              <span className="text-sm font-medium text-muted-foreground">
+                Older Chats ({filteredTurns.length - 2})
+              </span>
+              <ChevronUp className="w-4 h-4 text-muted-foreground transform transition-transform duration-200 group-data-[state=closed]:rotate-180" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-4">
+              <div className="space-y-4">
+                {filteredTurns.slice(0, -2).map((t, idx) => {
+                  const key = turnKey(t) || String(idx);
+                  const defaultOpen = shouldOpen(idx, key);
+                  const isPinned = !!pinned[key];
+                  return (
+                    <div
+                      key={key}
+                      ref={(el) => {
+                        if (el) refs.current[idx] = el;
+                      }}
+                    >
+                      <Collapsible
+                        defaultOpen={defaultOpen}
+                        className="overflow-hidden group mb-2 bg-background/20 rounded-lg p-1 border border-border/20 hover:border-border/40 transition-all duration-200"
+                      >
+                        <div className="w-full group">
+                          <div className="flex items-center justify-between px-3 py-2 bg-background/30 rounded-lg border border-border/30 hover:bg-background/40 transition-all duration-200">
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              <div className="font-medium text-xs min-w-0 flex-1 text-foreground">
+                                {t.user ? "" : "🤖"}
+                                {t.user && (
+                                  <div className="mt-0.5 text-xs text-muted-foreground truncate max-w-md">
+                                    {t.user.content.length > 60
+                                      ? `${t.user.content.substring(0, 60)}...`
+                                      : t.user.content}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                onClick={() => togglePin(key)}
+                                className={`p-1 rounded-md transition-all duration-200 ${
+                                  isPinned
+                                    ? "bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-400/30 hover:border-red-400/50"
+                                    : "bg-background/40 hover:bg-background/60 text-muted-foreground border border-border/30 hover:border-border/50"
+                                }`}
+                                title={isPinned ? "Unpin" : "Pin"}
+                              >
+                                <Pin className="w-2.5 h-2.5" />
+                              </button>
+                              <button
+                                onClick={() => toggleStar(key)}
+                                className={`p-1 rounded-md transition-all duration-200 ${
+                                  !!starred[key]
+                                    ? "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-400/30 hover:border-yellow-400/50"
+                                    : "bg-background/40 hover:bg-background/60 text-muted-foreground border border-border/30 hover:border-border/50"
+                                }`}
+                                title={!!starred[key] ? "Unstar" : "Star"}
+                              >
+                                <svg
+                                  className="w-2.5 h-2.5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                              </button>
+                              <CollapsibleTrigger
+                                data-collapsible="trigger"
+                                className="flex items-center justify-center"
+                              >
+                                <ChevronUp className="w-3 h-3 text-slate-400 transform transition-transform duration-200 group-data-[state=closed]:rotate-180" />
+                              </CollapsibleTrigger>
+                            </div>
+                          </div>
+                        </div>
+                        <CollapsibleContent className="overflow-hidden">
+                          <div className="p-3 text-sm space-y-4 border-t border-slate-600/20 mt-1">
+                            {t.user && (
+                              <div className="space-y-2">
+                                <div className="flex justify-end">
+                                  <div className="bg-gray-700/50 rounded-2xl px-3 py-1 border border-gray-600/30 max-w-xs">
+                                    <Markdown>{t.user.content}</Markdown>
+                                  </div>
+                                </div>
+                                <div className="flex items-center justify-end gap-1 mt-2">
+                                  <CopyButton content={t.user.content} />
+                                </div>
+                                <div className="flex justify-end">
+                                  <div className="bg-gray-700/50 rounded-2xl px-3 py-1 border border-gray-600/30 max-w-xs">
+                                    <Markdown>{t.user.content}</Markdown>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                            {t.assistant && (
+                              <div className="space-y-2 border-t border-border/20 pt-3">
+                                <div className="flex items-center justify-start">
+                                  <CopyButton content={t.assistant.content} />
+                                </div>
+                                <div className="space-y-2">
+                                  <Markdown>{t.assistant.content}</Markdown>
+                                  {t.assistant.parts &&
+                                    t.assistant.parts.length > 0 && (
+                                      <div className="mt-2 space-y-2">
+                                        {t.assistant.parts.map((part, idx) => {
+                                          const isLast =
+                                            idx ===
+                                            (t.assistant?.parts?.length ?? 0) -
+                                              1;
+                                          if (part.type === "tool-call") {
+                                            const isManualToolInvocation =
+                                              part.toolInvocation?.state ===
+                                              "partial-call";
+                                            return (
+                                              <div
+                                                key={idx}
+                                                className="p-2 bg-slate-800/40 rounded-lg border border-slate-600/30"
+                                              >
+                                                <div className="font-medium mb-1">
+                                                  🔧 Tool:{" "}
+                                                  {part.toolInvocation
+                                                    ?.toolName || "Unknown"}
+                                                </div>
+                                                <div className="text-xs text-gray-400">
+                                                  {part.toolInvocation
+                                                    ?.state === "result"
+                                                    ? "Completed"
+                                                    : "Executing..."}
+                                                </div>
+                                                {isManualToolInvocation &&
+                                                  isLast &&
+                                                  onPoxyToolCall && (
+                                                    <div className="mt-2 flex gap-2">
+                                                      <button
+                                                        onClick={() =>
+                                                          onPoxyToolCall({
+                                                            action: "manual",
+                                                            result: true,
+                                                          })
+                                                        }
+                                                        className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded hover:bg-green-200"
+                                                      >
+                                                        Approve
+                                                      </button>
+                                                      <button
+                                                        onClick={() =>
+                                                          onPoxyToolCall({
+                                                            action: "manual",
+                                                            result: false,
+                                                          })
+                                                        }
+                                                        className="px-2 text-xs bg-red-100 text-red-800 rounded hover:bg-red-200"
+                                                      >
+                                                        Reject
+                                                      </button>
+                                                    </div>
+                                                  )}
+                                              </div>
+                                            );
+                                          } else if (
+                                            part.type === "step-start"
+                                          ) {
+                                            return null;
+                                          }
+                                          return null;
+                                        })}
+                                      </div>
+                                    )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    </div>
+                  );
+                })}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
+
+        {/* Last 2 messages - always visible */}
+        <div className="border-t border-slate-600/40 pt-4 space-y-6">
+          {filteredTurns.slice(-2).map((t, relativeIdx) => {
+            const idx = filteredTurns.length - 2 + relativeIdx;
+            const key = turnKey(t) || String(idx);
+            const defaultOpen = shouldOpen(idx, key);
+            const isPinned = !!pinned[key];
+            return (
+              <div
+                key={key}
+                ref={(el) => {
+                  if (el) refs.current[idx] = el;
+                }}
+              >
+                <Collapsible
+                  defaultOpen={defaultOpen}
+                  className="overflow-hidden group mb-6 bg-background/30 rounded-lg p-1 border border-border/30 hover:border-border/50 transition-all duration-200"
+                >
+                  <div className="w-full group">
+                    <div className="flex items-center justify-between px-4 py-2 bg-background/40 rounded-lg border border-border/40 hover:bg-background/50 transition-all duration-200">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div className="font-medium text-sm min-w-0 flex-1 text-foreground">
+                          {t.user ? "" : "🤖"}
+                          {t.user && (
+                            <div className="mt-1 text-xs text-muted-foreground truncate max-w-md">
+                              {t.user.content.length > 60
+                                ? `${t.user.content.substring(0, 60)}...`
+                                : t.user.content}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => togglePin(key)}
+                          className={`p-1 rounded-md transition-all duration-200 ${
+                            isPinned
+                              ? "bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-400/30 hover:border-red-400/50"
+                              : "bg-background/40 hover:bg-background/60 text-muted-foreground border border-border/30 hover:border-border/50"
+                          }`}
+                          title={isPinned ? "Unpin" : "Pin"}
+                        >
+                          <Pin className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => toggleStar(key)}
+                          className={`p-1 rounded-md transition-all duration-200 ${
+                            !!starred[key]
+                              ? "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-400/30 hover:border-yellow-400/50"
+                              : "bg-background/40 hover:bg-background/60 text-muted-foreground border border-border/30 hover:border-border/50"
+                          }`}
+                          title={!!starred[key] ? "Unstar" : "Star"}
+                        >
+                          <svg
+                            className="w-3 h-3"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                          </svg>
+                        </button>
+                        <CollapsibleTrigger
+                          data-collapsible="trigger"
+                          className="flex items-center justify-center"
+                        >
+                          <ChevronUp className="w-4 h-4 text-slate-300 transform transition-transform duration-200 group-data-[state=closed]:rotate-180" />
+                        </CollapsibleTrigger>
+                      </div>
                     </div>
                   </div>
-                  <Collapsible>
-                    <CollapsibleTrigger asChild>
-                      <Button variant="ghost" size="sm" className="p-1 h-6 w-6">
-                        <ChevronUp className="w-4 h-4" />
-                      </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="mt-2 text-sm text-gray-600">
-                        {message.content}
-                      </div>
-                      <div className="mt-2">
-                        <CopyButton
-                          text={message.content}
-                          className="text-xs"
-                        />
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                </div>
+                  <CollapsibleContent className="overflow-hidden">
+                    <div className="p-4 text-sm space-y-4 border-t border-slate-500/30 mt-1">
+                      {t.user && (
+                        <div className="space-y-2">
+                          <div className="flex justify-end">
+                            <div className="bg-gray-700/50 rounded-2xl px-3 py-1 border border-gray-600/30 max-w-xs">
+                              <Markdown>{t.user.content}</Markdown>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-end gap-1 mt-2">
+                            <CopyButton content={t.user.content} />
+                          </div>
+                        </div>
+                      )}
+                      {t.assistant && (
+                        <div className="space-y-2 border-t border-border/30 pt-4">
+                          <div className="flex items-center justify-start">
+                            <CopyButton content={t.assistant.content} />
+                          </div>
+                          <div className="space-y-2">
+                            <Markdown>{t.assistant.content}</Markdown>
+                            {t.assistant.parts &&
+                              t.assistant.parts.length > 0 && (
+                                <div className="mt-2 space-y-2">
+                                  {t.assistant.parts.map((part, idx) => {
+                                    const isLast =
+                                      idx ===
+                                      (t.assistant?.parts?.length ?? 0) - 1;
+                                    if (part.type === "tool-call") {
+                                      const isManualToolInvocation =
+                                        part.toolInvocation?.state ===
+                                        "partial-call";
+                                      return (
+                                        <div
+                                          key={idx}
+                                          className="p-3 bg-slate-800/40 rounded-lg border border-slate-600/30"
+                                        >
+                                          <div className="font-medium mb-1">
+                                            🔧 Tool:{" "}
+                                            {part.toolInvocation?.toolName ||
+                                              "Unknown"}
+                                          </div>
+                                          <div className="text-xs text-gray-400">
+                                            {part.toolInvocation?.state ===
+                                            "result"
+                                              ? "Completed"
+                                              : "Executing..."}
+                                          </div>
+                                          {isManualToolInvocation &&
+                                            isLast &&
+                                            onPoxyToolCall && (
+                                              <div className="mt-2 flex gap-2">
+                                                <button
+                                                  onClick={() =>
+                                                    onPoxyToolCall({
+                                                      action: "manual",
+                                                      result: true,
+                                                    })
+                                                  }
+                                                  className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded hover:bg-green-200"
+                                                >
+                                                  Approve
+                                                </button>
+                                                <button
+                                                  onClick={() =>
+                                                    onPoxyToolCall({
+                                                      action: "manual",
+                                                      result: false,
+                                                    })
+                                                  }
+                                                  className="px-2 text-xs bg-red-100 text-red-800 rounded hover:bg-red-200"
+                                                >
+                                                  Reject
+                                                </button>
+                                              </div>
+                                            )}
+                                        </div>
+                                      );
+                                    } else if (part.type === "step-start") {
+                                      return null;
+                                    }
+                                    return null;
+                                  })}
+                                </div>
+                              )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
-      )}
+      </div>
 
-      {/* Older Chats Section */}
-      {olderMessages.length > 0 && (
-        <div className="border rounded-lg p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-gray-700">Older Chats</h3>
-            <Collapsible>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="p-1 h-6 w-6">
-                  <ChevronUp className="w-4 h-4" />
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="space-y-2">
-                  {olderMessages.map((message) => (
-                    <div
-                      key={message.id}
-                      className="border rounded p-3 bg-gray-50"
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-gray-600">
-                            {message.role === "user" ? "User" : message.role === "data" ? "Data" : "Assistant"}
-                          </span>
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => togglePin(message.id)}
-                              className="p-1 h-6 w-6"
-                            >
-                              <Pin
-                                className={`w-4 h-4 ${
-                                  pinned.has(message.id)
-                                    ? "fill-red-500 text-red-600"
-                                    : "text-gray-400"
-                                }`}
-                              />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => toggleStar(message.id)}
-                              className="p-1 h-6 w-6"
-                            >
-                              <svg
-                                className={`w-4 h-4 ${
-                                  starred.has(message.id)
-                                    ? "fill-yellow-500 text-yellow-600"
-                                    : "text-gray-400"
-                                }`}
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                                />
-                              </svg>
-                            </Button>
-                          </div>
-                        </div>
-                        <Collapsible>
-                          <CollapsibleTrigger asChild>
-                            <Button variant="ghost" size="sm" className="p-1 h-6 w-6">
-                              <ChevronUp className="w-4 h-4" />
-                            </Button>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent>
-                            <div className="mt-2 text-sm text-gray-600">
-                              {message.content}
-                            </div>
-                            <div className="mt-2">
-                              <CopyButton
-                                text={message.content}
-                                className="text-xs"
-                              />
-                            </div>
-                          </CollapsibleContent>
-                        </Collapsible>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          </div>
-        </div>
-      )}
+      {/* Project Tray for saving code snippets */}
+      <ProjectTray />
+    </div>
+  );
+}
 
-      {/* Last 2 Messages Section */}
-      {recentMessages.length > 0 && (
-        <div className="border rounded-lg p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-gray-700">Last 2 Messages</h3>
-            <Collapsible>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="p-1 h-6 w-6">
-                  <ChevronUp className="w-4 h-4" />
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="space-y-2">
-                  {recentMessages.map((message) => (
-                    <div
-                      key={message.id}
-                      className="border rounded p-3 bg-blue-50"
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-gray-600">
-                            {message.role === "user" ? "User" : message.role === "data" ? "Data" : "Assistant"}
-                          </span>
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => togglePin(message.id)}
-                              className="p-1 h-6 w-6"
-                            >
-                              <Pin
-                                className={`w-4 h-4 ${
-                                  pinned.has(message.id)
-                                    ? "fill-red-500 text-red-600"
-                                    : "text-gray-400"
-                                }`}
-                              />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => toggleStar(message.id)}
-                              className="p-1 h-6 w-6"
-                            >
-                              <svg
-                                className={`w-4 h-4 ${
-                                  starred.has(message.id)
-                                    ? "fill-yellow-500 text-yellow-600"
-                                    : "text-gray-400"
-                                }`}
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                                />
-                              </svg>
-                            </Button>
-                          </div>
-                        </div>
-                        <Collapsible>
-                          <CollapsibleTrigger asChild>
-                            <Button variant="ghost" size="sm" className="p-1 h-6 w-6">
-                              <ChevronUp className="w-4 h-4" />
-                            </Button>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent>
-                            <div className="mt-2 text-sm text-gray-600">
-                              {message.content}
-                            </div>
-                            <div className="mt-2">
-                              <CopyButton
-                                text={message.content}
-                                className="text-xs"
-                              />
-                            </div>
-                          </CollapsibleContent>
-                        </Collapsible>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          </div>
-        </div>
-      )}
+function SaveButtons({ turn }: { turn: Turn }) {
+  const [saved, setSaved] = React.useState<"none" | "session" | "local">(
+    "none",
+  );
 
-      {/* Save Buttons */}
-      {threadId && (
-        <div className="flex justify-center">
-          <SaveButtons threadId={threadId} onPoxyToolCall={onPoxyToolCall} />
-        </div>
+  const payload = React.useMemo(
+    () => ({
+      user: turn.user?.content ?? "",
+      assistant: turn.assistant?.content ?? "",
+      ts: Date.now(),
+    }),
+    [turn.user?.content, turn.assistant?.content],
+  );
+
+  const saveTemp = () => {
+    (window as any).__CHAT_AI_SAVED__ = (window as any).__CHAT_AI_SAVED__ ?? [];
+    (window as any).__CHAT_AI_SAVED__.push(payload);
+    setSaved("session");
+  };
+
+  const savePerm = () => {
+    if (typeof window !== "undefined") {
+      try {
+        const k = "chat-ai:saved-turns";
+        const list = JSON.parse(localStorage.getItem(k) || "[]");
+        list.push(payload);
+        localStorage.setItem(k, JSON.stringify(list));
+        setSaved("local");
+      } catch {}
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-1">
+      <button
+        onClick={saveTemp}
+        className="p-2 text-xs rounded-md bg-background/60 hover:bg-background/80 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105"
+        title="Save for this session"
+      >
+        <Save className="w-3 h-3" />
+      </button>
+      <button
+        onClick={savePerm}
+        className="p-2 text-xs rounded-md bg-background/50 hover:bg-background transition-colors"
+        title="Save on this device"
+      >
+        <HardDrive className="w-3 h-3" />
+      </button>
+      {saved !== "none" && (
+        <span className="text-[10px] text-muted-foreground ml-1">
+          ✓ {saved}
+        </span>
       )}
     </div>
+  );
+}
+
+function CopyButton({ content }: { content: string }) {
+  const [copied, setCopied] = React.useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="p-2 text-xs rounded-md bg-background/50 hover:bg-background transition-colors"
+      title="Copy response"
+    >
+      {copied ? (
+        <svg
+          className="w-3 h-3 text-green-500"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M5 13l4 4L19 7"
+          />
+        </svg>
+      ) : (
+        <svg
+          className="w-3 h-3"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+          />
+        </svg>
+      )}
+    </button>
   );
 }
