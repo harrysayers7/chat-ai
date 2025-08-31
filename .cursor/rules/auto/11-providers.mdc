@@ -5,7 +5,7 @@ alwaysApply: false
 ---
 
 # 🔌 Providers (Env ↔ Code)
-Generated: 2025-08-24T05:47:24.977Z
+Generated: 2025-08-31T01:18:48.679Z
 
 ## Environment Keys
 - **openai** → `OPENAI_API_KEY`: set (example: present)

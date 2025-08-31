@@ -106,12 +106,13 @@ alwaysApply: false
 ---
 
 # 🤖 Auto Patterns Summary
-Generated: 2025-08-24T05:47:24.936Z
+Generated: 2025-08-31T01:18:44.249Z
 
 
 ## ai-providers
 - **anthropic** 
   - `src/app/api/chat/route.ts:193`
+  - `src/app/api/test-chat/route.ts:17`
   - `src/components/prompt-input.tsx:417`
   - `src/components/select-model.tsx:148`
   - `src/lib/ai/models.ts:6`
@@ -132,6 +133,7 @@ Generated: 2025-08-24T05:47:24.936Z
   - `src/lib/ai/models.ts:57`
   - `src/lib/ai/models.ts:63`
 - **mcp** 
+  - `src/agents/tools/mokai.ts:18`
   - `src/app/(auth)/sign-up/page.tsx:140`
   - `src/app/(chat)/mcp/create/page.tsx:1`
   - `src/app/(chat)/mcp/create/page.tsx:12`
@@ -151,8 +153,7 @@ Generated: 2025-08-24T05:47:24.936Z
   - `src/app/(chat)/mcp/test/[id]/page.tsx:361`
   - `src/app/(chat)/mcp/test/[id]/page.tsx:398`
   - `src/app/(chat)/mcp/test/[id]/page.tsx:507`
-  - `src/app/(chat)/mcp/test/[id]/page.tsx:529`
-  - …and 297 more
+  - …and 299 more
 - **ollama** 
   - `src/lib/ai/models.ts:3`
   - `src/lib/ai/models.ts:16`
@@ -167,6 +168,9 @@ Generated: 2025-08-24T05:47:24.936Z
   - `src/app/api/chat/openai-realtime/route.ts:25`
   - `src/app/api/chat/openai-realtime/route.ts:96`
   - `src/app/api/chat/route.ts:193`
+  - `src/app/api/test-chat/route.ts:14`
+  - `src/app/api/test-chat/route.ts:15`
+  - `src/app/api/test-chat/route.ts:16`
   - `src/app/store/index.ts:5`
   - `src/app/store/index.ts:81`
   - `src/components/chat-bot-voice.tsx:9`
@@ -181,10 +185,7 @@ Generated: 2025-08-24T05:47:24.936Z
   - `src/components/select-model.tsx:161`
   - `src/components/ui/openai-icon.tsx:11`
   - `src/lib/ai/azure-openai-compatible.test.ts:3`
-  - `src/lib/ai/azure-openai-compatible.test.ts:4`
-  - `src/lib/ai/azure-openai-compatible.test.ts:8`
-  - `src/lib/ai/azure-openai-compatible.test.ts:9`
-  - …and 73 more
+  - …and 76 more
 - **openrouter** 
   - `src/lib/ai/models.ts:8`
   - `src/lib/ai/models.ts:53`
@@ -195,6 +196,9 @@ Generated: 2025-08-24T05:47:24.936Z
   - `src/lib/ai/models.ts:67`
   - `src/lib/ai/models.ts:68`
 - **xai** 
+  - `src/app/api/docs-sync/route.ts:16`
+  - `src/components/agent/docs-sync-agent.tsx:26`
+  - `src/components/agent/docs-sync-agent.tsx:169`
   - `src/components/prompt-input.tsx:34`
   - `src/components/prompt-input.tsx:415`
   - `src/components/prompt-input.tsx:416`
@@ -206,6 +210,8 @@ Generated: 2025-08-24T05:47:24.936Z
   - `src/lib/ai/models.ts:44`
   - `src/lib/ai/models.ts:45`
   - `src/lib/ai/models.ts:46`
+  - `src/lib/services/docs-sync-client.ts:281`
+  - `src/lib/services/docs-sync-client.ts:292`
 
 ## backend
 - **drizzle** 
@@ -239,13 +245,13 @@ Generated: 2025-08-24T05:47:24.936Z
   - `src/app/api/archive/[id]/route.ts:89`
   - `src/app/api/archive/route.ts:6`
   - `src/app/api/archive/route.ts:24`
+  - `src/app/api/auth/get-session/route.ts:4`
   - `src/app/api/bookmark/route.ts:10`
   - `src/app/api/bookmark/route.ts:55`
   - `src/app/api/chat/openai-realtime/route.ts:28`
   - `src/app/api/chat/route.ts:57`
   - `src/app/api/chat/temporary/route.ts:9`
-  - `src/app/api/chat/title/route.ts:16`
-  - …and 22 more
+  - …and 32 more
 - **redis** 
   - `src/lib/cache/redis-cache.ts:1`
   - `src/lib/cache/redis-cache.ts:6`
@@ -271,6 +277,7 @@ Generated: 2025-08-24T05:47:24.936Z
 
 ## frontend
 - **radix** 
+  - `src/components/CollapsibleChat.tsx:4`
   - `src/components/chat-bot-temporary.tsx:33`
   - `src/components/ui/accordion.tsx:4`
   - `src/components/ui/avatar.tsx:4`
@@ -278,6 +285,7 @@ Generated: 2025-08-24T05:47:24.936Z
   - `src/components/ui/breadcrumb.tsx:2`
   - `src/components/ui/button.tsx:2`
   - `src/components/ui/checkbox.tsx:4`
+  - `src/components/ui/collapsible.tsx:3`
   - `src/components/ui/context-menu.tsx:4`
   - `src/components/ui/dialog.tsx:4`
   - `src/components/ui/dropdown-menu.tsx:4`
@@ -289,31 +297,29 @@ Generated: 2025-08-24T05:47:24.936Z
   - `src/components/ui/select.tsx:4`
   - `src/components/ui/separator.tsx:4`
   - `src/components/ui/sheet.tsx:4`
-  - `src/components/ui/sidebar.tsx:4`
-  - `src/components/ui/switch.tsx:4`
-  - …and 3 more
+  - …and 5 more
 - **shadcn** 
   - `src/app/(auth)/sign-up/page.tsx:5`
   - `src/app/(auth)/sign-up/page.tsx:6`
   - `src/app/(auth)/sign-up/page.tsx:7`
   - `src/app/(auth)/sign-up/page.tsx:14`
+  - `src/app/(chat)/chat/[thread]/error.tsx:3`
+  - `src/app/(chat)/chat/[thread]/loading.tsx:1`
+  - `src/app/(chat)/chat/[thread]/not-found.tsx:1`
+  - `src/app/(chat)/layout.tsx:3`
   - `src/app/(chat)/mcp/test/[id]/page.tsx:36`
-  - `src/components/mcp-dashboard.tsx:4`
-  - `src/components/sign-in.tsx:5`
-  - `src/components/sign-in.tsx:6`
-  - `src/components/sign-in.tsx:7`
-  - `src/components/sign-in.tsx:14`
-  - `src/components/tool-invocation/bar-chart.tsx:19`
-  - `src/components/tool-invocation/bar-chart.tsx:25`
-  - `src/components/tool-invocation/interactive-table.tsx:20`
-  - `src/components/tool-invocation/interactive-table.tsx:21`
-  - `src/components/tool-invocation/interactive-table.tsx:22`
-  - `src/components/tool-invocation/interactive-table.tsx:30`
-  - `src/components/tool-invocation/interactive-table.tsx:37`
-  - `src/components/tool-invocation/line-chart.tsx:21`
-  - `src/components/tool-invocation/line-chart.tsx:27`
-  - `src/components/tool-invocation/pie-chart.tsx:12`
-  - …and 10 more
+  - `src/app/layout.tsx:8`
+  - `src/components/CodeBlockCollapsed.tsx:5`
+  - `src/components/CodeBlockCollapsed.tsx:6`
+  - `src/components/DiffBlock.tsx:5`
+  - `src/components/FilesTabs.tsx:3`
+  - `src/components/ProjectTray.tsx:3`
+  - `src/components/ProjectTray.tsx:4`
+  - `src/components/ProjectTray.tsx:5`
+  - `src/components/ProjectTray.tsx:6`
+  - `src/components/chat-bot.tsx:31`
+  - `src/components/chat-bot.tsx:42`
+  - …and 80 more
 - **tiptap** 
   - `src/components/chat-mention-input.tsx:24`
   - `src/components/mention-input.tsx:2`
@@ -329,21 +335,21 @@ Generated: 2025-08-24T05:47:24.936Z
   - `src/app/api/archive/[id]/items/[itemId]/route.ts:1`
   - `src/app/api/archive/[id]/route.ts:1`
   - `src/app/api/archive/route.ts:1`
+  - `src/app/api/auth/get-session/route.ts:1`
   - `src/app/api/chat/openai-realtime/route.ts:1`
   - `src/app/api/chat/route.ts:1`
   - `src/app/api/chat/temporary/route.ts:1`
   - `src/app/api/chat/title/route.ts:1`
+  - `src/app/api/docs-sync/route.ts:1`
+  - `src/app/api/github-instructions/route.ts:1`
   - `src/app/api/mcp/list/route.ts:1`
   - `src/app/api/mcp/oauth/callback/route.ts:1`
   - `src/app/api/mcp/route.ts:1`
   - `src/app/api/mcp/server-customizations/[server]/route.ts:1`
   - `src/app/api/mcp/tool-customizations/[server]/[tool]/route.ts:1`
   - `src/app/api/mcp/tool-customizations/[server]/route.ts:1`
-  - `src/app/api/thread/route.ts:1`
-  - `src/app/api/user/preferences/route.ts:1`
-  - `src/app/api/workflow/[id]/execute/route.ts:1`
-  - `src/app/api/workflow/[id]/route.ts:1`
-  - …and 3 more
+  - `src/app/api/tasks/databases/route.ts:1`
+  - …and 9 more
 - **possible-secret** — Potential secret in code
   - `src/lib/ai/azure-openai-compatible.test.ts:21`
   - `src/lib/ai/azure-openai-compatible.test.ts:30`
@@ -373,6 +379,13 @@ Generated: 2025-08-24T05:47:24.936Z
   - `src/lib/cache/safe-redis-cache.ts:92`
   - `src/lib/cache/safe-redis-cache.ts:98`
 - **zod** — Zod validation present
+  - `src/agents/tools/mokai.ts:8`
+  - `src/agents/tools/mokai.ts:9`
+  - `src/agents/tools/mokai.ts:10`
+  - `src/agents/tools/mokai.ts:19`
+  - `src/agents/tools/mokai.ts:20`
+  - `src/agents/tools/mokai.ts:21`
+  - `src/agents/tools/mokai.ts:22`
   - `src/app/api/archive/[id]/items/route.ts:5`
   - `src/app/api/archive/[id]/items/route.ts:6`
   - `src/app/api/bookmark/route.ts:5`
@@ -386,14 +399,7 @@ Generated: 2025-08-24T05:47:24.936Z
   - `src/components/tool-detail-popup.tsx:98`
   - `src/components/workflow/edit-workflow-popup.tsx:57`
   - `src/components/workflow/edit-workflow-popup.tsx:58`
-  - `src/components/workflow/edit-workflow-popup.tsx:63`
-  - `src/components/workflow/edit-workflow-popup.tsx:64`
-  - `src/components/workflow/edit-workflow-popup.tsx:66`
-  - `src/components/workflow/edit-workflow-popup.tsx:69`
-  - `src/lib/ai/create-openai-compatiable.ts:76`
-  - `src/lib/ai/create-openai-compatiable.ts:77`
-  - `src/lib/ai/create-openai-compatiable.ts:78`
-  - …and 178 more
+  - …and 185 more
 
 ---
 ### Cursor Guardrails (suggestions)
@@ -411,7 +417,7 @@ alwaysApply: false
 ---
 
 # 🔌 Providers (Env ↔ Code)
-Generated: 2025-08-24T05:47:24.977Z
+Generated: 2025-08-31T01:18:48.679Z
 
 ## Environment Keys
 - **openai** → `OPENAI_API_KEY`: set (example: present)
