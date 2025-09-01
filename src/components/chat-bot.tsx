@@ -383,9 +383,16 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
     }
   }, [handleScroll]);
 
-  // Scroll to bottom on page load/refresh
+  // Scroll to bottom only on initial load, not on every message change
+  const hasInitiallyScrolled = useRef(false);
+
   useEffect(() => {
-    if (messages.length > 0 && containerRef.current) {
+    if (
+      messages.length > 0 &&
+      containerRef.current &&
+      !hasInitiallyScrolled.current
+    ) {
+      hasInitiallyScrolled.current = true;
       const scrollToBottom = () => {
         if (containerRef.current) {
           containerRef.current.scrollTo({

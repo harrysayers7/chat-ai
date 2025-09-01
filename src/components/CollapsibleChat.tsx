@@ -110,19 +110,25 @@ export function CollapsibleChat({
   const [starred, setStarred] = React.useState<Record<string, boolean>>({});
   const [showOnlyStarred, setShowOnlyStarred] = React.useState(false);
 
-  // Scroll to bottom when component mounts
+  // Scroll to bottom only when new messages are added (not on every mount)
+  const hasScrolledToBottom = useRef(false);
+
   useEffect(() => {
-    // Small delay to ensure content is rendered
-    const timer = setTimeout(() => {
-      const container = document
-        .querySelector('[data-master-collapse="trigger"]')
-        ?.closest(".flex-1.overflow-y-auto");
-      if (container) {
-        container.scrollTop = container.scrollHeight;
-      }
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
+    // Only scroll to bottom if we haven't already done so and there are messages
+    if (!hasScrolledToBottom.current && messages.length > 0) {
+      hasScrolledToBottom.current = true;
+      // Small delay to ensure content is rendered
+      const timer = setTimeout(() => {
+        const container = document
+          .querySelector('[data-master-collapse="trigger"]')
+          ?.closest(".flex-1.overflow-y-auto");
+        if (container) {
+          container.scrollTop = container.scrollHeight;
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [messages.length]);
 
   // Convert messages to turns format
   const turns = useMemo(() => {
