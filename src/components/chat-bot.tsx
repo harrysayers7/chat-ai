@@ -50,6 +50,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { PromptLibrarySidePanel } from "./prompt-library-side-panel";
 import { PromptEditor } from "./prompt-editor";
 import { CollapsibleChat } from "./chat";
+import { useSidebarContextForAI } from "@/hooks/use-sidebar-context";
 
 type Props = {
   threadId: string;
@@ -65,7 +66,7 @@ const Particles = dynamic(() => import("@/components/ui/particles"), {
   ssr: false,
 });
 
-const debounce = createDebounce();
+const _debounce = createDebounce();
 
 const firstTimeStorage = getStorageManager("IS_FIRST");
 const isFirstTime = firstTimeStorage.get() ?? true;
@@ -73,6 +74,7 @@ firstTimeStorage.set(false);
 
 export default function ChatBot({ threadId, initialMessages, slots }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const sidebarContext = useSidebarContextForAI();
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [isPromptLibraryOpen, setIsPromptLibraryOpen] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
@@ -106,7 +108,8 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
     threadId,
   });
 
-  const [showParticles, setShowParticles] = useState(isFirstTime);
+  const [showParticles, setShowParticles] = useState(false); // Start with particles hidden to prevent initial jump
+  const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const {
     messages,
@@ -143,6 +146,7 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
           : latestRef.current.allowedMcpServers,
         mentions: latestRef.current.mentions,
         message: lastMessage,
+        sidebarContext,
       };
       return request;
     },
@@ -308,9 +312,21 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
   }, []);
 
   const handleFocus = useCallback(() => {
-    setShowParticles(false);
-    debounce(() => setShowParticles(true), 60000);
-  }, []);
+    // Hide particles immediately when user is active
+    if (showParticles) {
+      setShowParticles(false);
+    }
+
+    // Clear any existing timeout
+    if (idleTimeoutRef.current) {
+      clearTimeout(idleTimeoutRef.current);
+    }
+
+    // Set a new timeout to show particles after 30 seconds of inactivity
+    idleTimeoutRef.current = setTimeout(() => {
+      setShowParticles(true);
+    }, 30000);
+  }, [showParticles]);
 
   const handleInsertPrompt = useCallback(
     (content: string) => {
@@ -326,6 +342,10 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
     appStoreMutate({ currentThreadId: threadId });
     return () => {
       appStoreMutate({ currentThreadId: null });
+      // Clean up idle timeout
+      if (idleTimeoutRef.current) {
+        clearTimeout(idleTimeoutRef.current);
+      }
     };
   }, [threadId]);
 
@@ -358,7 +378,7 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
     if (mounted) {
       handleFocus();
     }
-  }, [input]);
+  }, [input, handleFocus]);
 
   // Add event listener for prompt library
   useEffect(() => {

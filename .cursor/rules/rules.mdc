@@ -106,11 +106,12 @@ alwaysApply: false
 ---
 
 # 🤖 Auto Patterns Summary
-Generated: 2025-09-01T05:13:02.084Z
+Generated: 2025-09-01T20:21:44.549Z
 
 
 ## ai-providers
 - **anthropic** 
+  - `src/app/api/ai-explanation/route.ts:27`
   - `src/app/api/chat/route.ts:193`
   - `src/app/api/test-chat/route.ts:17`
   - `src/components/prompt-input.tsx:417`
@@ -166,16 +167,16 @@ Generated: 2025-09-01T05:13:02.084Z
   - `src/lib/ai/models.ts:66`
   - `src/lib/ai/models.ts:67`
 - **openai** 
-  - `src/app/api/agent/ai/route.ts:86`
-  - `src/app/api/chat/actions.ts:55`
-  - `src/app/api/chat/actions.ts:127`
-  - `src/app/api/chat/actions.ts:203`
+  - `src/app/api/agent/ai/route.ts:87`
+  - `src/app/api/chat/actions.ts:56`
+  - `src/app/api/chat/actions.ts:131`
+  - `src/app/api/chat/actions.ts:210`
   - `src/app/api/chat/openai-realtime/route.ts:25`
   - `src/app/api/chat/openai-realtime/route.ts:96`
   - `src/app/api/chat/route.ts:193`
-  - `src/app/api/chat/route.ts:236`
-  - `src/app/api/chat/temporary/route.ts:33`
-  - `src/app/api/chat/title/route.ts:43`
+  - `src/app/api/chat/route.ts:237`
+  - `src/app/api/chat/temporary/route.ts:34`
+  - `src/app/api/chat/title/route.ts:44`
   - `src/app/api/test-chat/route.ts:14`
   - `src/app/api/test-chat/route.ts:15`
   - `src/app/api/test-chat/route.ts:16`
@@ -239,6 +240,7 @@ Generated: 2025-09-01T05:13:02.084Z
   - `src/app/api/agent/ai/route.ts:22`
   - `src/app/api/agent/route.ts:8`
   - `src/app/api/agent/route.ts:53`
+  - `src/app/api/ai-explanation/route.ts:6`
   - `src/app/api/archive/[id]/items/[itemId]/route.ts:4`
   - `src/app/api/archive/[id]/items/route.ts:9`
   - `src/app/api/archive/[id]/items/route.ts:41`
@@ -252,8 +254,7 @@ Generated: 2025-09-01T05:13:02.084Z
   - `src/app/api/bookmark/route.ts:55`
   - `src/app/api/chat/openai-realtime/route.ts:28`
   - `src/app/api/chat/route.ts:57`
-  - `src/app/api/chat/temporary/route.ts:9`
-  - …and 32 more
+  - …and 34 more
 - **redis** 
   - `src/lib/cache/redis-cache.ts:1`
   - `src/lib/cache/redis-cache.ts:6`
@@ -279,7 +280,9 @@ Generated: 2025-09-01T05:13:02.084Z
 
 ## frontend
 - **radix** 
-  - `src/components/CollapsibleChat.tsx:8`
+  - `src/components/chat/components/OlderChatsSection.tsx:9`
+  - `src/components/chat/components/PinnedChatsSection.tsx:9`
+  - `src/components/chat/components/TurnComponent.tsx:9`
   - `src/components/chat-bot-temporary.tsx:33`
   - `src/components/ui/accordion.tsx:4`
   - `src/components/ui/avatar.tsx:4`
@@ -297,9 +300,7 @@ Generated: 2025-09-01T05:13:02.084Z
   - `src/components/ui/radio-group.tsx:4`
   - `src/components/ui/scroll-area.tsx:4`
   - `src/components/ui/select.tsx:4`
-  - `src/components/ui/separator.tsx:4`
-  - `src/components/ui/sheet.tsx:4`
-  - …and 5 more
+  - …and 7 more
 - **shadcn** 
   - `src/app/(auth)/sign-up/page.tsx:5`
   - `src/app/(auth)/sign-up/page.tsx:6`
@@ -321,7 +322,7 @@ Generated: 2025-09-01T05:13:02.084Z
   - `src/components/ProjectTray.tsx:11`
   - `src/components/chat-bot.tsx:31`
   - `src/components/chat-bot.tsx:42`
-  - …and 80 more
+  - …and 90 more
 - **tiptap** 
   - `src/components/chat-mention-input.tsx:24`
   - `src/components/mention-input.tsx:2`
@@ -334,6 +335,7 @@ Generated: 2025-09-01T05:13:02.084Z
   - `src/app/api/agent/[id]/route.ts:1`
   - `src/app/api/agent/ai/route.ts:1`
   - `src/app/api/agent/route.ts:1`
+  - `src/app/api/ai-explanation/route.ts:1`
   - `src/app/api/archive/[id]/items/[itemId]/route.ts:1`
   - `src/app/api/archive/[id]/route.ts:1`
   - `src/app/api/archive/route.ts:1`
@@ -344,14 +346,13 @@ Generated: 2025-09-01T05:13:02.084Z
   - `src/app/api/chat/title/route.ts:1`
   - `src/app/api/docs-sync/route.ts:1`
   - `src/app/api/github-instructions/route.ts:1`
+  - `src/app/api/link-metadata/route.ts:1`
   - `src/app/api/mcp/list/route.ts:1`
   - `src/app/api/mcp/oauth/callback/route.ts:1`
   - `src/app/api/mcp/route.ts:1`
   - `src/app/api/mcp/server-customizations/[server]/route.ts:1`
   - `src/app/api/mcp/tool-customizations/[server]/[tool]/route.ts:1`
-  - `src/app/api/mcp/tool-customizations/[server]/route.ts:1`
-  - `src/app/api/tasks/databases/route.ts:1`
-  - …and 9 more
+  - …and 11 more
 - **possible-secret** — Potential secret in code
   - `src/lib/ai/azure-openai-compatible.test.ts:21`
   - `src/lib/ai/azure-openai-compatible.test.ts:30`
@@ -419,7 +420,7 @@ alwaysApply: false
 ---
 
 # 🔌 Providers (Env ↔ Code)
-Generated: 2025-09-01T05:13:02.793Z
+Generated: 2025-09-01T20:21:45.260Z
 
 ## Environment Keys
 - **openai** → `OPENAI_API_KEY`: set (example: present)

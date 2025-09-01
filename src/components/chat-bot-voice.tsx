@@ -457,7 +457,7 @@ function ConversationView({
             className={cn(
               "flex px-4 py-3",
               message.role == "user" &&
-                "ml-auto max-w-xl text-foreground rounded-2xl w-fit bg-input/40",
+                "ml-auto max-w-xl text-foreground rounded-lg w-fit bg-input/60 border border-primary/10 transform hover:scale-[1.02] transition-all duration-200",
             )}
           >
             {!message.completed ? (

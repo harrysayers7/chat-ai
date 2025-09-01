@@ -42,12 +42,14 @@ export async function POST(request: NextRequest) {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const { voice, allowedMcpServers, agentId } = (await request.json()) as {
-      model: string;
-      voice: string;
-      agentId?: string;
-      allowedMcpServers: Record<string, AllowedMCPServer>;
-    };
+    const { voice, allowedMcpServers, agentId, sidebarContext } =
+      (await request.json()) as {
+        model: string;
+        voice: string;
+        agentId?: string;
+        allowedMcpServers: Record<string, AllowedMCPServer>;
+        sidebarContext?: string;
+      };
 
     const mcpTools = await mcpClientsManager.tools();
 
@@ -89,6 +91,7 @@ export async function POST(request: NextRequest) {
         session.user,
         userPreferences ?? undefined,
         agent,
+        sidebarContext,
       ),
       buildMcpServerCustomizationsSystemPrompt(mcpServerCustomizations),
     );

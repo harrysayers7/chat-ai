@@ -7,7 +7,7 @@ import { AppHeader } from "@/components/layouts/app-header";
 import { AppPopupProvider } from "@/components/layouts/app-popup-provider";
 import { RightSidebar } from "@/components/layouts/right-sidebar";
 import { ContextMenu } from "@/components/layouts/context-menu";
-import { SidebarProvider } from "@/contexts/sidebar-context";
+
 import { useTextSelection } from "@/hooks/use-text-selection";
 import { Suspense, useState, useEffect } from "react";
 import { isShortcutEvent, Shortcuts } from "@/lib/keyboard-shortcuts";
@@ -33,24 +33,22 @@ export default function ChatLayout({
 
   return (
     <UISidebarProvider defaultOpen={false}>
-      <SidebarProvider>
-        <SWRConfigProvider>
-          <AppPopupProvider />
-          <HoverSidebar />
-          <main className="relative bg-background w-full flex flex-col h-screen">
-            <AppHeader />
-            <div className="flex-1 overflow-y-auto">
-              <Suspense fallback={<ChatLoadingFallback />}>{children}</Suspense>
-            </div>
-          </main>
-          <RightSidebar
-            isOpen={isRightSidebarOpen}
-            onToggle={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
-            selectedText={selectedText}
-          />
-          <ContextMenu />
-        </SWRConfigProvider>
-      </SidebarProvider>
+      <SWRConfigProvider>
+        <AppPopupProvider />
+        <HoverSidebar />
+        <main className="relative bg-background w-full flex flex-col h-screen">
+          <AppHeader />
+          <div className="flex-1 overflow-y-auto">
+            <Suspense fallback={<ChatLoadingFallback />}>{children}</Suspense>
+          </div>
+        </main>
+        <RightSidebar
+          isOpen={isRightSidebarOpen}
+          onToggle={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
+          selectedText={selectedText}
+        />
+        <ContextMenu />
+      </SWRConfigProvider>
     </UISidebarProvider>
   );
 }

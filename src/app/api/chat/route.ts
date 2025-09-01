@@ -73,6 +73,7 @@ export async function POST(request: Request) {
       allowedMcpServers,
       thinking,
       mentions = [],
+      sidebarContext,
     } = chatApiSchemaRequestBodySchema.parse(json);
 
     const model = customModelProvider.getModel(chatModel);
@@ -186,7 +187,12 @@ export async function POST(request: Request) {
           .orElse({});
 
         const systemPrompt = mergeSystemPrompt(
-          buildUserSystemPrompt(session.user, userPreferences, agent),
+          buildUserSystemPrompt(
+            session.user,
+            userPreferences,
+            agent,
+            sidebarContext,
+          ),
           buildMcpServerCustomizationsSystemPrompt(mcpServerCustomizations),
           !supportToolCall && buildToolCallUnsupportedModelSystemPrompt,
           (!supportToolCall ||

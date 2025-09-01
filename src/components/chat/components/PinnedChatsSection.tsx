@@ -36,7 +36,7 @@ export function PinnedChatsSection({
         <CollapsibleTrigger className="w-full flex items-center justify-between p-3 rounded-lg bg-background/20 hover:bg-background/30 border border-border/20 hover:border-border/40 transition-all duration-200">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-red-400">
-              📌 Pinned Chats
+              📌 Pinned Chats - Scrollable
             </span>
             <span className="text-xs text-muted-foreground">
               ({pinnedTurns.length})
@@ -46,7 +46,7 @@ export function PinnedChatsSection({
         </CollapsibleTrigger>
 
         <CollapsibleContent className="mt-4">
-          <div className="space-y-4">
+          <div className="max-h-[50vh] overflow-y-auto space-y-4 p-4 border-2 border-green-200/30 rounded-lg bg-green-50/20 dark:bg-green-950/20 dark:border-green-800/30">
             {pinnedTurns.map((t, idx) => {
               const key = turnKey(t) || String(idx);
               const defaultOpen = false;

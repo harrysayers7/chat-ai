@@ -22,6 +22,19 @@ import {
   TableHead,
   TableCell,
 } from "ui/table";
+import {
+  ContentBox,
+  SummaryBox,
+  ImportantBox,
+  WarningBox,
+  FlaggedBox,
+} from "./content-box";
+import {
+  detectContentType as detectContent,
+  shouldWrapInBox,
+  extractContent,
+  ContentType,
+} from "lib/content-detector";
 
 const FadeIn = memo(({ children }: PropsWithChildren) => {
   return <span className="fade-in animate-in duration-1000">{children} </span>;
@@ -37,6 +50,25 @@ export const WordByWordFadeIn = memo(({ children }: PropsWithChildren) => {
   );
 });
 WordByWordFadeIn.displayName = "WordByWordFadeIn";
+
+/**
+ * Get the appropriate content wrapper component based on content type
+ */
+function getContentWrapper(contentType: ContentType) {
+  switch (contentType) {
+    case "summary":
+      return SummaryBox;
+    case "important":
+      return ImportantBox;
+    case "warning":
+      return WarningBox;
+    case "flagged":
+      return FlaggedBox;
+    default:
+      return ContentBox;
+  }
+}
+
 const components: Partial<Components> = {
   table: ({ node, children, ...props }) => {
     return (
@@ -85,6 +117,28 @@ const components: Partial<Components> = {
     );
   },
   p: ({ children }) => {
+    // Convert children to string to check for content type
+    const textContent = React.Children.toArray(children)
+      .map((child) => (typeof child === "string" ? child : ""))
+      .join("");
+
+    // Check if this paragraph should be wrapped in a content box
+    if (shouldWrapInBox(textContent)) {
+      const contentType = detectContent(textContent);
+      const cleanContent = extractContent(textContent, contentType);
+
+      // Render the appropriate content box based on type
+      const ContentWrapper = getContentWrapper(contentType);
+
+      return (
+        <ContentWrapper type={contentType}>
+          <p className="leading-6 break-words m-0">
+            <WordByWordFadeIn>{cleanContent}</WordByWordFadeIn>
+          </p>
+        </ContentWrapper>
+      );
+    }
+
     return (
       <p className="leading-6 my-4 break-words">
         <WordByWordFadeIn>{children}</WordByWordFadeIn>

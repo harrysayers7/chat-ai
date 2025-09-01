@@ -164,7 +164,7 @@ export const UserMessagePart = memo(
           className={cn(
             "flex flex-col gap-4 max-w-full ring ring-input relative overflow-hidden",
             {
-              "bg-accent text-accent-foreground px-4 py-3 rounded-2xl": isLast,
+              "!bg-accent/80 text-accent-foreground px-4 py-3 !rounded-lg border border-primary/10 transform hover:scale-[1.02] transition-all duration-200": true,
               "opacity-50": isError,
             },
             isError && "border-destructive border",

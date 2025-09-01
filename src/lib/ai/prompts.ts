@@ -53,6 +53,7 @@ export const buildUserSystemPrompt = (
   user?: User,
   userPreferences?: UserPreferences,
   agent?: Agent,
+  sidebarContext?: string,
 ) => {
   const assistantName =
     agent?.name || userPreferences?.botName || "better-chatbot";
@@ -100,6 +101,15 @@ You can assist with:
 - Adapting communication to user preferences and context
 </general_capabilities>`;
 
+  // Sidebar context (user's personal notes, tasks, and ideas)
+  if (sidebarContext) {
+    prompt += `
+
+<user_personal_notes>
+${sidebarContext}
+</user_personal_notes>`;
+  }
+
   // Communication preferences
   const displayName = userPreferences?.displayName || user?.name;
   const hasStyleExample = userPreferences?.responseStyleExample;
@@ -137,6 +147,7 @@ export const buildSpeechSystemPrompt = (
   user: User,
   userPreferences?: UserPreferences,
   agent?: Agent,
+  sidebarContext?: string,
 ) => {
   const assistantName = agent?.name || userPreferences?.botName || "Assistant";
   const currentTime = format(new Date(), "EEEE, MMMM d, yyyy 'at' h:mm:ss a");
@@ -182,6 +193,15 @@ You excel at conversational voice interactions by:
 - Using available tools to gather information and complete tasks
 - Adapting communication to user preferences and context
 </voice_capabilities>`;
+
+  // Sidebar context (user's personal notes, tasks, and ideas)
+  if (sidebarContext) {
+    prompt += `
+
+<user_personal_notes>
+${sidebarContext}
+</user_personal_notes>`;
+  }
 
   // Communication preferences
   const displayName = userPreferences?.displayName || user?.name;

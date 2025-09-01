@@ -89,7 +89,7 @@ export function AIExplanationPopup({
   return (
     <div
       ref={popupRef}
-      className="fixed z-50 bg-background/95 backdrop-blur-lg border border-border/50 rounded-lg shadow-xl max-w-2xl w-[500px]"
+      className="fixed z-[60] bg-background/95 backdrop-blur-lg border border-border/50 rounded-lg shadow-xl max-w-2xl w-[500px]"
       style={{
         left: Math.min(position.x, window.innerWidth - 520),
         top: Math.min(position.y, window.innerHeight - 500),

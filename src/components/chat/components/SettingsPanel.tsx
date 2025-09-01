@@ -124,8 +124,7 @@ export const SettingsPanel = memo(function SettingsPanel({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className={className}>
-          <Settings className="w-4 h-4 mr-2" />
-          Settings
+          <Settings className="w-4 h-4" />
         </Button>
       </DialogTrigger>
 

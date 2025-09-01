@@ -32,13 +32,13 @@ export function OlderChatsSection({
       <Collapsible data-master-collapse="trigger" defaultOpen={false}>
         <CollapsibleTrigger className="w-full flex items-center justify-between p-3 rounded-lg bg-background/20 hover:bg-background/30 border border-border/20 hover:border-border/40 transition-all duration-200">
           <span className="text-sm font-medium text-muted-foreground">
-            Older Chats ({olderTurns.length})
+            📜 Older Chats ({olderTurns.length}) - Scrollable
           </span>
           <ChevronUp className="w-4 h-4 text-muted-foreground transform transition-transform duration-200 group-data-[state=closed]:rotate-180" />
         </CollapsibleTrigger>
 
         <CollapsibleContent className="mt-4">
-          <div className="space-y-4">
+          <div className="max-h-[60vh] overflow-y-auto space-y-4 p-4 border-2 border-blue-200/30 rounded-lg bg-blue-50/20 dark:bg-blue-950/20 dark:border-blue-800/30">
             {olderTurns.map((t, idx) => {
               const key = turnKey(t) || String(idx);
               const defaultOpen = shouldOpen(idx, key);

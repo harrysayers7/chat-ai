@@ -33,9 +33,11 @@ import {
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { Textarea } from "ui/textarea";
 import { Think } from "ui/think";
+import { useSidebarContextForAI } from "@/hooks/use-sidebar-context";
 
 export function ChatBotTemporary() {
   const t = useTranslations("Chat.TemporaryChat");
+  const sidebarContext = useSidebarContextForAI();
 
   const [temporaryChat, appStoreMutate] = appStore(
     useShallow((state) => [state.temporaryChat, state.mutate]),
@@ -67,6 +69,7 @@ export function ChatBotTemporary() {
     body: {
       chatModel: temporaryChat.chatModel,
       instructions: temporaryChat.instructions,
+      sidebarContext,
     },
     onError: () => {
       setMessages((prev) => prev.slice(0, -1));

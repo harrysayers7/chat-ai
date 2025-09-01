@@ -16,13 +16,14 @@ export async function POST(request: Request) {
       return redirect("/sign-in");
     }
 
-    const { messages, chatModel, instructions } = json as {
+    const { messages, chatModel, instructions, sidebarContext } = json as {
       messages: Message[];
       chatModel?: {
         provider: string;
         model: string;
       };
       instructions?: string;
+      sidebarContext?: string;
     };
     const model = customModelProvider.getModel(chatModel);
     const userPreferences =
@@ -35,9 +36,10 @@ export async function POST(request: Request) {
         chatModel?.model?.startsWith("gpt-5")
           ? 1
           : undefined,
-      system: `${buildUserSystemPrompt(session.user, userPreferences)} ${
-        instructions ? `\n\n${instructions}` : ""
-      }`.trim(),
+      system:
+        `${buildUserSystemPrompt(session.user, userPreferences, undefined, sidebarContext)} ${
+          instructions ? `\n\n${instructions}` : ""
+        }`.trim(),
       messages,
       maxSteps: 10,
       experimental_continueSteps: true,

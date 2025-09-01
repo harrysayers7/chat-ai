@@ -149,11 +149,13 @@ export function SearchAndFilter({
       {/* Filter Button */}
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="relative">
             <Filter className="h-4 w-4" />
-            Filters
             {hasActiveFilters && (
-              <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 text-xs">
+              <Badge
+                variant="secondary"
+                className="absolute -top-1 -right-1 h-4 w-4 p-0 text-xs"
+              >
                 !
               </Badge>
             )}

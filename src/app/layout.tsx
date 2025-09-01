@@ -8,6 +8,7 @@ import {
 import { Toaster } from "@/components/ui/sonner";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
+import { SidebarProvider } from "@/contexts/sidebar-context";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -41,10 +42,12 @@ export default async function RootLayout({
         >
           <ThemeStyleProvider>
             <NextIntlClientProvider>
-              <div id="root">
-                {children}
-                <Toaster richColors />
-              </div>
+              <SidebarProvider>
+                <div id="root">
+                  {children}
+                  <Toaster richColors />
+                </div>
+              </SidebarProvider>
             </NextIntlClientProvider>
           </ThemeStyleProvider>
         </ThemeProvider>

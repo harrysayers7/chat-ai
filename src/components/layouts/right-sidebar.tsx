@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,6 +32,7 @@ import {
   Edit,
   Trash2,
   Star,
+  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -60,11 +62,20 @@ export function RightSidebar({
   const [newItemType, setNewItemType] = useState<"task" | "snippet" | "idea">(
     "task",
   );
+  const [isSelectOpen, setIsSelectOpen] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [isHovering, setIsHovering] = useState(false);
 
   const handleAddItem = (item: Omit<SidebarItem, "id" | "createdAt">) => {
     addItem(item);
     setNewItemContent("");
     setIsAddingItem(false);
+    // Auto-open sidebar when adding an item (but not if select is open)
+    if (!isOpen && !isSelectOpen) {
+      onToggle();
+    }
   };
 
   const handleAddFromSelection = () => {
@@ -74,7 +85,35 @@ export function RightSidebar({
         type: newItemType,
         source: "chat selection",
       });
+      // Open the sidebar when adding from selection
+      if (!isOpen) {
+        onToggle();
+      }
     }
+  };
+
+  const updateDropdownPosition = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 4,
+        left: rect.left + window.scrollX,
+      });
+    }
+  };
+
+  const openDropdown = () => {
+    updateDropdownPosition();
+    setIsSelectOpen(true);
+  };
+
+  const closeDropdown = () => {
+    setIsSelectOpen(false);
+  };
+
+  const selectOption = (option: "task" | "snippet" | "idea") => {
+    setNewItemType(option);
+    setIsSelectOpen(false);
   };
 
   const filteredItems = items.filter((item) => {
@@ -124,8 +163,8 @@ export function RightSidebar({
         size="sm"
         onClick={onToggle}
         className={cn(
-          "fixed right-4 top-1/2 -translate-y-1/2 z-50 transition-all duration-200",
-          isOpen ? "right-80" : "right-4",
+          "fixed right-4 top-1/2 -translate-y-1/2 z-30 transition-all duration-200",
+          isOpen ? "right-96" : "right-4",
         )}
       >
         {isOpen ? (
@@ -138,7 +177,7 @@ export function RightSidebar({
       {/* Sidebar */}
       <div
         className={cn(
-          "fixed right-0 top-0 h-full w-80 bg-background border-l border-border shadow-lg transition-transform duration-200 z-40",
+          "fixed right-0 top-0 h-full w-96 bg-background border-l border-border shadow-lg transition-transform duration-200 z-20",
           isOpen ? "translate-x-0" : "translate-x-full",
         )}
       >
@@ -157,7 +196,7 @@ export function RightSidebar({
               value={activeTab}
               onValueChange={(value: any) => setActiveTab(value)}
             >
-              <SelectTrigger>
+              <SelectTrigger onClick={(e) => e.stopPropagation()}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -185,8 +224,12 @@ export function RightSidebar({
 
           {/* Add Item Section */}
           <div className="p-4 border-b border-border">
-            {selectedText && (
-              <div className="mb-3 p-3 bg-muted rounded-lg">
+            {selectedText && selectedText.length > 10 && (
+              <div
+                className="mb-3 p-3 bg-muted rounded-lg"
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
                 <p className="text-sm text-muted-foreground mb-2">
                   Selected text:
                 </p>
@@ -194,21 +237,45 @@ export function RightSidebar({
                   &ldquo;{selectedText.slice(0, 100)}
                   {selectedText.length > 100 ? "..." : ""}&rdquo;
                 </p>
-                <div className="flex gap-2 mt-2">
-                  <Select
-                    value={newItemType}
-                    onValueChange={(value: any) => setNewItemType(value)}
+                <div
+                  className="flex gap-2 mt-2"
+                  onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
+                  <div
+                    className="relative"
+                    onMouseEnter={() => {
+                      if (!isSelectOpen) {
+                        openDropdown();
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (!isHovering) {
+                        closeDropdown();
+                      }
+                    }}
                   >
-                    <SelectTrigger className="w-24">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="task">Task</SelectItem>
-                      <SelectItem value="snippet">Snippet</SelectItem>
-                      <SelectItem value="idea">Idea</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button size="sm" onClick={handleAddFromSelection}>
+                    <div
+                      ref={buttonRef}
+                      className="w-24 h-8 px-3 py-2 text-sm border border-input bg-background rounded-md flex items-center justify-between cursor-pointer hover:bg-accent"
+                    >
+                      <span>
+                        {newItemType === "task"
+                          ? "Task"
+                          : newItemType === "snippet"
+                            ? "Snippet"
+                            : "Idea"}
+                      </span>
+                      <ChevronDown className="h-3 w-3" />
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddFromSelection();
+                    }}
+                  >
                     <Plus className="h-3 w-3 mr-1" />
                     Add
                   </Button>
@@ -222,7 +289,8 @@ export function RightSidebar({
                 variant="outline"
                 size="sm"
                 className="w-full"
-                onClick={async () => {
+                onClick={async (e) => {
+                  e.stopPropagation();
                   try {
                     const clipboardText = await navigator.clipboard.readText();
                     if (clipboardText.trim()) {
@@ -260,7 +328,7 @@ export function RightSidebar({
                     value={newItemType}
                     onValueChange={(value: any) => setNewItemType(value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger onClick={(e) => e.stopPropagation()}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -277,20 +345,24 @@ export function RightSidebar({
                   />
                   <div className="flex gap-2">
                     <Button
-                      onClick={() =>
+                      onClick={(e) => {
+                        e.stopPropagation();
                         handleAddItem({
                           content: newItemContent,
                           type: newItemType,
                           source: "manual",
-                        })
-                      }
+                        });
+                      }}
                       disabled={!newItemContent.trim()}
                     >
                       Add
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => setIsAddingItem(false)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsAddingItem(false);
+                      }}
                     >
                       Cancel
                     </Button>
@@ -316,11 +388,17 @@ export function RightSidebar({
                 <div
                   key={item.id}
                   className={cn(
-                    "p-3 rounded-lg border transition-all duration-200",
+                    "p-3 rounded-lg border transition-all duration-200 cursor-pointer",
                     item.isCompleted
                       ? "bg-muted opacity-75"
                       : "bg-background hover:bg-muted/50",
                   )}
+                  onClick={() => {
+                    // Auto-open sidebar when clicking on an item (but not if select is open)
+                    if (!isOpen && !isSelectOpen) {
+                      onToggle();
+                    }
+                  }}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
@@ -330,11 +408,12 @@ export function RightSidebar({
                             variant="ghost"
                             size="sm"
                             className="h-6 w-6 p-0"
-                            onClick={() =>
+                            onClick={(e) => {
+                              e.stopPropagation();
                               updateItem(item.id, {
                                 isCompleted: !item.isCompleted,
-                              })
-                            }
+                              });
+                            }}
                           >
                             <CheckSquare
                               className={cn(
@@ -377,9 +456,10 @@ export function RightSidebar({
                         variant="ghost"
                         size="sm"
                         className="h-6 w-6 p-0"
-                        onClick={() =>
-                          updateItem(item.id, { isStarred: !item.isStarred })
-                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateItem(item.id, { isStarred: !item.isStarred });
+                        }}
                       >
                         <Star
                           className={cn(
@@ -394,7 +474,10 @@ export function RightSidebar({
                         variant="ghost"
                         size="sm"
                         className="h-6 w-6 p-0 text-destructive"
-                        onClick={() => deleteItem(item.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteItem(item.id);
+                        }}
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>
@@ -406,6 +489,44 @@ export function RightSidebar({
           </div>
         </div>
       </div>
+
+      {/* Portal-based dropdown */}
+      {isSelectOpen &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            className="fixed bg-background border border-border rounded-md shadow-lg z-[9999] w-24"
+            style={{
+              top: dropdownPosition.top,
+              left: dropdownPosition.left,
+            }}
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => {
+              setIsHovering(false);
+              closeDropdown();
+            }}
+          >
+            <div
+              className="w-full px-3 py-2 text-left text-sm hover:bg-muted border-b border-border cursor-pointer"
+              onMouseDown={() => selectOption("task")}
+            >
+              Task
+            </div>
+            <div
+              className="w-full px-3 py-2 text-left text-sm hover:bg-muted border-b border-border cursor-pointer"
+              onMouseDown={() => selectOption("snippet")}
+            >
+              Snippet
+            </div>
+            <div
+              className="w-full px-3 py-2 text-left text-sm hover:bg-muted cursor-pointer"
+              onMouseDown={() => selectOption("idea")}
+            >
+              Idea
+            </div>
+          </div>,
+          document.body,
+        )}
     </>
   );
 }
