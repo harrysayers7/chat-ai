@@ -53,7 +53,7 @@ class SSOTUpdater {
     try {
       const stats = fs.statSync(SSOT_FILE);
       return stats.mtime;
-    } catch (error) {
+    } catch (_error) {
       return new Date(0);
     }
   }
@@ -299,7 +299,7 @@ ${changeSummary}
       try {
         execSync(`git add ${SSOT_FILE}`, { stdio: 'pipe' });
         console.log("📁 Updated SSOT staged for commit");
-      } catch (error) {
+      } catch (_error) {
         console.log("ℹ️  File staged (not in git repository)");
       }
       

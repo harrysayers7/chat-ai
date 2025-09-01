@@ -114,8 +114,6 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
     setInput,
     append,
     status,
-    reload,
-    setMessages,
     addToolResult,
     error,
     stop,
@@ -488,7 +486,6 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
                     .map((part) => part.text)
                     .join(" "),
                 }))}
-                threadId={threadId}
                 onPoxyToolCall={
                   isPendingToolCall && !isExecutingProxyToolCall
                     ? () => proxyToolCall({ action: "manual", result: true })

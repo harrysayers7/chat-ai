@@ -69,7 +69,7 @@ class PreCommitSSOTUpdater {
     try {
       execSync('git rev-parse --git-dir', { stdio: 'pipe' });
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -81,7 +81,7 @@ class PreCommitSSOTUpdater {
         encoding: 'utf8'
       });
       return result.trim().length > 0;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -109,7 +109,7 @@ class PreCommitSSOTUpdater {
       }
 
       return false;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
