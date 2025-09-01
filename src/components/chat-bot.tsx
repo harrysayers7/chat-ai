@@ -49,7 +49,7 @@ import { getStorageManager } from "lib/browser-stroage";
 import { AnimatePresence, motion } from "framer-motion";
 import { PromptLibrarySidePanel } from "./prompt-library-side-panel";
 import { PromptEditor } from "./prompt-editor";
-import { CollapsibleChat } from "./chat";
+import { ChatUI } from "./chat";
 import { useSidebarContextForAI } from "@/hooks/use-sidebar-context";
 
 type Props = {
@@ -504,7 +504,7 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
               className="flex-1 overflow-y-auto px-6 pb-40 max-w-4xl mx-auto w-full"
               ref={containerRef}
             >
-              <CollapsibleChat
+              <ChatUI
                 messages={messages.map((msg) => ({
                   id: msg.id,
                   role: msg.role,

@@ -15,7 +15,7 @@ export interface Turn {
   };
 }
 
-export interface CollapsibleChatProps {
+export interface ChatUIProps {
   messages: any[];
   isLoading?: boolean;
   onPoxyToolCall?: (data: any) => void;

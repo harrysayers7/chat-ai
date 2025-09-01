@@ -1,5 +1,5 @@
 // Main component
-export { CollapsibleChat } from "./CollapsibleChat";
+export { ChatUI } from "./ChatUI";
 
 // Types
 export type * from "./types";

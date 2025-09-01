@@ -27,13 +27,13 @@ import {
   turnKey,
   debounce,
 } from "./utils";
-import type { CollapsibleChatProps } from "./types";
+import type { ChatUIProps } from "./types";
 
-export function CollapsibleChat({
+export function ChatUI({
   messages,
   isLoading = false,
   onPoxyToolCall,
-}: CollapsibleChatProps) {
+}: ChatUIProps) {
   // AI Explanation functionality
   const { isPopupVisible, popupPosition, selectedText, hidePopup } =
     useAIExplanation();
@@ -361,10 +361,7 @@ export function CollapsibleChat({
 
   // Safety check for messages after all hooks
   if (!messages || !Array.isArray(messages)) {
-    console.warn(
-      "CollapsibleChat: messages prop is not a valid array",
-      messages,
-    );
+    console.warn("ChatUI: messages prop is not a valid array", messages);
     return (
       <div className="w-full p-4 text-center text-muted-foreground">
         No messages to display

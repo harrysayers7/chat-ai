@@ -6,7 +6,7 @@ This directory contains the chat message management system for the application.
 
 ```
 ChatBot (src/components/chat-bot.tsx)
-└── CollapsibleChat (src/components/chat/CollapsibleChat.tsx)
+└── ChatUI (src/components/chat/ChatUI.tsx)
     ├── SearchAndFilter
     ├── SettingsPanel
     ├── FloatingControls
@@ -20,7 +20,7 @@ ChatBot (src/components/chat-bot.tsx)
 
 ## Key Components
 
-### CollapsibleChat (Main Container)
+### ChatUI (Main Container)
 **Purpose**: Comprehensive chat message management system
 **Renders**: Only when `messages.length > 0` (not on empty chat state)
 **Features**:
@@ -55,7 +55,7 @@ ChatBot (src/components/chat-bot.tsx)
 ## Important Notes
 
 ### Rendering Conditions
-- `CollapsibleChat` only renders when `emptyMessage` is false
+- `ChatUI` only renders when `emptyMessage` is false
 - `emptyMessage = messages.length === 0 && !error`
 - This means the component won't appear on a fresh/empty chat
 
@@ -90,8 +90,8 @@ ChatBot (src/components/chat-bot.tsx)
 
 ## Future Improvements
 
-### Potential Renaming
-Consider renaming `CollapsibleChat` to `ChatMessageManager` as it better describes the component's comprehensive functionality.
+### Component Naming
+The component was renamed from `CollapsibleChat` to `ChatUI` to better reflect its comprehensive chat interface functionality.
 
 ### Architecture Considerations
 - The component is quite large (500+ lines) and handles many responsibilities
@@ -100,7 +100,7 @@ Consider renaming `CollapsibleChat` to `ChatMessageManager` as it better describ
 
 ## Testing Checklist
 
-- [ ] Empty chat state (shows ChatGreeting, not CollapsibleChat)
+- [ ] Empty chat state (shows ChatGreeting, not ChatUI)
 - [ ] Single message (shows CurrentMessageSection only)
 - [ ] Multiple messages (shows OlderChatsSection with scrollable container)
 - [ ] Pinned messages (shows PinnedChatsSection with scrollable container)
