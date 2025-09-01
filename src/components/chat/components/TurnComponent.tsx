@@ -104,118 +104,120 @@ export const TurnComponent = memo(function TurnComponent({
   };
 
   return (
-    <Collapsible
-      open={isExpanded}
-      onOpenChange={handleOpenChange}
-      className="overflow-hidden group mb-3"
-    >
-      <div className="w-full group">
-        <div className="flex items-center justify-between px-3 py-1.5 bg-background/40 rounded-2xl border border-border/30 hover:bg-background/50 transition-all duration-200 shadow-sm">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            {showCheckbox && onToggleSelect && (
-              <TurnCheckbox
-                isSelected={isSelected}
-                onToggle={() => onToggleSelect(turnKey)}
-                className="shrink-0"
-              />
-            )}
-            <div className="font-medium text-sm min-w-0 flex-1 text-foreground">
-              {turn.user ? "" : "🤖 Assistant"}
+    <>
+      <Collapsible
+        open={isExpanded}
+        onOpenChange={handleOpenChange}
+        className="overflow-hidden group mb-3"
+      >
+        <div className="w-full group">
+          <div className="flex items-center justify-between px-3 py-1.5 bg-background/40 rounded-2xl border border-border/30 hover:bg-background/50 transition-all duration-200 shadow-sm">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              {showCheckbox && onToggleSelect && (
+                <TurnCheckbox
+                  isSelected={isSelected}
+                  onToggle={() => onToggleSelect(turnKey)}
+                  className="shrink-0"
+                />
+              )}
+              <div className="font-medium text-sm min-w-0 flex-1 text-foreground">
+                {turn.user ? "" : "🤖 Assistant"}
+                {turn.user && (
+                  <div className="mt-1 text-xs text-muted-foreground truncate max-w-md">
+                    {truncateToWords(turn.user.content, 10)}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={() => onTogglePin(turnKey)}
+                className={`p-2 rounded-md transition-all duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                  isPinned
+                    ? "bg-red-500/20 hover:bg-red-500/30 active:bg-red-500/40 text-red-400 border border-red-400/30 hover:border-red-400/50"
+                    : "bg-background/40 hover:bg-background/60 active:bg-background/70 text-muted-foreground border border-border/30 hover:border-border/50"
+                }`}
+                title={isPinned ? "Unpin" : "Pin"}
+              >
+                <Pin className="w-3 h-3" />
+              </button>
+
+              <button
+                onClick={() => onToggleStar(turnKey)}
+                className={`p-2 rounded-md transition-all duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                  isStarred
+                    ? "bg-yellow-500/20 hover:bg-yellow-500/30 active:bg-yellow-500/40 text-yellow-400 border border-yellow-400/30 hover:border-yellow-400/50"
+                    : "bg-background/40 hover:bg-background/60 active:bg-background/70 text-muted-foreground border border-border/30 hover:border-border/50"
+                }`}
+                title={isStarred ? "Unstar" : "Star"}
+              >
+                <svg
+                  className="w-2.5 h-2.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+              </button>
+
+              <CollapsibleTrigger
+                data-collapsible="trigger"
+                className="flex items-center justify-center p-2 rounded-md transition-all duration-200 min-w-[44px] min-h-[44px] bg-background/40 hover:bg-background/60 active:bg-background/70 border border-border/30 hover:border-border/50"
+              >
+                <ChevronUp className="w-3 h-3 text-slate-400 transform transition-transform duration-200 group-data-[state=closed]:rotate-180" />
+              </CollapsibleTrigger>
+            </div>
+          </div>
+        </div>
+
+        <CollapsibleContent className="overflow-hidden">
+          {/* Lazy loading: only render content after first expansion */}
+          {hasBeenExpanded ? (
+            <div className="p-3 text-sm space-y-4 border-t border-slate-600/20 mt-1">
               {turn.user && (
-                <div className="mt-1 text-xs text-muted-foreground truncate max-w-md">
-                  {truncateToWords(turn.user.content, 10)}
+                <div className="space-y-2">
+                  <div className="flex justify-end">
+                    <ContentAwareMessage
+                      content={turn.user.content}
+                      showTypeIndicator={false}
+                    >
+                      <ExpandableUserMessage content={turn.user.content} />
+                    </ContentAwareMessage>
+                  </div>
+                  <div className="flex items-center justify-end gap-1 mt-2">
+                    <CopyButton content={turn.user.content} />
+                  </div>
+                </div>
+              )}
+
+              {turn.assistant && (
+                <div className="space-y-2 border-t border-border/20 pt-3">
+                  <div className="space-y-2">
+                    <ContentAwareMessage content={turn.assistant.content}>
+                      <Markdown>{turn.assistant.content}</Markdown>
+                    </ContentAwareMessage>
+                    <div className="flex items-center justify-start">
+                      <CopyButton content={turn.assistant.content} />
+                    </div>
+
+                    {renderToolParts(
+                      turn.assistant.parts,
+                      turn.assistant.isLastMessage,
+                    )}
+                  </div>
                 </div>
               )}
             </div>
-          </div>
-
-          <div className="flex items-center gap-1 shrink-0">
-            <button
-              onClick={() => onTogglePin(turnKey)}
-              className={`p-2 rounded-md transition-all duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center ${
-                isPinned
-                  ? "bg-red-500/20 hover:bg-red-500/30 active:bg-red-500/40 text-red-400 border border-red-400/30 hover:border-red-400/50"
-                  : "bg-background/40 hover:bg-background/60 active:bg-background/70 text-muted-foreground border border-border/30 hover:border-border/50"
-              }`}
-              title={isPinned ? "Unpin" : "Pin"}
-            >
-              <Pin className="w-3 h-3" />
-            </button>
-
-            <button
-              onClick={() => onToggleStar(turnKey)}
-              className={`p-2 rounded-md transition-all duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center ${
-                isStarred
-                  ? "bg-yellow-500/20 hover:bg-yellow-500/30 active:bg-yellow-500/40 text-yellow-400 border border-yellow-400/30 hover:border-yellow-400/50"
-                  : "bg-background/40 hover:bg-background/60 active:bg-background/70 text-muted-foreground border border-border/30 hover:border-border/50"
-              }`}
-              title={isStarred ? "Unstar" : "Star"}
-            >
-              <svg
-                className="w-2.5 h-2.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
-            </button>
-
-            <CollapsibleTrigger
-              data-collapsible="trigger"
-              className="flex items-center justify-center p-2 rounded-md transition-all duration-200 min-w-[44px] min-h-[44px] bg-background/40 hover:bg-background/60 active:bg-background/70 border border-border/30 hover:border-border/50"
-            >
-              <ChevronUp className="w-3 h-3 text-slate-400 transform transition-transform duration-200 group-data-[state=closed]:rotate-180" />
-            </CollapsibleTrigger>
-          </div>
-        </div>
-      </div>
-
-      <CollapsibleContent className="overflow-hidden">
-        {/* Lazy loading: only render content after first expansion */}
-        {hasBeenExpanded ? (
-          <div className="p-3 text-sm space-y-4 border-t border-slate-600/20 mt-1">
-            {turn.user && (
-              <div className="space-y-2">
-                <div className="flex justify-end">
-                  <ContentAwareMessage
-                    content={turn.user.content}
-                    showTypeIndicator={false}
-                  >
-                    <ExpandableUserMessage content={turn.user.content} />
-                  </ContentAwareMessage>
-                </div>
-                <div className="flex items-center justify-end gap-1 mt-2">
-                  <CopyButton content={turn.user.content} />
-                </div>
-              </div>
-            )}
-
-            {turn.assistant && (
-              <div className="space-y-2 border-t border-border/20 pt-3">
-                <div className="space-y-2">
-                  <ContentAwareMessage content={turn.assistant.content}>
-                    <Markdown>{turn.assistant.content}</Markdown>
-                  </ContentAwareMessage>
-                  <div className="flex items-center justify-start">
-                    <CopyButton content={turn.assistant.content} />
-                  </div>
-
-                  {renderToolParts(
-                    turn.assistant.parts,
-                    turn.assistant.isLastMessage,
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="p-3 text-sm text-center text-muted-foreground">
-            Loading content...
-          </div>
-        )}
-      </CollapsibleContent>
-    </Collapsible>
+          ) : (
+            <div className="p-3 text-sm text-center text-muted-foreground">
+              Loading content...
+            </div>
+          )}
+        </CollapsibleContent>
+      </Collapsible>
+    </>
   );
 });

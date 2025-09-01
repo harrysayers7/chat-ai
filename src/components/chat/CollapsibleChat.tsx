@@ -13,6 +13,8 @@ import { LoadingSkeleton } from "./components/LoadingSkeleton";
 import { AnimatedFeedback } from "./components/AnimatedFeedback";
 import { SmoothTransition } from "./components/SmoothTransition";
 import { SettingsPanel } from "./components/SettingsPanel";
+import { AIExplanationPopup } from "./components/AIExplanationPopup";
+import { useAIExplanation } from "./hooks/useAIExplanation";
 import {
   convertMessagesToTurns,
   filterTurns,
@@ -26,6 +28,34 @@ export function CollapsibleChat({
   isLoading = false,
   onPoxyToolCall,
 }: CollapsibleChatProps) {
+  // AI Explanation functionality
+  const { isPopupVisible, popupPosition, selectedText, hidePopup } =
+    useAIExplanation();
+
+  const handleExplain = async (text: string): Promise<string> => {
+    try {
+      const response = await fetch("/api/ai-explanation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text,
+          context: "From chat conversation",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to get explanation");
+      }
+
+      const data = await response.json();
+      return data.explanation;
+    } catch (error) {
+      console.error("AI explanation error:", error);
+      throw error;
+    }
+  };
   const refs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Stable ref callback to avoid re-renders
@@ -432,6 +462,15 @@ export function CollapsibleChat({
         onBulkStar={handleBulkStar}
         onBulkDelete={handleBulkDelete}
         totalTurns={filteredTurns.length}
+      />
+
+      {/* AI Explanation Popup */}
+      <AIExplanationPopup
+        isVisible={isPopupVisible}
+        position={popupPosition}
+        selectedText={selectedText}
+        onClose={hidePopup}
+        onExplain={handleExplain}
       />
     </div>
   );
