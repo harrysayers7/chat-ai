@@ -47,11 +47,6 @@ export const ContentAwareMessage = memo(function ContentAwareMessage({
         className={cn(
           "rounded-lg p-4 transition-all duration-200",
           contentType.type === "text" ? "bg-background/40" : "bg-background/60",
-          contentType.type !== "text" && "border-l-4",
-          contentType.type === "code" && "border-l-blue-500/50",
-          contentType.type === "link" && "border-l-green-500/50",
-          contentType.type === "image" && "border-l-purple-500/50",
-          contentType.type === "mixed" && "border-l-indigo-500/50",
         )}
       >
         {children}
@@ -62,7 +57,6 @@ export const ContentAwareMessage = memo(function ContentAwareMessage({
         <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
           {contentType.hasCode && (
             <span className="flex items-center gap-1">
-              <span>💻</span>
               <span>Code</span>
             </span>
           )}

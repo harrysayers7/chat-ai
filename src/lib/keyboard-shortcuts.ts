@@ -87,12 +87,22 @@ const openShortcutsPopupShortcut: Shortcut = {
   },
 };
 
+const toggleRightSidebarShortcut: Shortcut = {
+  description: "toggleRightSidebar",
+  shortcut: {
+    key: "N",
+    command: true,
+    shift: true,
+  },
+};
+
 export const Shortcuts = {
   openNewChat: openNewChatShortcut,
   openChatPreferences: openChatPreferencesShortcut,
   toggleTemporaryChat: toggleTemporaryChatShortcut,
   toggleVoiceChat: toggleVoiceChatShortcut,
   toggleSidebar: toggleSidebarShortcut,
+  toggleRightSidebar: toggleRightSidebarShortcut,
   lastMessageCopy: lastMessageCopyShortcut,
   deleteThread: deleteThreadShortcut,
   toolMode: toolModeShortcut,

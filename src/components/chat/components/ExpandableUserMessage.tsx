@@ -71,32 +71,34 @@ export function ExpandableUserMessage({ content }: ExpandableUserMessageProps) {
 
   // Content type indicators using content detector
   const contentType = detectContentType(content);
-  const typeIcon = getContentTypeIcon(contentType.type);
+  const _typeIcon = getContentTypeIcon(contentType.type);
   const typeColor = getContentTypeColor(contentType.type);
 
   if (!shouldTruncate) {
     return (
-      <div className={`rounded-full px-4 py-0.5 border max-w-xs ${typeColor}`}>
-        <div className="flex items-center gap-2">
-          <span className="text-xs opacity-70">{typeIcon}</span>
-          <span className="text-sm text-gray-200">{content}</span>
+      <div
+        className={`rounded-full px-6 py-2 max-w-md transform transition-all duration-200 hover:scale-105 ${typeColor}`}
+      >
+        <div className="flex items-center">
+          <span className="text-sm font-medium">{content}</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`rounded-lg px-4 py-3 border max-w-md ${typeColor}`}>
-      <div className="flex items-start gap-2">
-        <span className="text-xs opacity-70 mt-0.5">{typeIcon}</span>
+    <div
+      className={`rounded-xl px-6 py-4 max-w-lg transform transition-all duration-200 hover:scale-105 ${typeColor}`}
+    >
+      <div className="flex items-start">
         <div className="flex-1 min-w-0">
-          <div className="text-sm text-gray-200">
+          <div className="text-sm">
             {isExpanded ? (
-              <div className="whitespace-pre-wrap">{content}</div>
+              <div className="whitespace-pre-wrap font-medium">{content}</div>
             ) : (
               <div>
-                <span className="font-medium">{analysis.preview}</span>
-                <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                <span className="font-semibold">{analysis.preview}</span>
+                <div className="flex items-center gap-2 mt-3 text-xs opacity-70">
                   <span>{analysis.wordCount} words</span>
                   {analysis.hasCode && <span>• Code</span>}
                   {analysis.hasLinks && <span>• Links</span>}
@@ -107,7 +109,7 @@ export function ExpandableUserMessage({ content }: ExpandableUserMessageProps) {
           </div>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="mt-2 text-xs text-blue-400 hover:text-blue-300 transition-colors font-medium"
+            className="mt-3 text-xs text-gray-700 hover:text-gray-800 transition-colors font-semibold bg-sky-200/40 px-3 py-1 rounded-full hover:bg-sky-200/60"
           >
             {isExpanded
               ? "Show less"

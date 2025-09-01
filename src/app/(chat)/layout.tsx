@@ -1,28 +1,57 @@
 "use client";
 
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider as UISidebarProvider } from "@/components/ui/sidebar";
 import { SWRConfigProvider } from "./swr-config";
-import { AppSidebar } from "@/components/layouts/app-sidebar";
+import { HoverSidebar } from "@/components/layouts/hover-sidebar";
 import { AppHeader } from "@/components/layouts/app-header";
 import { AppPopupProvider } from "@/components/layouts/app-popup-provider";
-import { Suspense } from "react";
+import { RightSidebar } from "@/components/layouts/right-sidebar";
+import { ContextMenu } from "@/components/layouts/context-menu";
+import { SidebarProvider } from "@/contexts/sidebar-context";
+import { useTextSelection } from "@/hooks/use-text-selection";
+import { Suspense, useState, useEffect } from "react";
+import { isShortcutEvent, Shortcuts } from "@/lib/keyboard-shortcuts";
 
 export default function ChatLayout({
   children,
 }: { children: React.ReactNode }) {
+  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+  const { selectedText } = useTextSelection();
+
+  // Keyboard shortcut handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isShortcutEvent(e, Shortcuts.toggleRightSidebar)) {
+        e.preventDefault();
+        setIsRightSidebarOpen((prev) => !prev);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
-    <SidebarProvider>
-      <SWRConfigProvider>
-        <AppPopupProvider />
-        <AppSidebar />
-        <main className="relative bg-background w-full flex flex-col h-screen">
-          <AppHeader />
-          <div className="flex-1 overflow-y-auto">
-            <Suspense fallback={<ChatLoadingFallback />}>{children}</Suspense>
-          </div>
-        </main>
-      </SWRConfigProvider>
-    </SidebarProvider>
+    <UISidebarProvider defaultOpen={false}>
+      <SidebarProvider>
+        <SWRConfigProvider>
+          <AppPopupProvider />
+          <HoverSidebar />
+          <main className="relative bg-background w-full flex flex-col h-screen">
+            <AppHeader />
+            <div className="flex-1 overflow-y-auto">
+              <Suspense fallback={<ChatLoadingFallback />}>{children}</Suspense>
+            </div>
+          </main>
+          <RightSidebar
+            isOpen={isRightSidebarOpen}
+            onToggle={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
+            selectedText={selectedText}
+          />
+          <ContextMenu />
+        </SWRConfigProvider>
+      </SidebarProvider>
+    </UISidebarProvider>
   );
 }
 

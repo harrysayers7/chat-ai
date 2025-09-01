@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useRef, useEffect, useMemo, useCallback } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useMemo,
+  useCallback,
+  useState,
+} from "react";
 import { FloatingControls } from "./components/FloatingControls";
 import { PinnedChatsSection } from "./components/PinnedChatsSection";
 import { OlderChatsSection } from "./components/OlderChatsSection";
@@ -31,6 +37,9 @@ export function CollapsibleChat({
   // AI Explanation functionality
   const { isPopupVisible, popupPosition, selectedText, hidePopup } =
     useAIExplanation();
+
+  // Hover state for header controls
+  const [isHeaderHovered, setIsHeaderHovered] = useState(false);
 
   const handleExplain = async (text: string): Promise<string> => {
     try {
@@ -390,7 +399,17 @@ export function CollapsibleChat({
         />
       )}
 
-      <div className="flex items-center justify-between mb-4">
+      <div
+        className="flex items-center justify-between mb-4 transition-all duration-200 rounded-lg p-2"
+        onMouseEnter={() => setIsHeaderHovered(true)}
+        onMouseLeave={() => setIsHeaderHovered(false)}
+        style={{
+          opacity: isHeaderHovered ? 1 : 0.4,
+          backgroundColor: isHeaderHovered
+            ? "rgba(0, 0, 0, 0.05)"
+            : "transparent",
+        }}
+      >
         <SearchAndFilter
           onSearchChange={setSearchQuery}
           onFilterChange={setContentFilters}

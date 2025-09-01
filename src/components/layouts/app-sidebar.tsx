@@ -24,7 +24,13 @@ import { Session, User } from "better-auth";
 
 export function AppSidebar({
   session,
-}: { session?: { session: Session; user: User } | undefined }) {
+  onMouseEnter,
+  onMouseLeave,
+}: {
+  session?: { session: Session; user: User } | undefined;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+}) {
   const { toggleSidebar, setOpenMobile } = useSidebar();
   const router = useRouter();
   const isMobile = useIsMobile();
@@ -58,6 +64,8 @@ export function AppSidebar({
     <Sidebar
       collapsible="offcanvas"
       className="border-r border-sidebar-border/80"
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       <SidebarHeader>
         <SidebarMenu>
