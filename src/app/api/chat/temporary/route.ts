@@ -30,6 +30,11 @@ export async function POST(request: Request) {
 
     return streamText({
       model,
+      temperature:
+        chatModel?.provider === "openai" &&
+        chatModel?.model?.startsWith("gpt-5")
+          ? 1
+          : undefined,
       system: `${buildUserSystemPrompt(session.user, userPreferences)} ${
         instructions ? `\n\n${instructions}` : ""
       }`.trim(),

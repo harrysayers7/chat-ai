@@ -5,5 +5,5 @@
 - **Export**: Future feature → summaries only, not raw history.
 description: Logging and audit policies
 globs: ["**/*.{ts,tsx,js,jsx}"]
-alwaysApply: false
+alwaysApply: intelligently
 ---

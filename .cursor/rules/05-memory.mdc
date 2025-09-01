@@ -9,5 +9,5 @@
 - **Consent**: Long-term memory must be opt-in; default = off.
 description: Memory architecture and data retention policies
 globs: ["**/*.{ts,tsx,js,jsx}"]
-alwaysApply: false
+alwaysApply: intelligently
 ---

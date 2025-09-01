@@ -7,5 +7,5 @@
 - **Docs**: README stays current with setup steps.
 description: Project workflow and development guidelines
 globs: ["**/*.{ts,tsx,js,jsx,md,pr,yml}"]
-alwaysApply: false
+alwaysApply: intelligently
 ---

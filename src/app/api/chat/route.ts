@@ -233,6 +233,11 @@ export async function POST(request: Request) {
 
         const result = streamText({
           model,
+          temperature:
+            chatModel?.provider === "openai" &&
+            chatModel?.model?.startsWith("gpt-5")
+              ? 1
+              : undefined,
           system: systemPrompt,
           messages,
           maxSteps: 10,

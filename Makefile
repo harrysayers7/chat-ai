@@ -1,7 +1,7 @@
 # Development Makefile for chat-ai
 # Usage: make <target>
 
-.PHONY: help dev build test lint clean rules rules-update rules-watch git-status git-add git-commit git-push git-pull
+.PHONY: help dev build test lint clean rules rules-update rules-watch git-status git-add git-commit git-push git-pull git-save git-quick-commit commit-rules git-diff git-log git-branch
 
 # Default target
 help:
@@ -23,11 +23,20 @@ help:
 	@echo "  git-status   - Show git status"
 	@echo "  git-add      - Add all changes"
 	@echo "  git-commit   - Commit staged changes (set MESSAGE='your message')"
+	@echo "  git-save     - Add all + commit (set MESSAGE='your message')"
+	@echo "  git-quick-commit - Quick commit with timestamp (set MESSAGE='your message')"
 	@echo "  git-push     - Push to remote"
 	@echo "  git-pull     - Pull from remote"
+	@echo "  git-diff     - Show git diff"
+	@echo "  git-log      - Show recent commits"
+	@echo "  git-branch   - Show branch status"
+	@echo "  commit-rules - Update rules + add + commit"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make git-commit MESSAGE='feat: add new component'"
+	@echo "  make git-save MESSAGE='fix: resolve temperature issue'"
+	@echo "  make git-quick-commit MESSAGE='update models'"
+	@echo "  make commit-rules MESSAGE='update self-learning patterns'"
 	@echo "  make rules"
 
 # Development
@@ -95,9 +104,36 @@ git-pull:
 	@echo "📥 Pulling from remote..."
 	git pull
 
+# Enhanced Git Operations
+git-save: git-add git-commit
+	@echo "💾 All changes saved and committed!"
+
+git-quick-commit:
+	@if [ -z "$(MESSAGE)" ]; then \
+		echo "❌ Error: MESSAGE is required"; \
+		echo "Usage: make git-quick-commit MESSAGE='your commit message'"; \
+		exit 1; \
+	fi
+	@echo "⚡ Quick commit: $(MESSAGE)"
+	@TIMESTAMP=$$(date '+%Y-%m-%d %H:%M:%S'); \
+	git add . && git commit -m "$(MESSAGE) - $(TIMESTAMP)"
+
 # Common Workflows
 commit-rules: rules git-add
 	@echo "📝 Staging rules changes..."
+
+# Git Status Helpers
+git-diff:
+	@echo "📋 Showing git diff..."
+	git diff
+
+git-log:
+	@echo "📜 Recent commits..."
+	git log --oneline -10
+
+git-branch:
+	@echo "🌿 Current branch and status..."
+	git branch -v
 	@echo "💡 Run 'make git-commit MESSAGE=\"your message\"' to commit"
 
 commit-working: git-add

@@ -109,6 +109,11 @@ export const llmNodeExecutor: NodeExecutor<LLMNodeData> = async ({
   if (isTextResponse) {
     const response = await generateText({
       model,
+      temperature:
+        node.model?.provider === "openai" &&
+        node.model?.model?.startsWith("gpt-5")
+          ? 1
+          : undefined,
       messages,
       maxSteps: 1,
     });
@@ -122,6 +127,11 @@ export const llmNodeExecutor: NodeExecutor<LLMNodeData> = async ({
 
   const response = await generateObject({
     model,
+    temperature:
+      node.model?.provider === "openai" &&
+      node.model?.model?.startsWith("gpt-5")
+        ? 1
+        : undefined,
     messages,
     schema: jsonSchemaToZod(node.outputSchema.properties.answer),
     maxRetries: 3,
@@ -211,6 +221,11 @@ export const toolNodeExecutor: NodeExecutor<ToolNodeData> = async ({
 
     const response = await generateText({
       model: customModelProvider.getModel(node.model),
+      temperature:
+        node.model?.provider === "openai" &&
+        node.model?.model?.startsWith("gpt-5")
+          ? 1
+          : undefined,
       maxSteps: 1,
       toolChoice: "required", // Force the model to call the tool
       prompt,

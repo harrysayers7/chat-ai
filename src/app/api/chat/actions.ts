@@ -52,6 +52,10 @@ export async function generateTitleFromUserMessageAction({
 
   const { text: title } = await generateText({
     model,
+    temperature:
+      model.provider === "openai" && model.model?.startsWith("gpt-5")
+        ? 1
+        : undefined,
     system: CREATE_THREAD_TITLE_PROMPT,
     prompt,
   });
@@ -123,6 +127,10 @@ export async function generateExampleToolSchemaAction(options: {
   );
   const { object } = await generateObject({
     model,
+    temperature:
+      model.provider === "openai" && model.model?.startsWith("gpt-5")
+        ? 1
+        : undefined,
     schema,
     prompt: generateExampleToolSchemaPrompt({
       toolInfo: options.toolInfo,
@@ -198,6 +206,10 @@ export async function generateObjectAction({
 }) {
   const result = await generateObject({
     model: customModelProvider.getModel(model),
+    temperature:
+      model?.provider === "openai" && model?.model?.startsWith("gpt-5")
+        ? 1
+        : undefined,
     system: prompt.system,
     prompt: prompt.user,
     schema: jsonSchemaToZod(schema),

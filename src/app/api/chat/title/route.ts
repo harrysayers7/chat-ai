@@ -40,6 +40,11 @@ export async function POST(request: Request) {
       execute(dataStream) {
         const result = streamText({
           model: customModelProvider.getModel(chatModel),
+          temperature:
+            chatModel?.provider === "openai" &&
+            chatModel?.model?.startsWith("gpt-5")
+              ? 1
+              : undefined,
           system: CREATE_THREAD_TITLE_PROMPT,
           experimental_transform: smoothStream({ chunking: "word" }),
           prompt: message,

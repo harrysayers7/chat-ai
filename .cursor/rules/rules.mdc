@@ -18,7 +18,7 @@ Static rules take precedence when guidance overlaps.
 - **Docs**: README stays current with setup steps.
 description: Project workflow and development guidelines
 globs: ["**/*.{ts,tsx,js,jsx,md,pr,yml}"]
-alwaysApply: false
+alwaysApply: intelligently
 ---
 
 <!-- file: 01-security.mdc -->
@@ -47,7 +47,7 @@ alwaysApply: true
 - **Mentions**: Use `@tool` style for one-offs; presets for frequent tools.
 description: MCP server and tool usage guidelines
 globs: ["**/*.{ts,tsx,js,jsx}", "**/mcp/**/*", "**/tools/**/*"]
-alwaysApply: false
+alwaysApply: intelligently
 ---
 
 <!-- file: 03-audit.mdc -->
@@ -59,7 +59,7 @@ alwaysApply: false
 - **Export**: Future feature → summaries only, not raw history.
 description: Logging and audit policies
 globs: ["**/*.{ts,tsx,js,jsx}"]
-alwaysApply: false
+alwaysApply: intelligently
 ---
 
 <!-- file: 04-observability.mdc -->
@@ -75,7 +75,7 @@ alwaysApply: false
 - **Alerting**: Future → GitHub/Discord webhook integration on sustained errors.
 description: Performance metrics and SLO guidelines
 globs: ["**/*.{ts,tsx,js,jsx}"]
-alwaysApply: false
+alwaysApply: intelligently
 ---
 
 <!-- file: 05-memory.mdc -->
@@ -91,7 +91,7 @@ alwaysApply: false
 - **Consent**: Long-term memory must be opt-in; default = off.
 description: Memory architecture and data retention policies
 globs: ["**/*.{ts,tsx,js,jsx}"]
-alwaysApply: false
+alwaysApply: intelligently
 ---
 
 
@@ -106,7 +106,7 @@ alwaysApply: false
 ---
 
 # 🤖 Auto Patterns Summary
-Generated: 2025-08-31T01:18:44.249Z
+Generated: 2025-09-01T05:13:02.084Z
 
 
 ## ai-providers
@@ -130,10 +130,10 @@ Generated: 2025-08-31T01:18:44.249Z
   - `src/lib/ai/models.ts:35`
   - `src/lib/ai/models.ts:36`
   - `src/lib/ai/models.ts:37`
-  - `src/lib/ai/models.ts:57`
-  - `src/lib/ai/models.ts:63`
+  - `src/lib/ai/models.ts:58`
+  - `src/lib/ai/models.ts:64`
 - **mcp** 
-  - `src/agents/tools/mokai.ts:18`
+  - `src/agents/tools/mokai.ts:24`
   - `src/app/(auth)/sign-up/page.tsx:140`
   - `src/app/(chat)/mcp/create/page.tsx:1`
   - `src/app/(chat)/mcp/create/page.tsx:12`
@@ -161,13 +161,21 @@ Generated: 2025-08-31T01:18:44.249Z
   - `src/lib/ai/models.ts:49`
   - `src/lib/ai/models.ts:50`
   - `src/lib/ai/models.ts:51`
-  - `src/lib/ai/models.ts:64`
+  - `src/lib/ai/models.ts:52`
   - `src/lib/ai/models.ts:65`
   - `src/lib/ai/models.ts:66`
+  - `src/lib/ai/models.ts:67`
 - **openai** 
+  - `src/app/api/agent/ai/route.ts:86`
+  - `src/app/api/chat/actions.ts:55`
+  - `src/app/api/chat/actions.ts:127`
+  - `src/app/api/chat/actions.ts:203`
   - `src/app/api/chat/openai-realtime/route.ts:25`
   - `src/app/api/chat/openai-realtime/route.ts:96`
   - `src/app/api/chat/route.ts:193`
+  - `src/app/api/chat/route.ts:236`
+  - `src/app/api/chat/temporary/route.ts:33`
+  - `src/app/api/chat/title/route.ts:43`
   - `src/app/api/test-chat/route.ts:14`
   - `src/app/api/test-chat/route.ts:15`
   - `src/app/api/test-chat/route.ts:16`
@@ -178,27 +186,20 @@ Generated: 2025-08-31T01:18:44.249Z
   - `src/components/chat-bot-voice.tsx:81`
   - `src/components/chat-bot-voice.tsx:285`
   - `src/components/prompt-input.tsx:33`
-  - `src/components/prompt-input.tsx:413`
-  - `src/components/select-model.tsx:22`
-  - `src/components/select-model.tsx:144`
-  - `src/components/select-model.tsx:160`
-  - `src/components/select-model.tsx:161`
-  - `src/components/ui/openai-icon.tsx:11`
-  - `src/lib/ai/azure-openai-compatible.test.ts:3`
-  - …and 76 more
+  - …and 86 more
 - **openrouter** 
   - `src/lib/ai/models.ts:8`
-  - `src/lib/ai/models.ts:53`
   - `src/lib/ai/models.ts:54`
   - `src/lib/ai/models.ts:55`
   - `src/lib/ai/models.ts:56`
   - `src/lib/ai/models.ts:57`
-  - `src/lib/ai/models.ts:67`
+  - `src/lib/ai/models.ts:58`
   - `src/lib/ai/models.ts:68`
+  - `src/lib/ai/models.ts:69`
 - **xai** 
-  - `src/app/api/docs-sync/route.ts:16`
-  - `src/components/agent/docs-sync-agent.tsx:26`
-  - `src/components/agent/docs-sync-agent.tsx:169`
+  - `src/app/api/docs-sync/route.ts:20`
+  - `src/components/agent/docs-sync-agent.tsx:40`
+  - `src/components/agent/docs-sync-agent.tsx:188`
   - `src/components/prompt-input.tsx:34`
   - `src/components/prompt-input.tsx:415`
   - `src/components/prompt-input.tsx:416`
@@ -210,11 +211,12 @@ Generated: 2025-08-31T01:18:44.249Z
   - `src/lib/ai/models.ts:44`
   - `src/lib/ai/models.ts:45`
   - `src/lib/ai/models.ts:46`
-  - `src/lib/services/docs-sync-client.ts:281`
-  - `src/lib/services/docs-sync-client.ts:292`
+  - `src/lib/services/docs-sync-client.ts:288`
+  - `src/lib/services/docs-sync-client.ts:299`
 
 ## backend
 - **drizzle** 
+  - `src/lib/auth/server.ts:8`
   - `src/lib/db/pg/db.pg.ts:1`
   - `src/lib/db/pg/migrate.pg.ts:1`
   - `src/lib/db/pg/repositories/agent-repository.pg.ts:4`
@@ -277,7 +279,7 @@ Generated: 2025-08-31T01:18:44.249Z
 
 ## frontend
 - **radix** 
-  - `src/components/CollapsibleChat.tsx:4`
+  - `src/components/CollapsibleChat.tsx:8`
   - `src/components/chat-bot-temporary.tsx:33`
   - `src/components/ui/accordion.tsx:4`
   - `src/components/ui/avatar.tsx:4`
@@ -309,14 +311,14 @@ Generated: 2025-08-31T01:18:44.249Z
   - `src/app/(chat)/layout.tsx:3`
   - `src/app/(chat)/mcp/test/[id]/page.tsx:36`
   - `src/app/layout.tsx:8`
-  - `src/components/CodeBlockCollapsed.tsx:5`
-  - `src/components/CodeBlockCollapsed.tsx:6`
-  - `src/components/DiffBlock.tsx:5`
+  - `src/components/CodeBlockCollapsed.tsx:7`
+  - `src/components/CodeBlockCollapsed.tsx:8`
+  - `src/components/DiffBlock.tsx:7`
   - `src/components/FilesTabs.tsx:3`
   - `src/components/ProjectTray.tsx:3`
-  - `src/components/ProjectTray.tsx:4`
-  - `src/components/ProjectTray.tsx:5`
-  - `src/components/ProjectTray.tsx:6`
+  - `src/components/ProjectTray.tsx:9`
+  - `src/components/ProjectTray.tsx:10`
+  - `src/components/ProjectTray.tsx:11`
   - `src/components/chat-bot.tsx:31`
   - `src/components/chat-bot.tsx:42`
   - …and 80 more
@@ -379,13 +381,10 @@ Generated: 2025-08-31T01:18:44.249Z
   - `src/lib/cache/safe-redis-cache.ts:92`
   - `src/lib/cache/safe-redis-cache.ts:98`
 - **zod** — Zod validation present
-  - `src/agents/tools/mokai.ts:8`
   - `src/agents/tools/mokai.ts:9`
   - `src/agents/tools/mokai.ts:10`
-  - `src/agents/tools/mokai.ts:19`
-  - `src/agents/tools/mokai.ts:20`
-  - `src/agents/tools/mokai.ts:21`
-  - `src/agents/tools/mokai.ts:22`
+  - `src/agents/tools/mokai.ts:25`
+  - `src/agents/tools/mokai.ts:26`
   - `src/app/api/archive/[id]/items/route.ts:5`
   - `src/app/api/archive/[id]/items/route.ts:6`
   - `src/app/api/bookmark/route.ts:5`
@@ -399,7 +398,10 @@ Generated: 2025-08-31T01:18:44.249Z
   - `src/components/tool-detail-popup.tsx:98`
   - `src/components/workflow/edit-workflow-popup.tsx:57`
   - `src/components/workflow/edit-workflow-popup.tsx:58`
-  - …and 185 more
+  - `src/components/workflow/edit-workflow-popup.tsx:63`
+  - `src/components/workflow/edit-workflow-popup.tsx:64`
+  - `src/components/workflow/edit-workflow-popup.tsx:66`
+  - …and 182 more
 
 ---
 ### Cursor Guardrails (suggestions)
@@ -417,7 +419,7 @@ alwaysApply: false
 ---
 
 # 🔌 Providers (Env ↔ Code)
-Generated: 2025-08-31T01:18:48.679Z
+Generated: 2025-09-01T05:13:02.793Z
 
 ## Environment Keys
 - **openai** → `OPENAI_API_KEY`: set (example: present)

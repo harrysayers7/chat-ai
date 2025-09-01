@@ -14,7 +14,7 @@ import {
 import { ChatModel } from "app-types/chat";
 
 const ollama = createOllama({
-  baseURL: process.env.OLLAMA_BASE_URL || "http://localhost:11434/api",
+  baseURL: process.env.OLLAMA_BASE_URL || "http://127.0.0.1:11434/api",
 });
 
 const staticModels = {
@@ -49,6 +49,7 @@ const staticModels = {
     "gemma3:1b": ollama("gemma3:1b"),
     "gemma3:4b": ollama("gemma3:4b"),
     "gemma3:12b": ollama("gemma3:12b"),
+    "deepseek-coder-v2-lite": ollama("deepseek-coder-v2:16b"),
   },
   openRouter: {
     "qwen3-8b:free": openrouter("qwen/qwen3-8b:free"),

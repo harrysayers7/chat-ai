@@ -83,6 +83,11 @@ export async function POST(request: Request) {
 
     const result = streamObject({
       model: customModelProvider.getModel(chatModel),
+      temperature:
+        chatModel?.provider === "openai" &&
+        chatModel?.model?.startsWith("gpt-5")
+          ? 1
+          : undefined,
       system,
       prompt: message,
       schema: dynamicAgentSchema,

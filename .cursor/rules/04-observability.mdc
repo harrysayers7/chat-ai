@@ -9,5 +9,5 @@
 - **Alerting**: Future → GitHub/Discord webhook integration on sustained errors.
 description: Performance metrics and SLO guidelines
 globs: ["**/*.{ts,tsx,js,jsx}"]
-alwaysApply: false
+alwaysApply: intelligently
 ---

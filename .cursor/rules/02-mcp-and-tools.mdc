@@ -7,5 +7,5 @@
 - **Mentions**: Use `@tool` style for one-offs; presets for frequent tools.
 description: MCP server and tool usage guidelines
 globs: ["**/*.{ts,tsx,js,jsx}", "**/mcp/**/*", "**/tools/**/*"]
-alwaysApply: false
+alwaysApply: intelligently
 ---
