@@ -49,7 +49,7 @@ import { getStorageManager } from "lib/browser-stroage";
 import { AnimatePresence, motion } from "framer-motion";
 import { PromptLibrarySidePanel } from "./prompt-library-side-panel";
 import { PromptEditor } from "./prompt-editor";
-import { CollapsibleChat } from "./CollapsibleChat";
+import { CollapsibleChat } from "./chat";
 
 type Props = {
   threadId: string;
