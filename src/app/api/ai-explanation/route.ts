@@ -91,7 +91,7 @@ function generateExplanationPrompt(
 ) {
   const { type, complexity } = analysis;
 
-  let prompt = `Please provide a clear, concise explanation of the following text: "${text}"\n\n`;
+  let prompt = `Please provide a clear, well-formatted explanation of the following text: "${text}"\n\n`;
 
   if (context) {
     prompt += `Context: ${context}\n\n`;
@@ -99,36 +99,22 @@ function generateExplanationPrompt(
 
   switch (type) {
     case "code":
-      prompt += `This appears to be code or technical content. Please explain:
-- What this code does
-- Key concepts involved
-- Any important patterns or best practices
-- Potential use cases`;
+      prompt += `This appears to be code or technical content. Provide a brief explanation in 2-3 sentences:`;
       break;
 
     case "mathematical":
-      prompt += `This appears to be mathematical content. Please explain:
-- The mathematical concept or formula
-- What each part represents
-- Practical applications
-- Related concepts`;
+      prompt += `This appears to be mathematical content. Provide a brief explanation in 2-3 sentences:`;
       break;
 
     case "reference":
-      prompt += `This appears to be a reference or link. Please explain:
-- What this reference is about
-- Why it might be relevant
-- Key information it provides`;
+      prompt += `This appears to be a reference or link. Provide a brief explanation in 2-3 sentences:`;
       break;
 
     default:
-      prompt += `Please provide a clear explanation that:
-- Summarizes the main points
-- Clarifies any complex concepts
-- Provides context if needed`;
+      prompt += `Provide a brief explanation in 2-3 sentences:`;
   }
 
-  prompt += `\n\nKeep the explanation concise but comprehensive. Use simple language when possible.`;
+  prompt += `\n\nIMPORTANT: Keep explanations VERY brief - just 2-3 sentences total. Use simple markdown formatting with **bold text** for key terms. Focus only on the most essential information. No lengthy explanations or multiple sections.`;
 
   return prompt;
 }

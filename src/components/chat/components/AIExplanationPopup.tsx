@@ -6,6 +6,7 @@ import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Markdown } from "../../markdown";
 
 interface AIExplanationPopupProps {
   isVisible: boolean;
@@ -88,10 +89,10 @@ export function AIExplanationPopup({
   return (
     <div
       ref={popupRef}
-      className="fixed z-50 bg-background/95 backdrop-blur-lg border border-border/50 rounded-lg shadow-xl max-w-md"
+      className="fixed z-50 bg-background/95 backdrop-blur-lg border border-border/50 rounded-lg shadow-xl max-w-2xl w-[500px]"
       style={{
-        left: Math.min(position.x, window.innerWidth - 400),
-        top: Math.min(position.y, window.innerHeight - 300),
+        left: Math.min(position.x, window.innerWidth - 520),
+        top: Math.min(position.y, window.innerHeight - 500),
       }}
     >
       {/* Header */}
@@ -114,7 +115,7 @@ export function AIExplanationPopup({
       </div>
 
       {/* Content */}
-      <div className="p-3">
+      <div className="p-6">
         {isLoading ? (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -128,9 +129,11 @@ export function AIExplanationPopup({
             </Button>
           </div>
         ) : explanation ? (
-          <div className="space-y-3">
-            <div className="text-sm leading-relaxed">{explanation}</div>
-            <div className="flex items-center gap-2 pt-2 border-t border-border/30">
+          <div className="space-y-4">
+            <div className="text-sm leading-relaxed max-h-96 overflow-y-auto prose prose-sm dark:prose-invert max-w-none prose-headings:mt-3 prose-headings:mb-2 prose-h2:text-base prose-h2:font-medium prose-p:mb-2 prose-p:leading-relaxed prose-ul:mb-2 prose-li:mb-1 prose-li:leading-relaxed prose-strong:font-medium">
+              <Markdown>{explanation}</Markdown>
+            </div>
+            <div className="flex items-center gap-2 pt-3 border-t border-border/30">
               <Button size="sm" variant="outline" onClick={handleCopy}>
                 <Copy className="w-3 h-3 mr-1" />
                 Copy
