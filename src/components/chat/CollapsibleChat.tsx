@@ -8,6 +8,11 @@ import { CurrentMessageSection } from "./components/CurrentMessageSection";
 import { SearchAndFilter } from "./components/SearchAndFilter";
 import { BulkOperations } from "./components/BulkOperations";
 import { ProjectTray } from "../ProjectTray";
+import { persistenceService, ChatPreferences } from "@/lib/persistence";
+import { LoadingSkeleton } from "./components/LoadingSkeleton";
+import { AnimatedFeedback } from "./components/AnimatedFeedback";
+import { SmoothTransition } from "./components/SmoothTransition";
+import { SettingsPanel } from "./components/SettingsPanel";
 import {
   convertMessagesToTurns,
   filterTurns,
@@ -31,30 +36,41 @@ export function CollapsibleChat({
     [],
   );
 
-  const [pinned, setPinned] = React.useState<Record<string, boolean>>({});
-  const [starred, setStarred] = React.useState<Record<string, boolean>>({});
-  const [showOnlyStarred, setShowOnlyStarred] = React.useState(false);
+  // Load preferences from persistence service
+  const [preferences, setPreferences] = React.useState<ChatPreferences>(
+    persistenceService.getPreferences(),
+  );
+  const [pinned, setPinned] = React.useState<Record<string, boolean>>(
+    preferences.pinnedTurns,
+  );
+  const [starred, setStarred] = React.useState<Record<string, boolean>>(
+    preferences.starredTurns,
+  );
+  const [showOnlyStarred, setShowOnlyStarred] = React.useState(
+    preferences.showOnlyStarred,
+  );
 
   // Search and filter state
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [contentFilters, setContentFilters] = React.useState({
-    showUser: true,
-    showAssistant: true,
-    showCode: true,
-    showLinks: true,
-    showImages: true,
-    showText: true,
-  });
-  const [dateRange, setDateRange] = React.useState({
-    start: null as Date | null,
-    end: null as Date | null,
-  });
+  const [searchQuery, setSearchQuery] = React.useState(preferences.searchQuery);
+  const [contentFilters, setContentFilters] = React.useState(
+    preferences.contentFilters,
+  );
+  const [dateRange, setDateRange] = React.useState(preferences.dateRange);
 
   // Bulk operations state
   const [selectedTurns, setSelectedTurns] = React.useState<Set<string>>(
-    new Set(),
+    new Set(preferences.selectedTurns),
   );
-  const [_showCheckboxes, _setShowCheckboxes] = React.useState(false);
+  const [showCheckboxes, setShowCheckboxes] = React.useState(
+    preferences.showCheckboxes,
+  );
+
+  // Animation and feedback state
+  const [showFeedback, setShowFeedback] = React.useState(false);
+  const [feedbackMessage, setFeedbackMessage] = React.useState("");
+  const [feedbackType, setFeedbackType] = React.useState<
+    "success" | "error" | "info"
+  >("success");
 
   // Scroll to bottom only when new messages are added (not on every mount)
   const hasScrolledToBottom = useRef(false);
@@ -80,7 +96,7 @@ export function CollapsibleChat({
   const turns = useMemo(() => convertMessagesToTurns(messages), [messages]);
 
   // Debounced state updates for better performance
-  const debouncedSetPinned = useMemo(
+  const _debouncedSetPinned = useMemo(
     () =>
       debounce((key: string, value: boolean) => {
         setPinned((prev) => ({ ...prev, [key]: value }));
@@ -88,7 +104,7 @@ export function CollapsibleChat({
     [],
   );
 
-  const debouncedSetStarred = useMemo(
+  const _debouncedSetStarred = useMemo(
     () =>
       debounce((key: string, value: boolean) => {
         setStarred((prev) => ({ ...prev, [key]: value }));
@@ -96,30 +112,47 @@ export function CollapsibleChat({
     [],
   );
 
+  // Save preferences when they change
+  const savePreferences = useCallback(
+    (updates: Partial<ChatPreferences>) => {
+      const updated = { ...preferences, ...updates };
+      setPreferences(updated);
+      persistenceService.savePreferences(updated);
+    },
+    [preferences],
+  );
+
+  // Show feedback message
+  const showFeedbackMessage = useCallback(
+    (message: string, type: "success" | "error" | "info" = "success") => {
+      setFeedbackMessage(message);
+      setFeedbackType(type);
+      setShowFeedback(true);
+      setTimeout(() => setShowFeedback(false), 3000);
+    },
+    [],
+  );
+
   const togglePin = useCallback(
     (key: string) => {
-      // Immediate visual feedback with optimistic update
-      setPinned((prev) => {
-        const newValue = !prev[key];
-        // Also schedule debounced update for consistency
-        debouncedSetPinned(key, newValue);
-        return { ...prev, [key]: newValue };
-      });
+      const newValue = !pinned[key];
+      const newPinned = { ...pinned, [key]: newValue };
+      setPinned(newPinned);
+      savePreferences({ pinnedTurns: newPinned });
+      showFeedbackMessage(newValue ? "Message pinned" : "Message unpinned");
     },
-    [debouncedSetPinned],
+    [pinned, savePreferences, showFeedbackMessage],
   );
 
   const toggleStar = useCallback(
     (key: string) => {
-      // Immediate visual feedback with optimistic update
-      setStarred((prev) => {
-        const newValue = !prev[key];
-        // Also schedule debounced update for consistency
-        debouncedSetStarred(key, newValue);
-        return { ...prev, [key]: newValue };
-      });
+      const newValue = !starred[key];
+      const newStarred = { ...starred, [key]: newValue };
+      setStarred(newStarred);
+      savePreferences({ starredTurns: newStarred });
+      showFeedbackMessage(newValue ? "Message starred" : "Message unstarred");
     },
-    [debouncedSetStarred],
+    [starred, savePreferences, showFeedbackMessage],
   );
 
   // Enhanced filtering with search and content filters
@@ -138,8 +171,8 @@ export function CollapsibleChat({
 
     // Apply content type filters
     filtered = filtered.filter((turn) => {
-      const hasUser = turn.user && contentFilters.showUser;
-      const hasAssistant = turn.assistant && contentFilters.showAssistant;
+      const hasUser = !!turn.user;
+      const hasAssistant = !!turn.assistant;
 
       if (!hasUser && !hasAssistant) return false;
 
@@ -309,52 +342,82 @@ export function CollapsibleChat({
 
   return (
     <div className="w-full">
-      <SearchAndFilter
-        onSearchChange={setSearchQuery}
-        onFilterChange={setContentFilters}
-        onDateRangeChange={setDateRange}
-        totalMessages={turns.length}
-        filteredCount={filteredTurns.length}
-      />
+      {/* Loading state */}
+      {isLoading && (
+        <SmoothTransition isVisible={isLoading} direction="up">
+          <div className="mb-4">
+            <LoadingSkeleton type="turn" />
+          </div>
+        </SmoothTransition>
+      )}
+
+      {/* Feedback messages */}
+      {showFeedback && (
+        <AnimatedFeedback
+          type={feedbackType}
+          message={feedbackMessage}
+          onClose={() => setShowFeedback(false)}
+        />
+      )}
+
+      <div className="flex items-center justify-between mb-4">
+        <SearchAndFilter
+          onSearchChange={setSearchQuery}
+          onFilterChange={setContentFilters}
+          onDateRangeChange={setDateRange}
+          totalMessages={turns.length}
+          filteredCount={filteredTurns.length}
+        />
+        <SettingsPanel />
+      </div>
+
       <FloatingControls
         filteredTurns={filteredTurns}
         showOnlyStarred={showOnlyStarred}
         onToggleStarFilter={() => setShowOnlyStarred(!showOnlyStarred)}
         onExpandAll={expandAll}
         onCollapseAll={collapseAll}
+        onToggleBulkMode={() => setShowCheckboxes((prev) => !prev)}
+        isBulkMode={showCheckboxes}
       />
 
-      <PinnedChatsSection
-        turns={turns}
-        pinned={pinned}
-        starred={starred}
-        onTogglePin={togglePin}
-        onToggleStar={toggleStar}
-      />
-
-      <OlderChatsSection
-        filteredTurns={filteredTurns}
-        pinned={pinned}
-        starred={starred}
-        onTogglePin={togglePin}
-        onToggleStar={toggleStar}
-        onPoxyToolCall={onPoxyToolCall}
-        refs={refs}
-        shouldOpen={shouldOpen}
-      />
-
-      {currentTurn && (
-        <CurrentMessageSection
-          turn={currentTurn}
-          isPinned={!!pinned[currentTurnKey]}
-          isStarred={!!starred[currentTurnKey]}
+      <SmoothTransition isVisible={true} direction="up" delay={100}>
+        <PinnedChatsSection
+          turns={turns}
+          pinned={pinned}
+          starred={starred}
           onTogglePin={togglePin}
           onToggleStar={toggleStar}
-          turnKey={currentTurnKey}
+        />
+      </SmoothTransition>
+
+      <SmoothTransition isVisible={true} direction="up" delay={200}>
+        <OlderChatsSection
+          filteredTurns={filteredTurns}
+          pinned={pinned}
+          starred={starred}
+          onTogglePin={togglePin}
+          onToggleStar={toggleStar}
           onPoxyToolCall={onPoxyToolCall}
           refs={refs}
-          idx={currentIdx}
+          shouldOpen={shouldOpen}
         />
+      </SmoothTransition>
+
+      {currentTurn && (
+        <SmoothTransition isVisible={true} direction="up" delay={300}>
+          <CurrentMessageSection
+            turn={currentTurn}
+            isPinned={!!pinned[currentTurnKey]}
+            isStarred={!!starred[currentTurnKey]}
+            onTogglePin={togglePin}
+            onToggleStar={toggleStar}
+            turnKey={currentTurnKey}
+            onPoxyToolCall={onPoxyToolCall}
+            refs={refs}
+            idx={currentIdx}
+          />
+        </SmoothTransition>
       )}
 
       {/* Project Tray for saving code snippets */}
