@@ -1,12 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { memo } from "react";
 
 interface CopyButtonProps {
   content: string;
 }
 
-export function CopyButton({ content }: CopyButtonProps) {
+export const CopyButton = memo(function CopyButton({
+  content,
+}: CopyButtonProps) {
   const [copied, setCopied] = React.useState(false);
 
   const handleCopy = async () => {
@@ -56,4 +58,4 @@ export function CopyButton({ content }: CopyButtonProps) {
       )}
     </button>
   );
-}
+});

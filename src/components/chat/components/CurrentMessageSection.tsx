@@ -5,7 +5,7 @@ import { Pin } from "lucide-react";
 import { Markdown } from "../../markdown";
 import { CopyButton } from "./CopyButton";
 import { ExpandableUserMessage } from "./ExpandableUserMessage";
-import { formatTimestamp } from "../utils";
+import { formatTimestamp, formatRelativeTimestamp } from "../utils";
 import type { CurrentMessageSectionProps } from "../types";
 
 export function CurrentMessageSection({
@@ -90,7 +90,18 @@ export function CurrentMessageSection({
             <div className="flex items-center justify-between px-4 py-2 bg-background/40 rounded-lg hover:bg-background/50 transition-all duration-200">
               <div className="flex items-center gap-2 min-w-0 flex-1">
                 <div className="font-medium text-sm min-w-0 flex-1 text-muted-foreground">
-                  {turn.user ? formatTimestamp() : "🤖"}
+                  {turn.user ? (
+                    <div className="flex items-center gap-2">
+                      <span>
+                        {formatRelativeTimestamp(turn.user.timestamp)}
+                      </span>
+                      <span className="text-xs opacity-70">
+                        {formatTimestamp()}
+                      </span>
+                    </div>
+                  ) : (
+                    "🤖"
+                  )}
                 </div>
               </div>
             </div>

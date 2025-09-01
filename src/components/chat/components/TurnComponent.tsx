@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { memo, useState, useCallback } from "react";
 import { Pin, ChevronUp } from "lucide-react";
 import {
   Collapsible,
@@ -14,7 +14,7 @@ import { ExpandableUserMessage } from "./ExpandableUserMessage";
 import { truncateToWords } from "../utils";
 import type { TurnComponentProps } from "../types";
 
-export function TurnComponent({
+export const TurnComponent = memo(function TurnComponent({
   turn,
   isPinned,
   isStarred,
@@ -24,6 +24,19 @@ export function TurnComponent({
   turnKey,
   onPoxyToolCall,
 }: TurnComponentProps) {
+  // Lazy loading: only render content when expanded
+  const [isExpanded, setIsExpanded] = useState(defaultOpen);
+  const [hasBeenExpanded, setHasBeenExpanded] = useState(defaultOpen);
+
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      setIsExpanded(open);
+      if (open && !hasBeenExpanded) {
+        setHasBeenExpanded(true);
+      }
+    },
+    [hasBeenExpanded],
+  );
   const renderToolParts = (parts: any[], isLast = false) => {
     if (!parts || parts.length === 0) return null;
 
@@ -87,7 +100,8 @@ export function TurnComponent({
 
   return (
     <Collapsible
-      defaultOpen={defaultOpen}
+      open={isExpanded}
+      onOpenChange={handleOpenChange}
       className="overflow-hidden group mb-2 bg-background/20 rounded-lg p-1 hover:bg-background/30 transition-all duration-200"
     >
       <div className="w-full group">
@@ -147,35 +161,42 @@ export function TurnComponent({
       </div>
 
       <CollapsibleContent className="overflow-hidden">
-        <div className="p-3 text-sm space-y-4 border-t border-slate-600/20 mt-1">
-          {turn.user && (
-            <div className="space-y-2">
-              <div className="flex justify-end">
-                <ExpandableUserMessage content={turn.user.content} />
-              </div>
-              <div className="flex items-center justify-end gap-1 mt-2">
-                <CopyButton content={turn.user.content} />
-              </div>
-            </div>
-          )}
-
-          {turn.assistant && (
-            <div className="space-y-2 border-t border-border/20 pt-3">
+        {/* Lazy loading: only render content after first expansion */}
+        {hasBeenExpanded ? (
+          <div className="p-3 text-sm space-y-4 border-t border-slate-600/20 mt-1">
+            {turn.user && (
               <div className="space-y-2">
-                <Markdown>{turn.assistant.content}</Markdown>
-                <div className="flex items-center justify-start">
-                  <CopyButton content={turn.assistant.content} />
+                <div className="flex justify-end">
+                  <ExpandableUserMessage content={turn.user.content} />
                 </div>
-
-                {renderToolParts(
-                  turn.assistant.parts,
-                  turn.assistant.isLastMessage,
-                )}
+                <div className="flex items-center justify-end gap-1 mt-2">
+                  <CopyButton content={turn.user.content} />
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+
+            {turn.assistant && (
+              <div className="space-y-2 border-t border-border/20 pt-3">
+                <div className="space-y-2">
+                  <Markdown>{turn.assistant.content}</Markdown>
+                  <div className="flex items-center justify-start">
+                    <CopyButton content={turn.assistant.content} />
+                  </div>
+
+                  {renderToolParts(
+                    turn.assistant.parts,
+                    turn.assistant.isLastMessage,
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="p-3 text-sm text-center text-muted-foreground">
+            Loading content...
+          </div>
+        )}
       </CollapsibleContent>
     </Collapsible>
   );
-}
+});

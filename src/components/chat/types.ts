@@ -3,6 +3,7 @@ export interface Turn {
     id: string;
     content: string;
     isError: boolean;
+    timestamp?: number;
   };
   assistant?: {
     id: string;
@@ -10,6 +11,7 @@ export interface Turn {
     isError: boolean;
     isLastMessage: boolean;
     parts: any[];
+    timestamp?: number;
   };
 }
 

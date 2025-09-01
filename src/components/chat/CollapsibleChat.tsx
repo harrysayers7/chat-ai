@@ -6,7 +6,12 @@ import { PinnedChatsSection } from "./components/PinnedChatsSection";
 import { OlderChatsSection } from "./components/OlderChatsSection";
 import { CurrentMessageSection } from "./components/CurrentMessageSection";
 import { ProjectTray } from "../ProjectTray";
-import { convertMessagesToTurns, filterTurns, turnKey } from "./utils";
+import {
+  convertMessagesToTurns,
+  filterTurns,
+  turnKey,
+  debounce,
+} from "./utils";
 import type { CollapsibleChatProps } from "./types";
 
 export function CollapsibleChat({
@@ -15,6 +20,14 @@ export function CollapsibleChat({
   onPoxyToolCall,
 }: CollapsibleChatProps) {
   const refs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Stable ref callback to avoid re-renders
+  const _setRef = useCallback(
+    (index: number) => (el: HTMLDivElement | null) => {
+      refs.current[index] = el;
+    },
+    [],
+  );
 
   const [pinned, setPinned] = React.useState<Record<string, boolean>>({});
   const [starred, setStarred] = React.useState<Record<string, boolean>>({});
@@ -43,13 +56,48 @@ export function CollapsibleChat({
   // Convert messages to turns format
   const turns = useMemo(() => convertMessagesToTurns(messages), [messages]);
 
-  const togglePin = useCallback((key: string) => {
-    setPinned((prev) => ({ ...prev, [key]: !prev[key] }));
-  }, []);
+  // Debounced state updates for better performance
+  const debouncedSetPinned = useMemo(
+    () =>
+      debounce((key: string, value: boolean) => {
+        setPinned((prev) => ({ ...prev, [key]: value }));
+      }, 100),
+    [],
+  );
 
-  const toggleStar = useCallback((key: string) => {
-    setStarred((prev) => ({ ...prev, [key]: !prev[key] }));
-  }, []);
+  const debouncedSetStarred = useMemo(
+    () =>
+      debounce((key: string, value: boolean) => {
+        setStarred((prev) => ({ ...prev, [key]: value }));
+      }, 100),
+    [],
+  );
+
+  const togglePin = useCallback(
+    (key: string) => {
+      // Immediate visual feedback with optimistic update
+      setPinned((prev) => {
+        const newValue = !prev[key];
+        // Also schedule debounced update for consistency
+        debouncedSetPinned(key, newValue);
+        return { ...prev, [key]: newValue };
+      });
+    },
+    [debouncedSetPinned],
+  );
+
+  const toggleStar = useCallback(
+    (key: string) => {
+      // Immediate visual feedback with optimistic update
+      setStarred((prev) => {
+        const newValue = !prev[key];
+        // Also schedule debounced update for consistency
+        debouncedSetStarred(key, newValue);
+        return { ...prev, [key]: newValue };
+      });
+    },
+    [debouncedSetStarred],
+  );
 
   // Filter turns based on starred filter
   const filteredTurns = useMemo(
@@ -72,36 +120,42 @@ export function CollapsibleChat({
   );
 
   const expandAll = useCallback(() => {
-    refs.current.forEach((el, idx) => {
-      // Skip pinned chats - they should always stay expanded
-      const key = filteredTurns[idx]
-        ? turnKey(filteredTurns[idx])
-        : String(idx);
-      if (pinned[key]) return;
+    // Use requestAnimationFrame for smoother performance
+    requestAnimationFrame(() => {
+      refs.current.forEach((el, idx) => {
+        // Skip pinned chats - they should always stay expanded
+        const key = filteredTurns[idx]
+          ? turnKey(filteredTurns[idx])
+          : String(idx);
+        if (pinned[key]) return;
 
-      const trigger = el?.querySelector<HTMLElement>(
-        '[data-collapsible="trigger"]',
-      );
-      if (trigger && trigger.getAttribute("aria-expanded") === "false") {
-        trigger.click();
-      }
+        const trigger = el?.querySelector<HTMLElement>(
+          '[data-collapsible="trigger"]',
+        );
+        if (trigger && trigger.getAttribute("aria-expanded") === "false") {
+          trigger.click();
+        }
+      });
     });
   }, [filteredTurns, pinned]);
 
   const collapseAll = useCallback(() => {
-    refs.current.forEach((el, idx) => {
-      // Skip pinned chats - they should always stay expanded
-      const key = filteredTurns[idx]
-        ? turnKey(filteredTurns[idx])
-        : String(idx);
-      if (pinned[key]) return;
+    // Use requestAnimationFrame for smoother performance
+    requestAnimationFrame(() => {
+      refs.current.forEach((el, idx) => {
+        // Skip pinned chats - they should always stay expanded
+        const key = filteredTurns[idx]
+          ? turnKey(filteredTurns[idx])
+          : String(idx);
+        if (pinned[key]) return;
 
-      const trigger = el?.querySelector<HTMLElement>(
-        '[data-collapsible="trigger"]',
-      );
-      if (trigger && trigger.getAttribute("aria-expanded") === "true") {
-        trigger.click();
-      }
+        const trigger = el?.querySelector<HTMLElement>(
+          '[data-collapsible="trigger"]',
+        );
+        if (trigger && trigger.getAttribute("aria-expanded") === "true") {
+          trigger.click();
+        }
+      });
     });
   }, [filteredTurns, pinned]);
 

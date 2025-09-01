@@ -1,5 +1,17 @@
 import type { Turn } from "./types";
 
+// Debounce utility for performance optimization
+export function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number,
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
+
 // Helper function to generate unique keys for turns
 export function turnKey(t: Turn): string {
   const a = t.user?.id ?? "";
@@ -18,6 +30,32 @@ export function truncateToWords(text: string, maxWords: number = 10): string {
 export function formatTimestamp(): string {
   const now = new Date();
   return now.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+// Enhanced timestamp with relative time
+export function formatRelativeTimestamp(timestamp?: number): string {
+  if (!timestamp) return formatTimestamp();
+
+  const now = Date.now();
+  const diff = now - timestamp;
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (seconds < 60) return "Just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days < 7) return `${days}d ago`;
+
+  // For older messages, show full date
+  return new Date(timestamp).toLocaleString("en-US", {
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -45,6 +83,9 @@ export function convertMessagesToTurns(messages: any[]): Turn[] {
           id: msg.id || `user-${idx}`,
           content: msg.content || "",
           isError: false,
+          timestamp: msg.createdAt
+            ? new Date(msg.createdAt).getTime()
+            : Date.now(),
         },
       };
     } else if (msg.role === "assistant") {
@@ -54,6 +95,9 @@ export function convertMessagesToTurns(messages: any[]): Turn[] {
         isError: false,
         isLastMessage: idx === messages.length - 1,
         parts: msg.parts || [],
+        timestamp: msg.createdAt
+          ? new Date(msg.createdAt).getTime()
+          : Date.now(),
       };
       // Save the turn
       result.push(currentTurn as Turn);
