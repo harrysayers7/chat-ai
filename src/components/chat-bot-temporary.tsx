@@ -290,7 +290,7 @@ function DrawerTemporaryContent({
     >
       {!messages.length && (
         <div className="flex-1 items-center flex">
-          <div className="max-w-3xl mx-auto my-4">
+          <div className="max-w-xl mx-auto my-4">
             {" "}
             <div className="rounded-xl p-6 flex flex-col gap-2 leading-relaxed text-center">
               <h1 className="text-4xl font-semibold ">
@@ -320,7 +320,7 @@ function DrawerTemporaryContent({
           );
         })}
         {showThink && (
-          <div className="w-full mx-auto max-w-3xl px-6">
+          <div className="w-full mx-auto max-w-xl px-6">
             <Think />
           </div>
         )}
