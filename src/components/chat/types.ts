@@ -30,6 +30,9 @@ export interface TurnComponentProps {
   defaultOpen?: boolean;
   turnKey: string;
   onPoxyToolCall?: (data: any) => void;
+  isSelected?: boolean;
+  onToggleSelect?: (key: string) => void;
+  showCheckbox?: boolean;
 }
 
 export interface FloatingControlsProps {
@@ -38,6 +41,8 @@ export interface FloatingControlsProps {
   onToggleStarFilter: () => void;
   onExpandAll: () => void;
   onCollapseAll: () => void;
+  onToggleBulkMode?: () => void;
+  isBulkMode?: boolean;
 }
 
 export interface PinnedChatsSectionProps {

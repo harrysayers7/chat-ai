@@ -11,6 +11,8 @@ import { Markdown } from "../../markdown";
 import { CopyButton } from "./CopyButton";
 import { SaveButtons } from "./SaveButtons";
 import { ExpandableUserMessage } from "./ExpandableUserMessage";
+import { TurnCheckbox } from "./TurnCheckbox";
+import { ContentAwareMessage } from "./ContentAwareMessage";
 import { truncateToWords } from "../utils";
 import type { TurnComponentProps } from "../types";
 
@@ -23,6 +25,9 @@ export const TurnComponent = memo(function TurnComponent({
   defaultOpen = false,
   turnKey,
   onPoxyToolCall,
+  isSelected = false,
+  onToggleSelect,
+  showCheckbox = false,
 }: TurnComponentProps) {
   // Lazy loading: only render content when expanded
   const [isExpanded, setIsExpanded] = useState(defaultOpen);
@@ -102,15 +107,22 @@ export const TurnComponent = memo(function TurnComponent({
     <Collapsible
       open={isExpanded}
       onOpenChange={handleOpenChange}
-      className="overflow-hidden group mb-2 bg-background/20 rounded-lg p-1 hover:bg-background/30 transition-all duration-200"
+      className="overflow-hidden group mb-3"
     >
       <div className="w-full group">
-        <div className="flex items-center justify-between px-3 py-2 bg-background/30 rounded-lg border border-border/30 hover:bg-background/40 transition-all duration-200">
+        <div className="flex items-center justify-between px-3 py-1.5 bg-background/40 rounded-2xl border border-border/30 hover:bg-background/50 transition-all duration-200 shadow-sm">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <div className="font-medium text-xs min-w-0 flex-1 text-foreground">
-              {turn.user ? "" : "🤖"}
+            {showCheckbox && onToggleSelect && (
+              <TurnCheckbox
+                isSelected={isSelected}
+                onToggle={() => onToggleSelect(turnKey)}
+                className="shrink-0"
+              />
+            )}
+            <div className="font-medium text-sm min-w-0 flex-1 text-foreground">
+              {turn.user ? "" : "🤖 Assistant"}
               {turn.user && (
-                <div className="mt-0.5 text-xs text-muted-foreground truncate max-w-md">
+                <div className="mt-1 text-xs text-muted-foreground truncate max-w-md">
                   {truncateToWords(turn.user.content, 10)}
                 </div>
               )}
@@ -120,22 +132,22 @@ export const TurnComponent = memo(function TurnComponent({
           <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={() => onTogglePin(turnKey)}
-              className={`p-1 rounded-md transition-all duration-200 ${
+              className={`p-2 rounded-md transition-all duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center ${
                 isPinned
-                  ? "bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-400/30 hover:border-red-400/50"
-                  : "bg-background/40 hover:bg-background/60 text-muted-foreground border border-border/30 hover:border-border/50"
+                  ? "bg-red-500/20 hover:bg-red-500/30 active:bg-red-500/40 text-red-400 border border-red-400/30 hover:border-red-400/50"
+                  : "bg-background/40 hover:bg-background/60 active:bg-background/70 text-muted-foreground border border-border/30 hover:border-border/50"
               }`}
               title={isPinned ? "Unpin" : "Pin"}
             >
-              <Pin className="w-2.5 h-2.5" />
+              <Pin className="w-3 h-3" />
             </button>
 
             <button
               onClick={() => onToggleStar(turnKey)}
-              className={`p-1 rounded-md transition-all duration-200 ${
+              className={`p-2 rounded-md transition-all duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center ${
                 isStarred
-                  ? "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-400/30 hover:border-yellow-400/50"
-                  : "bg-background/40 hover:bg-background/60 text-muted-foreground border border-border/30 hover:border-border/50"
+                  ? "bg-yellow-500/20 hover:bg-yellow-500/30 active:bg-yellow-500/40 text-yellow-400 border border-yellow-400/30 hover:border-yellow-400/50"
+                  : "bg-background/40 hover:bg-background/60 active:bg-background/70 text-muted-foreground border border-border/30 hover:border-border/50"
               }`}
               title={isStarred ? "Unstar" : "Star"}
             >
@@ -152,7 +164,7 @@ export const TurnComponent = memo(function TurnComponent({
 
             <CollapsibleTrigger
               data-collapsible="trigger"
-              className="flex items-center justify-center"
+              className="flex items-center justify-center p-2 rounded-md transition-all duration-200 min-w-[44px] min-h-[44px] bg-background/40 hover:bg-background/60 active:bg-background/70 border border-border/30 hover:border-border/50"
             >
               <ChevronUp className="w-3 h-3 text-slate-400 transform transition-transform duration-200 group-data-[state=closed]:rotate-180" />
             </CollapsibleTrigger>
@@ -167,7 +179,12 @@ export const TurnComponent = memo(function TurnComponent({
             {turn.user && (
               <div className="space-y-2">
                 <div className="flex justify-end">
-                  <ExpandableUserMessage content={turn.user.content} />
+                  <ContentAwareMessage
+                    content={turn.user.content}
+                    showTypeIndicator={false}
+                  >
+                    <ExpandableUserMessage content={turn.user.content} />
+                  </ContentAwareMessage>
                 </div>
                 <div className="flex items-center justify-end gap-1 mt-2">
                   <CopyButton content={turn.user.content} />
@@ -178,7 +195,9 @@ export const TurnComponent = memo(function TurnComponent({
             {turn.assistant && (
               <div className="space-y-2 border-t border-border/20 pt-3">
                 <div className="space-y-2">
-                  <Markdown>{turn.assistant.content}</Markdown>
+                  <ContentAwareMessage content={turn.assistant.content}>
+                    <Markdown>{turn.assistant.content}</Markdown>
+                  </ContentAwareMessage>
                   <div className="flex items-center justify-start">
                     <CopyButton content={turn.assistant.content} />
                   </div>

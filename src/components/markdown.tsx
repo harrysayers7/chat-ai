@@ -7,6 +7,13 @@ import JsonView from "ui/json-view";
 import { LinkIcon } from "lucide-react";
 import CodeBlockCollapsed from "./CodeBlockCollapsed";
 import { toast } from "sonner";
+import { LinkPreview } from "./chat/components/LinkPreview";
+import { EnhancedImage } from "./chat/components/EnhancedImage";
+import {
+  detectContentType,
+  getContentTypeIcon,
+  getContentTypeColor,
+} from "./chat/utils/contentDetector";
 import {
   Table,
   TableHeader,
@@ -120,6 +127,20 @@ const components: Partial<Components> = {
     );
   },
   a: ({ node, children, ...props }) => {
+    const href = props.href || "";
+    const isExternalLink = href.startsWith("http");
+
+    if (isExternalLink) {
+      return (
+        <LinkPreview
+          url={href}
+          className="text-primary hover:underline flex gap-1.5 items-center"
+        >
+          <WordByWordFadeIn>{children}</WordByWordFadeIn>
+        </LinkPreview>
+      );
+    }
+
     return (
       <a
         className="text-primary hover:underline flex gap-1.5 items-center"
@@ -178,8 +199,9 @@ const components: Partial<Components> = {
     const { src, alt, ...rest } = props;
 
     return src ? (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img className="mx-auto rounded-lg" src={src} alt={alt} {...rest} />
+      <div className="my-4">
+        <EnhancedImage src={String(src)} alt={alt} {...rest} />
+      </div>
     ) : null;
   },
 };

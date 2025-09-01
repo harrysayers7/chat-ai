@@ -5,6 +5,8 @@ import { FloatingControls } from "./components/FloatingControls";
 import { PinnedChatsSection } from "./components/PinnedChatsSection";
 import { OlderChatsSection } from "./components/OlderChatsSection";
 import { CurrentMessageSection } from "./components/CurrentMessageSection";
+import { SearchAndFilter } from "./components/SearchAndFilter";
+import { BulkOperations } from "./components/BulkOperations";
 import { ProjectTray } from "../ProjectTray";
 import {
   convertMessagesToTurns,
@@ -32,6 +34,27 @@ export function CollapsibleChat({
   const [pinned, setPinned] = React.useState<Record<string, boolean>>({});
   const [starred, setStarred] = React.useState<Record<string, boolean>>({});
   const [showOnlyStarred, setShowOnlyStarred] = React.useState(false);
+
+  // Search and filter state
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [contentFilters, setContentFilters] = React.useState({
+    showUser: true,
+    showAssistant: true,
+    showCode: true,
+    showLinks: true,
+    showImages: true,
+    showText: true,
+  });
+  const [dateRange, setDateRange] = React.useState({
+    start: null as Date | null,
+    end: null as Date | null,
+  });
+
+  // Bulk operations state
+  const [selectedTurns, setSelectedTurns] = React.useState<Set<string>>(
+    new Set(),
+  );
+  const [_showCheckboxes, _setShowCheckboxes] = React.useState(false);
 
   // Scroll to bottom only when new messages are added (not on every mount)
   const hasScrolledToBottom = useRef(false);
@@ -99,11 +122,70 @@ export function CollapsibleChat({
     [debouncedSetStarred],
   );
 
-  // Filter turns based on starred filter
-  const filteredTurns = useMemo(
-    () => filterTurns(turns, starred, showOnlyStarred),
-    [turns, starred, showOnlyStarred],
-  );
+  // Enhanced filtering with search and content filters
+  const filteredTurns = useMemo(() => {
+    let filtered = filterTurns(turns, starred, showOnlyStarred);
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((turn) => {
+        const userContent = turn.user?.content?.toLowerCase() || "";
+        const assistantContent = turn.assistant?.content?.toLowerCase() || "";
+        return userContent.includes(query) || assistantContent.includes(query);
+      });
+    }
+
+    // Apply content type filters
+    filtered = filtered.filter((turn) => {
+      const hasUser = turn.user && contentFilters.showUser;
+      const hasAssistant = turn.assistant && contentFilters.showAssistant;
+
+      if (!hasUser && !hasAssistant) return false;
+
+      // Check content type filters
+      const userContent = turn.user?.content || "";
+      const assistantContent = turn.assistant?.content || "";
+
+      const hasCode = /```[\s\S]*```|`[^`]+`/.test(
+        userContent + assistantContent,
+      );
+      const hasLinks = /https?:\/\/[^\s]+/.test(userContent + assistantContent);
+      const hasImages = /\.(jpg|jpeg|png|gif|webp|svg)(\?[^#\s]*)?$/i.test(
+        userContent + assistantContent,
+      );
+      const hasText = !hasCode && !hasLinks && !hasImages;
+
+      return (
+        (hasCode && contentFilters.showCode) ||
+        (hasLinks && contentFilters.showLinks) ||
+        (hasImages && contentFilters.showImages) ||
+        (hasText && contentFilters.showText)
+      );
+    });
+
+    // Apply date range filter
+    if (dateRange.start || dateRange.end) {
+      filtered = filtered.filter((turn) => {
+        const userTime = turn.user?.timestamp;
+        const assistantTime = turn.assistant?.timestamp;
+        const turnTime = userTime || assistantTime;
+
+        if (!turnTime) return true; // Keep if no timestamp
+
+        const turnDate = new Date(turnTime);
+        const startDate = dateRange.start;
+        const endDate = dateRange.end;
+
+        if (startDate && turnDate < startDate) return false;
+        if (endDate && turnDate > endDate) return false;
+
+        return true;
+      });
+    }
+
+    return filtered;
+  }, [turns, starred, showOnlyStarred, searchQuery, contentFilters, dateRange]);
 
   const shouldOpen = useCallback(
     (idx: number, key: string) => {
@@ -159,6 +241,52 @@ export function CollapsibleChat({
     });
   }, [filteredTurns, pinned]);
 
+  // Bulk operations handlers
+  const _handleToggleSelect = useCallback((turnKey: string) => {
+    setSelectedTurns((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(turnKey)) {
+        newSet.delete(turnKey);
+      } else {
+        newSet.add(turnKey);
+      }
+      return newSet;
+    });
+  }, []);
+
+  const handleSelectAll = useCallback(() => {
+    const allTurnKeys = filteredTurns.map((turn) => turnKey(turn));
+    setSelectedTurns(new Set(allTurnKeys));
+  }, [filteredTurns]);
+
+  const handleDeselectAll = useCallback(() => {
+    setSelectedTurns(new Set());
+  }, []);
+
+  const handleBulkPin = useCallback(() => {
+    selectedTurns.forEach((key) => {
+      if (!pinned[key]) {
+        togglePin(key);
+      }
+    });
+    setSelectedTurns(new Set());
+  }, [selectedTurns, pinned, togglePin]);
+
+  const handleBulkStar = useCallback(() => {
+    selectedTurns.forEach((key) => {
+      if (!starred[key]) {
+        toggleStar(key);
+      }
+    });
+    setSelectedTurns(new Set());
+  }, [selectedTurns, starred, toggleStar]);
+
+  const handleBulkDelete = useCallback(() => {
+    // This would need to be implemented based on your deletion logic
+    console.log("Bulk delete:", Array.from(selectedTurns));
+    setSelectedTurns(new Set());
+  }, [selectedTurns]);
+
   // Safety check for messages after all hooks
   if (!messages || !Array.isArray(messages)) {
     console.warn(
@@ -181,6 +309,13 @@ export function CollapsibleChat({
 
   return (
     <div className="w-full">
+      <SearchAndFilter
+        onSearchChange={setSearchQuery}
+        onFilterChange={setContentFilters}
+        onDateRangeChange={setDateRange}
+        totalMessages={turns.length}
+        filteredCount={filteredTurns.length}
+      />
       <FloatingControls
         filteredTurns={filteredTurns}
         showOnlyStarred={showOnlyStarred}
@@ -224,6 +359,17 @@ export function CollapsibleChat({
 
       {/* Project Tray for saving code snippets */}
       <ProjectTray />
+
+      {/* Bulk Operations Toolbar */}
+      <BulkOperations
+        selectedTurns={Array.from(selectedTurns)}
+        onSelectAll={handleSelectAll}
+        onDeselectAll={handleDeselectAll}
+        onBulkPin={handleBulkPin}
+        onBulkStar={handleBulkStar}
+        onBulkDelete={handleBulkDelete}
+        totalTurns={filteredTurns.length}
+      />
     </div>
   );
 }

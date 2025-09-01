@@ -53,7 +53,7 @@ export async function generateTitleFromUserMessageAction({
   const { text: title } = await generateText({
     model,
     temperature:
-      model.provider === "openai" && model.model?.startsWith("gpt-5")
+      model.provider === "openai" && model.modelId?.startsWith("gpt-5")
         ? 1
         : undefined,
     system: CREATE_THREAD_TITLE_PROMPT,
@@ -128,7 +128,7 @@ export async function generateExampleToolSchemaAction(options: {
   const { object } = await generateObject({
     model,
     temperature:
-      model.provider === "openai" && model.model?.startsWith("gpt-5")
+      model.provider === "openai" && model.modelId?.startsWith("gpt-5")
         ? 1
         : undefined,
     schema,

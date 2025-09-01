@@ -87,7 +87,7 @@ export function CurrentMessageSection({
       >
         <div className="mb-6">
           <div className="w-full group">
-            <div className="flex items-center justify-between px-4 py-2 bg-background/40 rounded-lg hover:bg-background/50 transition-all duration-200">
+            <div className="flex items-center justify-between px-4 py-2 bg-background/60 rounded-2xl hover:bg-background/70 transition-all duration-200 shadow-md hover:shadow-lg border border-white/10">
               <div className="flex items-center gap-2 min-w-0 flex-1">
                 <div className="font-medium text-sm min-w-0 flex-1 text-muted-foreground">
                   {turn.user ? (
@@ -100,7 +100,7 @@ export function CurrentMessageSection({
                       </span>
                     </div>
                   ) : (
-                    "🤖"
+                    "🤖 Assistant"
                   )}
                 </div>
               </div>
