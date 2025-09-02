@@ -60,4 +60,4 @@ custom-mcp-server/dist/
 *.ignore
 .mcp-config.json
 openai-compatible.config.ts
-certificates
+certificatescustom-mcp-server/node_modules/
