@@ -43,6 +43,7 @@ import {
   useSidebarContext,
   type SidebarItem,
   type NotionTask,
+  type NotionDatabase,
 } from "@/contexts/sidebar-context";
 import { useNotionTasks } from "@/hooks/use-notion-tasks";
 
@@ -97,7 +98,7 @@ export function RightSidebar({
   const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
   const [isHovering, setIsHovering] = useState(false);
 
   const handleAddItem = (item: Omit<SidebarItem, "id" | "createdAt">) => {

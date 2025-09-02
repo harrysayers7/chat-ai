@@ -13,6 +13,33 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // Handle SSE connection for MCP
+  if (req.method === "GET" && req.url === "/mcp") {
+    res.writeHead(200, {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "Cache-Control",
+    });
+
+    // Send initial connection event
+    res.write("event: connected\n");
+    res.write('data: {"type":"connected"}\n\n');
+
+    // Keep connection alive
+    const keepAlive = setInterval(() => {
+      res.write("event: ping\n");
+      res.write('data: {"type":"ping"}\n\n');
+    }, 30000);
+
+    req.on("close", () => {
+      clearInterval(keepAlive);
+    });
+
+    return;
+  }
+
   if (req.method === "POST" && req.url === "/mcp") {
     let body = "";
     req.on("data", (chunk) => {

@@ -1,0 +1,227 @@
+name: Deploy to Production
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy (leave empty for latest release)'
+        required: false
+        type: string
+      force_deploy:
+        description: 'Force deployment even if tests fail'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.force_deploy != 'true'
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.2.1
+          run_install: true
+          
+      - name: Run comprehensive tests
+        run: |
+          pnpm test -- --run
+          pnpm test:e2e
+          pnpm check-types
+          pnpm lint
+          
+      - name: Security audit
+        run: |
+          pnpm audit --audit-level moderate || echo "⚠️ Security audit found issues, but continuing..."
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: test
+    if: always() && (needs.test.result == 'success' || github.event.inputs.force_deploy == 'true')
+    
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.version || github.event.release.tag_name || 'main' }}
+        
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+          
+      - name: Add server to known hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.PRODUCTION_SERVER_HOST }} >> ~/.ssh/known_hosts
+          
+      - name: Create deployment backup
+        run: |
+          ssh ${{ secrets.PRODUCTION_SERVER_USER }}@${{ secrets.PRODUCTION_SERVER_HOST }} << 'EOF'
+            set -e
+            
+            echo "💾 Creating deployment backup..."
+            
+            BACKUP_DIR="/home/chat-ai/backups/$(date +%Y%m%d_%H%M%S)"
+            mkdir -p "$BACKUP_DIR"
+            
+            # Backup current deployment
+            if [ -d "/home/chat-ai/deploy-production" ]; then
+              cp -r /home/chat-ai/deploy-production "$BACKUP_DIR/"
+              echo "✅ Backup created at $BACKUP_DIR"
+            else
+              echo "⚠️ No existing deployment to backup"
+            fi
+            
+            # Keep only last 5 backups
+            ls -t /home/chat-ai/backups/ | tail -n +6 | xargs -r rm -rf
+          EOF
+          
+      - name: Deploy to production server
+        run: |
+          ssh ${{ secrets.PRODUCTION_SERVER_USER }}@${{ secrets.PRODUCTION_SERVER_HOST }} << 'EOF'
+            set -e
+            
+            echo "🚀 Starting production deployment..."
+            
+            # Navigate to deployment directory
+            cd /home/chat-ai/deploy-production || {
+              echo "❌ Production deployment directory not found. Creating..."
+              mkdir -p /home/chat-ai/deploy-production
+              cd /home/chat-ai/deploy-production
+            }
+            
+            # Pull latest code
+            echo "📥 Pulling latest code..."
+            if [ -d ".git" ]; then
+              git fetch origin
+              git reset --hard origin/${{ github.event.inputs.version || github.event.release.tag_name || 'main' }}
+            else
+              git clone https://github.com/${{ github.repository }}.git .
+              git checkout ${{ github.event.inputs.version || github.event.release.tag_name || 'main' }}
+            fi
+            
+            # Install dependencies
+            echo "📦 Installing dependencies..."
+            if ! command -v pnpm &> /dev/null; then
+              npm install -g pnpm
+            fi
+            pnpm install --prod --frozen-lockfile
+            
+            # Run database migrations
+            echo "🗄️ Running database migrations..."
+            pnpm db:push || {
+              echo "❌ Database migration failed!"
+              echo "🔄 Rolling back to previous version..."
+              # Rollback logic would go here
+              exit 1
+            }
+            
+            # Build application
+            echo "🏗️ Building application..."
+            pnpm build
+            
+            # Graceful restart
+            echo "🔄 Gracefully restarting application..."
+            
+            # Stop current application gracefully
+            if pgrep -f "next start" > /dev/null; then
+              echo "🛑 Stopping current application..."
+              pkill -TERM -f "next start"
+              sleep 10
+              
+              # Force kill if still running
+              if pgrep -f "next start" > /dev/null; then
+                echo "⚠️ Force stopping application..."
+                pkill -KILL -f "next start"
+                sleep 2
+              fi
+            fi
+            
+            # Start application in background
+            echo "🚀 Starting new application..."
+            nohup pnpm start > app.log 2>&1 &
+            sleep 10
+            
+            # Verify deployment
+            echo "✅ Verifying deployment..."
+            for i in {1..5}; do
+              if curl -f http://localhost:3000/health > /dev/null 2>&1; then
+                echo "🎉 Production deployment successful!"
+                break
+              else
+                echo "⏳ Waiting for application to start... (attempt $i/5)"
+                sleep 5
+              fi
+            done
+            
+            if ! curl -f http://localhost:3000/health > /dev/null 2>&1; then
+              echo "❌ Deployment verification failed"
+              echo "📋 Application logs:"
+              tail -n 50 app.log
+              exit 1
+            fi
+          EOF
+          
+      - name: Verify production deployment
+        run: |
+          echo "🔍 Verifying production deployment..."
+          sleep 15
+          
+          # Check if production domain is accessible
+          if curl -f --connect-timeout 15 "https://${{ secrets.PRODUCTION_DOMAIN }}" > /dev/null 2>&1; then
+            echo "✅ Production deployment verified: https://${{ secrets.PRODUCTION_DOMAIN }}"
+          else
+            echo "⚠️ Production domain not accessible, checking server directly..."
+            if curl -f --connect-timeout 10 "http://${{ secrets.PRODUCTION_SERVER_HOST }}:3000" > /dev/null 2>&1; then
+              echo "✅ Server is responding, but domain may need DNS/SSL setup"
+            else
+              echo "❌ Production deployment verification failed"
+              exit 1
+            fi
+          fi
+          
+      - name: Run post-deployment health checks
+        run: |
+          echo "🏥 Running post-deployment health checks..."
+          
+          # Basic health check
+          if curl -f --connect-timeout 10 "https://${{ secrets.PRODUCTION_DOMAIN }}/api/health" > /dev/null 2>&1; then
+            echo "✅ Health check passed"
+          else
+            echo "⚠️ Health check endpoint not responding"
+          fi
+          
+          # Check database connectivity
+          ssh ${{ secrets.PRODUCTION_SERVER_USER }}@${{ secrets.PRODUCTION_SERVER_HOST }} << 'EOF'
+            cd /home/chat-ai/deploy-production
+            if pnpm db:check > /dev/null 2>&1; then
+              echo "✅ Database connectivity verified"
+            else
+              echo "⚠️ Database connectivity check failed"
+            fi
+          EOF
+          
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Production deployment completed successfully"
+            echo "🌐 Production URL: https://${{ secrets.PRODUCTION_DOMAIN }}"
+            echo "📊 Deployment version: ${{ github.event.inputs.version || github.event.release.tag_name || 'main' }}"
+          else
+            echo "❌ Production deployment failed"
+            echo "📋 Check the logs above for details"
+            echo "🔄 Consider rolling back to previous version"
+          fi

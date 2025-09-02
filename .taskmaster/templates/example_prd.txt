@@ -1,0 +1,32 @@
+# Example PRD Template
+
+## Project Overview
+[Brief description of your project]
+
+## Core Features
+1. [Feature 1]
+2. [Feature 2]
+3. [Feature 3]
+
+## Technical Requirements
+- [Requirement 1]
+- [Requirement 2]
+- [Requirement 3]
+
+## Success Metrics
+- [Metric 1]
+- [Metric 2]
+- [Metric 3]
+
+## Development Phases
+### Phase 1: [Phase Name]
+- [Task 1]
+- [Task 2]
+
+### Phase 2: [Phase Name]
+- [Task 1]
+- [Task 2]
+
+## Notes
+[Any additional notes or considerations]
+

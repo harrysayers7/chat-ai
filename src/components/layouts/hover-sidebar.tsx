@@ -17,11 +17,11 @@ export function HoverSidebar({ session: propSession }: HoverSidebarProps) {
     "/session",
     () => authClient.getSession(),
     {
-      fallbackData: propSession,
+      fallbackData: propSession as any,
     },
   );
 
-  const session = propSession || sessionData;
+  const session = propSession || (sessionData as any);
   const { open, setOpen, isMobile } = useSidebar();
   const [isHovering, setIsHovering] = useState(false);
   const [isHoverZoneActive, setIsHoverZoneActive] = useState(false);

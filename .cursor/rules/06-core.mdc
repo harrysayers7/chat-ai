@@ -1,0 +1,81 @@
+---
+description: Core development rules and essential information for chat-ai project
+globs: ["**/*.{ts,tsx,js,jsx,md,json}"]
+alwaysApply: true
+---
+
+# Core Development Rules - chat-ai
+
+## Technology Stack
+- **Framework**: Next.js 15 + React 19 + TypeScript strict mode
+- **AI SDK**: AI SDK v4 with MCP (Model Context Protocol)
+- **Database**: PostgreSQL with Drizzle ORM
+- **Styling**: Tailwind CSS v4 + shadcn/ui + Radix UI
+- **Package Manager**: pnpm (required)
+- **Node Version**: >=18
+- **Development Port**: 3030 (local host)
+
+## Security Requirements (CRITICAL)
+- **Secrets**: Never commit secrets. Use `.env` only. Never paste API keys, PII, or tokens into chats/commits/logs
+- **Input Validation**: Zod validation required at ALL API boundaries
+- **Database**: Use Drizzle ORM with parameterized queries only. No string-built SQL
+- **Error Handling**: Generic user-facing errors, detailed errors only in server logs
+- **Authentication**: Use existing better-auth + OAuth flows only
+
+## Coding Standards
+- **TypeScript**: Strict mode, no `any` unless wrapped and explained
+- **Functions**: Keep small, single responsibility, early returns preferred
+- **API Routes**: Always validate inputs with Zod schemas
+- **Database**: Use repository pattern with Drizzle ORM
+- **State Management**: Zustand for client state, server actions for API boundaries
+
+## Development Workflow
+- **Branching**: feature/* → PR → main (avoid direct pushes to main)
+- **PRs**: Keep small, typed, tested, include screenshots for UI changes
+- **Environment**: Update `.env.example` when env vars change
+- **Testing**: Add unit tests (Vitest) for changed logic, Playwright for critical flows
+
+## AI Provider Configuration
+- **Allowed Providers**: OPENAI, ANTHROPIC, GOOGLE, XAI, OPENROUTER, OLLAMA
+- **Model Selection**: Use cheapest model that passes tests
+- **Provider-Agnostic**: Generate code using AI SDK v4 patterns when uncertain
+
+## MCP & Tools
+- **Tool Choice**: Manual default, auto only for idempotent tools
+- **Chain Limits**: Max 5 calls, stop on repeated thoughts
+- **Side Effects**: Ask before any irreversible action
+- **Mentions**: Use `@tool` style for one-offs, presets for frequent tools
+
+## Performance & Observability
+- **Latency SLOs**: p95 < 2s, p99 < 5s for chat responses
+- **Error Budget**: <2% 5xx errors in 1h window
+- **Logging**: Redact secrets/PII, include request id + timings only
+- **Memory**: 30d raw chat retention, 90d summaries
+
+## Deployment
+- **Primary Target**: Vercel for production
+- **Docker**: Optional for self-host/MCP STDIO experiments
+- **Build**: Optimize for Vercel edge/functions, avoid Node-only APIs where possible
+
+## File Organization
+- **Path Aliases**: Use configured aliases (`@/...`, `lib/*`, `ui/*`, etc.)
+- **Imports**: Organize imports with Biome formatter
+- **Components**: Keep accessible with proper labels and roles
+- **No Silent Catches**: Annotate expected failures
+
+## Environment Variables (Required)
+- **Database**: `POSTGRES_URL` (required)
+- **Auth**: `BETTER_AUTH_SECRET` (required)
+- **LLM Providers**: At least one API key from allowed providers
+- **Optional**: `EXA_API_KEY`, OAuth credentials, feature flags
+
+## Other Rules
+- **Placeholder Detection**: Before modifying any code, scan for and warn about placeholders (TODO, FIXME, PLACEHOLDER, incomplete implementations, or suspicious comments). Ask how to handle them before proceeding.
+- **Dependency Conflicts**: Before adding new dependencies, check for version conflicts with existing packages and warn about potential breaking changes or security vulnerabilities.
+- **Environment Variable Changes**: When modifying environment variables, update `.env.example` and warn about required changes for other developers.
+- **Database Schema Changes**: Before modifying database schemas, check for existing migrations and warn about potential data loss or breaking changes.
+- **API Breaking Changes**: Before modifying API endpoints, check for existing consumers and warn about breaking changes that could affect integrations.
+- **Type Safety**: Before modifying TypeScript interfaces or types, scan for all usages and warn about potential breaking changes to dependent code.
+- **Import/Export Changes**: Before removing or renaming exports, scan for all import statements and warn about potential broken references.
+- **Configuration Drift**: Before modifying config files (next.config, tsconfig, etc.), check for environment-specific overrides and warn about potential conflicts.
+

@@ -114,7 +114,7 @@ export const LinkPreview = memo(function LinkPreview({
   }
 
   return (
-    <div className="group">
+    <span className="group inline-block">
       {/* Link text */}
       <a
         href={url}
@@ -130,7 +130,7 @@ export const LinkPreview = memo(function LinkPreview({
       </a>
 
       {/* Preview card */}
-      <div className="mt-2">
+      <div className="mt-2 block">
         <button
           onClick={handleToggle}
           className="w-full text-left p-3 bg-background/40 border border-border/30 rounded-lg hover:bg-background/60 transition-all duration-200 group"
@@ -240,6 +240,6 @@ export const LinkPreview = memo(function LinkPreview({
           </div>
         )}
       </div>
-    </div>
+    </span>
   );
 });

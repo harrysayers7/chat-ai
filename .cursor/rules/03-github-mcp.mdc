@@ -1,0 +1,81 @@
+---
+description: GitHub MCP integration and usage guidelines
+globs: ["**/*.{ts,tsx,js,jsx}", "**/mcp/**/*", "**/github/**/*"]
+alwaysApply: intelligently
+---
+
+# GitHub MCP Integration Rules
+
+## Core Principles
+- **Security First**: All GitHub operations require valid authentication tokens
+- **Read-Only Default**: Default to read-only operations, require confirmation for writes
+- **Rate Limit Respect**: Honor GitHub API rate limits (5,000 requests/hour)
+- **Error Graceful**: Handle GitHub API errors with clear user feedback
+
+## Authentication & Access
+- **Token Required**: `GITHUB_TOKEN` environment variable must be set
+- **Token Scopes**: Require `repo`, `read:org`, `read:user` scopes
+- **Token Security**: Never expose tokens in logs or client-side code
+- **Token Rotation**: Rotate tokens every 90 days
+
+## Tool Usage Guidelines
+- **Manual Selection**: Default to manual tool selection for GitHub operations
+- **Auto-Selection**: Only for idempotent read operations
+- **Tool Mentions**: Use `@mcp_github_*` format for one-off operations
+- **Tool Presets**: Create presets for common workflows
+
+## Operation Limits
+- **Chain Limits**: Maximum 5 consecutive GitHub MCP calls
+- **Stop on Repeat**: Stop if same operation attempted multiple times
+- **Timeout**: 30-second timeout for GitHub API operations
+- **Confirmation**: Always confirm destructive operations
+
+## Destructive Operations (Require Confirmation)
+- Creating new repositories
+- Deleting files or repositories  
+- Merging pull requests
+- Creating issues or pull requests
+- Pushing commits to repositories
+
+## Error Handling
+- **Rate Limits**: Exponential backoff with jitter
+- **Auth Errors**: Clear tokens, request re-authentication
+- **Network Errors**: Retry with backoff (max 3 retries)
+- **Validation Errors**: Provide clear, actionable error messages
+
+## Monitoring & Logging
+- **Operation Logging**: Log all GitHub operations with timestamps
+- **Error Logging**: Log detailed error information
+- **Security Logging**: Log authentication failures
+- **Rate Limit Monitoring**: Track API usage and limits
+
+## Best Practices
+- **Idempotent Design**: Make operations idempotent when possible
+- **Batch Operations**: Group related operations to reduce API calls
+- **Caching**: Cache frequently accessed data
+- **Clear Feedback**: Provide clear feedback for all operations
+
+## Configuration
+```json
+{
+  "github-mcp": {
+    "command": "npx",
+    "args": ["@modelcontextprotocol/server-github@latest"],
+    "env": {
+      "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+    }
+  }
+}
+```
+
+## Available Tools
+- **Repository**: `get_file_contents`, `create_or_update_file`, `delete_file`, `push_files`
+- **Issues/PRs**: `list_issues`, `create_issue`, `update_issue`, `add_issue_comment`, `create_pull_request`
+- **Search**: `search_repositories`, `search_code`, `search_issues`, `search_users`
+- **Commits**: `list_commits`, `get_commit`, `get_pull_request_diff`
+
+## Troubleshooting
+- **Token Issues**: Verify token validity and scopes
+- **Rate Limits**: Check API usage, implement backoff
+- **Permission Errors**: Verify repository access permissions
+- **Network Issues**: Check connectivity, retry with backoff

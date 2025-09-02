@@ -62,9 +62,16 @@ type Props = {
   };
 };
 
-const Particles = dynamic(() => import("@/components/ui/particles"), {
-  ssr: false,
-});
+const Particles = dynamic(
+  () =>
+    import("@/components/ui/particles").catch(
+      () => import("@/components/ui/particles-fallback"),
+    ),
+  {
+    ssr: false,
+    loading: () => <div className="w-full h-full bg-transparent" />,
+  },
+);
 
 const _debounce = createDebounce();
 

@@ -5,7 +5,7 @@ alwaysApply: false
 ---
 
 # 🤖 Auto Patterns Summary
-Generated: 2025-09-01T23:08:57.253Z
+Generated: 2025-09-02T05:01:14.291Z
 
 
 ## ai-providers
@@ -53,7 +53,7 @@ Generated: 2025-09-01T23:08:57.253Z
   - `src/app/(chat)/mcp/test/[id]/page.tsx:361`
   - `src/app/(chat)/mcp/test/[id]/page.tsx:398`
   - `src/app/(chat)/mcp/test/[id]/page.tsx:507`
-  - …and 299 more
+  - …and 320 more
 - **ollama** 
   - `src/lib/ai/models.ts:3`
   - `src/lib/ai/models.ts:16`
@@ -76,6 +76,8 @@ Generated: 2025-09-01T23:08:57.253Z
   - `src/app/api/chat/route.ts:243`
   - `src/app/api/chat/temporary/route.ts:35`
   - `src/app/api/chat/title/route.ts:44`
+  - `src/app/api/summarize/route.ts:2`
+  - `src/app/api/summarize/route.ts:15`
   - `src/app/api/test-chat/route.ts:14`
   - `src/app/api/test-chat/route.ts:15`
   - `src/app/api/test-chat/route.ts:16`
@@ -84,9 +86,7 @@ Generated: 2025-09-01T23:08:57.253Z
   - `src/components/chat-bot-voice.tsx:9`
   - `src/components/chat-bot-voice.tsx:45`
   - `src/components/chat-bot-voice.tsx:81`
-  - `src/components/chat-bot-voice.tsx:285`
-  - `src/components/prompt-input.tsx:33`
-  - …and 86 more
+  - …and 88 more
 - **openrouter** 
   - `src/lib/ai/models.ts:8`
   - `src/lib/ai/models.ts:54`
@@ -153,7 +153,7 @@ Generated: 2025-09-01T23:08:57.253Z
   - `src/app/api/bookmark/route.ts:55`
   - `src/app/api/chat/openai-realtime/route.ts:28`
   - `src/app/api/chat/route.ts:57`
-  - …and 35 more
+  - …and 36 more
 - **redis** 
   - `src/lib/cache/redis-cache.ts:1`
   - `src/lib/cache/redis-cache.ts:6`
@@ -251,7 +251,7 @@ Generated: 2025-09-01T23:08:57.253Z
   - `src/app/api/mcp/route.ts:1`
   - `src/app/api/mcp/server-customizations/[server]/route.ts:1`
   - `src/app/api/mcp/tool-customizations/[server]/[tool]/route.ts:1`
-  - …and 12 more
+  - …and 13 more
 - **possible-secret** — Potential secret in code
   - `src/lib/ai/azure-openai-compatible.test.ts:21`
   - `src/lib/ai/azure-openai-compatible.test.ts:30`

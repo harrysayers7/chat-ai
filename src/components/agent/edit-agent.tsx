@@ -18,7 +18,12 @@ import { BACKGROUND_COLORS } from "lib/const";
 import { cn, fetcher, objectFlow } from "lib/utils";
 import { safe } from "ts-safe";
 import { handleErrorWithToast } from "ui/shared-toast";
-import { ChevronDownIcon, Loader, WandSparklesIcon } from "lucide-react";
+import {
+  ChevronDownIcon,
+  Loader,
+  WandSparklesIcon,
+  Settings2Icon,
+} from "lucide-react";
 import { Button } from "ui/button";
 import {
   DropdownMenu,
@@ -32,6 +37,7 @@ import { Textarea } from "ui/textarea";
 import { ScrollArea } from "ui/scroll-area";
 import { Skeleton } from "ui/skeleton";
 import { TextShimmer } from "ui/text-shimmer";
+import { Tooltip, TooltipContent, TooltipTrigger } from "ui/tooltip";
 import { ShareableActions, Visibility } from "@/components/shareable-actions";
 import { GenerateAgentDialog } from "./generate-agent-dialog";
 import { AgentIconPicker } from "./agent-icon-picker";
@@ -386,6 +392,28 @@ export default function EditAgent({
                   disabled={isLoading}
                   onBookmarkToggle={handleBookmarkToggle}
                   isBookmarkToggleLoading={isBookmarkToggleLoading}
+                  renderActions={() => (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 text-muted-foreground hover:text-foreground"
+                          disabled={isLoading}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            // Add your link action here - could be a router.push or window.open
+                            // Example: router.push(`/agent/${agent.id}/settings`);
+                            // Or: window.open(`/agent/${agent.id}/settings`, '_blank');
+                          }}
+                        >
+                          <Settings2Icon className="size-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>{t("Agent.settings")}</TooltipContent>
+                    </Tooltip>
+                  )}
                 />
               </div>
             )}

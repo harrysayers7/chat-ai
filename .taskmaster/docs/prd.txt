@@ -1,0 +1,139 @@
+# Chat-AI Project - Product Requirements Document
+
+## Project Overview
+Chat-AI is a comprehensive AI-powered chatbot application built with Next.js 15, React 19, and the Vercel AI SDK. The application provides a modern, feature-rich chat interface with MCP (Model Context Protocol) integration, allowing users to interact with various AI models and external tools seamlessly.
+
+## Core Features
+
+### 1. Multi-Provider AI Chat Interface
+- Support for multiple AI providers: OpenAI, Anthropic (Claude), Google Gemini, xAI, OpenRouter, Ollama
+- Real-time chat with streaming responses
+- Voice assistant capabilities with OpenAI Realtime API
+- Model switching and provider management
+- Custom system prompts and chat customization
+
+### 2. MCP (Model Context Protocol) Integration
+- Seamless integration with external MCP servers
+- Tool mentions (@toolname) for quick tool access
+- Visual workflow creation and management
+- Custom tool presets and configurations
+- Browser automation with Playwright MCP
+- Web search capabilities with Exa AI
+
+### 3. Authentication & User Management
+- Better Auth integration with OAuth providers (Google, GitHub, Microsoft)
+- User session management
+- Secure authentication flows
+- User preferences and settings
+
+### 4. Database & Data Management
+- PostgreSQL integration with Drizzle ORM
+- User data persistence
+- Chat history and conversation management
+- Database migrations and schema management
+
+### 5. Advanced UI/UX Features
+- Modern, responsive design with Tailwind CSS
+- Dark/light theme support
+- Interactive data visualization tools
+- Export capabilities (CSV, Excel)
+- Real-time collaboration features
+- Temporary chat windows
+
+### 6. Development & Deployment
+- Docker containerization support
+- Vercel deployment ready
+- Comprehensive testing suite (Vitest, Playwright)
+- CI/CD pipeline integration
+- Environment configuration management
+
+## Technical Architecture
+
+### Frontend Stack
+- Next.js 15 with App Router
+- React 19 with TypeScript
+- Tailwind CSS v4 + shadcn/ui + Radix UI
+- Framer Motion for animations
+- Zustand for state management
+
+### Backend Stack
+- Next.js API routes
+- Better Auth for authentication
+- Drizzle ORM with PostgreSQL
+- AI SDK v4 for LLM integration
+- MCP SDK for tool integration
+
+### Development Tools
+- Biome for linting and formatting
+- Husky for git hooks
+- Playwright for E2E testing
+- Vitest for unit testing
+- TypeScript strict mode
+
+## Current Project Status
+
+### Completed Features
+- ✅ Core chat interface with streaming
+- ✅ Multi-provider AI integration
+- ✅ MCP server integration
+- ✅ Authentication system
+- ✅ Database setup with Drizzle
+- ✅ Docker containerization
+- ✅ Basic UI components and theming
+- ✅ Web search integration
+- ✅ Voice assistant capabilities
+- ✅ Workflow creation system
+
+### Areas for Enhancement
+- 🔄 Advanced workflow management
+- 🔄 Enhanced data visualization
+- 🔄 File attachment and processing
+- 🔄 RAG (Retrieval-Augmented Generation)
+- 🔄 Collaborative document editing
+- 🔄 Web-based compute integration
+- 🔄 Advanced analytics and monitoring
+- 🔄 Performance optimization
+- 🔄 Security hardening
+- 🔄 Documentation improvements
+
+## Development Priorities
+
+### Phase 1: Core Stability & Performance
+1. Performance optimization and monitoring
+2. Security audit and hardening
+3. Error handling improvements
+4. Database query optimization
+5. Caching implementation
+
+### Phase 2: Feature Enhancements
+1. Advanced workflow management
+2. Enhanced data visualization tools
+3. File processing capabilities
+4. RAG implementation
+5. Advanced analytics dashboard
+
+### Phase 3: Advanced Features
+1. Collaborative editing
+2. Web-based compute
+3. Advanced AI agent capabilities
+4. Multi-tenant support
+5. Enterprise features
+
+## Success Metrics
+- Response time < 2s for chat interactions
+- 99.9% uptime
+- <2% error rate
+- User engagement metrics
+- Tool usage analytics
+- Performance benchmarks
+
+## Technical Requirements
+- Node.js >= 18
+- PostgreSQL database
+- Docker support
+- Vercel deployment compatibility
+- TypeScript strict mode
+- Comprehensive test coverage
+- Security best practices
+- Performance optimization
+

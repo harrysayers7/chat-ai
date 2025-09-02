@@ -1,10 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { AgentSummary, AgentUpdateSchema } from "app-types/agent";
 import { Card, CardDescription, CardHeader, CardTitle } from "ui/card";
 import { Button } from "ui/button";
-import { Plus, ArrowUpRight } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "ui/tooltip";
+import { Plus, ArrowUpRight, Settings2Icon } from "lucide-react";
 import Link from "next/link";
 import { BackgroundPaths } from "ui/background-paths";
 import { useBookmark } from "@/hooks/queries/use-bookmark";
@@ -31,6 +33,7 @@ export function AgentsList({
   userId,
 }: AgentsListProps) {
   const t = useTranslations();
+  const _router = useRouter();
   const mutateAgents = useMutateAgents();
   const [deletingAgentLoading, setDeletingAgentLoading] = useState<
     string | null
@@ -161,6 +164,27 @@ export function AgentsList({
               isVisibilityChangeLoading={visibilityChangeLoading === agent.id}
               isDeleteLoading={deletingAgentLoading === agent.id}
               onDelete={deleteAgent}
+              renderActions={() => (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 text-muted-foreground hover:text-foreground"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // Add your link action here - could be a router.push or window.open
+                        // Example: router.push(`/agent/${agent.id}/settings`);
+                        // Or: window.open(`/agent/${agent.id}/settings`, '_blank');
+                      }}
+                    >
+                      <Settings2Icon className="size-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{t("Agent.settings")}</TooltipContent>
+                </Tooltip>
+              )}
             />
           ))}
         </div>

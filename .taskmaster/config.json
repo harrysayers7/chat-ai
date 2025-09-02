@@ -1,0 +1,25 @@
+{
+  "project": {
+    "name": "chat-ai",
+    "description": "AI-powered chatbot application with MCP integration",
+    "version": "1.20.2",
+    "type": "web-application"
+  },
+  "models": {
+    "main": "claude-3-5-sonnet-20241022",
+    "research": "claude-3-5-sonnet-20241022",
+    "fallback": "gpt-4o"
+  },
+  "rules": ["cursor", "windsurf", "vscode"],
+  "features": {
+    "prd": true,
+    "research": true,
+    "task_management": true,
+    "workflow_integration": true
+  },
+  "directories": {
+    "docs": ".taskmaster/docs",
+    "tasks": ".taskmaster/tasks",
+    "templates": ".taskmaster/templates"
+  }
+}
