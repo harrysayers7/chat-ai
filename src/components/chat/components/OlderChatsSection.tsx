@@ -38,7 +38,7 @@ export function OlderChatsSection({
         </CollapsibleTrigger>
 
         <CollapsibleContent className="mt-4">
-          <div className="max-h-[60vh] overflow-y-auto space-y-4 p-4 border-2 border-blue-200/30 rounded-lg bg-blue-50/20 dark:bg-blue-950/20 dark:border-blue-800/30">
+          <div className="max-h-[60vh] overflow-y-auto scrollbar-fade space-y-4 p-4 border-2 border-blue-200/30 rounded-lg bg-blue-50/20 dark:bg-blue-950/20 dark:border-blue-800/30">
             {olderTurns.map((t, idx) => {
               const key = turnKey(t) || String(idx);
               const defaultOpen = shouldOpen(idx, key);

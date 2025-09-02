@@ -307,7 +307,7 @@ export function ChatHistorySidebar({
         {/* Content */}
         <div
           ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0"
+          className="flex-1 overflow-y-auto scrollbar-fade p-4 space-y-4 min-h-0"
         >
           {/* Recent */}
           {groupedHistory.recent.length > 0 && (

@@ -9,6 +9,7 @@ import { RightSidebar } from "@/components/layouts/right-sidebar";
 import { ContextMenu } from "@/components/layouts/context-menu";
 
 import { useTextSelection } from "@/hooks/use-text-selection";
+import { useScrollbarAutoHide } from "@/hooks/use-scrollbar-auto-hide";
 import { Suspense, useState, useEffect } from "react";
 import { isShortcutEvent, Shortcuts } from "@/lib/keyboard-shortcuts";
 
@@ -17,6 +18,9 @@ export default function ChatLayout({
 }: { children: React.ReactNode }) {
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
   const { selectedText } = useTextSelection();
+
+  // Enable auto-hide scrollbar behavior
+  useScrollbarAutoHide();
 
   // Keyboard shortcut handler
   useEffect(() => {
@@ -38,7 +42,7 @@ export default function ChatLayout({
         <HoverSidebar />
         <main className="relative bg-background w-full flex flex-col h-screen">
           <AppHeader />
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto scrollbar-auto-hide">
             <Suspense fallback={<ChatLoadingFallback />}>{children}</Suspense>
           </div>
         </main>

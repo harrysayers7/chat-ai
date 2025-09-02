@@ -29,6 +29,7 @@ import {
   Sun,
   MoonStar,
   ChevronRight,
+  Bot,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { appStore } from "@/app/store";
@@ -126,6 +127,15 @@ export function AppSidebarUser({
             >
               <Settings2 className="size-4 text-foreground" />
               <span>{t("chatPreferences")}</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => {
+                window.open("/agents", "_blank");
+              }}
+            >
+              <Bot className="size-4 text-foreground" />
+              <span>Agent Settings</span>
             </DropdownMenuItem>
             <SelectTheme />
             <SelectLanguage />
@@ -225,7 +235,7 @@ function SelectTheme() {
               </div>
             </div>
           </DropdownMenuLabel>
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-96 overflow-y-auto scrollbar-fade">
             {BASE_THEMES.map((t) => (
               <DropdownMenuCheckboxItem
                 key={t}
@@ -264,7 +274,7 @@ function SelectLanguage() {
         <span>{t("language")}</span>
       </DropdownMenuSubTrigger>
       <DropdownMenuPortal>
-        <DropdownMenuSubContent className="w-48 max-h-96 overflow-y-auto">
+        <DropdownMenuSubContent className="w-48 max-h-96 overflow-y-auto scrollbar-fade">
           <DropdownMenuLabel className="text-muted-foreground">
             {t("language")}
           </DropdownMenuLabel>

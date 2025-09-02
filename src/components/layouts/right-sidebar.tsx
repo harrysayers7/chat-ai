@@ -33,12 +33,18 @@ import {
   Trash2,
   Star,
   ChevronDown,
+  Database,
+  RefreshCw,
+  ExternalLink,
+  ArrowUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   useSidebarContext,
   type SidebarItem,
+  type NotionTask,
 } from "@/contexts/sidebar-context";
+import { useNotionTasks } from "@/hooks/use-notion-tasks";
 
 interface RightSidebarProps {
   isOpen: boolean;
@@ -53,10 +59,36 @@ export function RightSidebar({
   selectedText,
   onAddFromSelection,
 }: RightSidebarProps) {
-  const { items, addItem, updateItem, deleteItem } = useSidebarContext();
-  const [activeTab, setActiveTab] = useState<"tasks" | "snippets" | "ideas">(
-    "tasks",
-  );
+  const {
+    items,
+    addItem,
+    updateItem,
+    deleteItem,
+    notionTasks,
+    notionDatabases,
+    selectedDatabaseId,
+    setNotionTasks,
+    setNotionDatabases,
+    setSelectedDatabaseId,
+    promoteToNotion,
+    importFromNotion,
+  } = useSidebarContext();
+
+  const {
+    tasks: notionTasksFromHook,
+    databases: notionDatabasesFromHook,
+    isLoading: notionLoading,
+    error: notionError,
+    fetchTasks,
+    createTask,
+    updateTask,
+    fetchDatabases,
+    refreshTasks,
+    notionServerId,
+  } = useNotionTasks();
+  const [activeTab, setActiveTab] = useState<
+    "tasks" | "snippets" | "ideas" | "notion"
+  >("tasks");
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [newItemContent, setNewItemContent] = useState("");
   const [newItemType, setNewItemType] = useState<"task" | "snippet" | "idea">(
@@ -124,6 +156,8 @@ export function RightSidebar({
         return item.type === "snippet";
       case "ideas":
         return item.type === "idea";
+      case "notion":
+        return false; // Notion items are handled separately
       default:
         return false;
     }
@@ -137,6 +171,8 @@ export function RightSidebar({
         return <FileText className="h-4 w-4" />;
       case "ideas":
         return <Lightbulb className="h-4 w-4" />;
+      case "notion":
+        return <Database className="h-4 w-4" />;
       default:
         return null;
     }
@@ -150,6 +186,8 @@ export function RightSidebar({
         return "Snippets";
       case "ideas":
         return "Ideas";
+      case "notion":
+        return "Notion";
       default:
         return "";
     }
@@ -216,6 +254,12 @@ export function RightSidebar({
                   <div className="flex items-center gap-2">
                     <Lightbulb className="h-4 w-4" />
                     Ideas
+                  </div>
+                </SelectItem>
+                <SelectItem value="notion">
+                  <div className="flex items-center gap-2">
+                    <Database className="h-4 w-4" />
+                    Notion
                   </div>
                 </SelectItem>
               </SelectContent>
@@ -373,8 +417,24 @@ export function RightSidebar({
           </div>
 
           {/* Items List */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {filteredItems.length === 0 ? (
+          <div className="flex-1 overflow-y-auto scrollbar-fade p-4 space-y-3">
+            {activeTab === "notion" ? (
+              <NotionTabContent
+                notionTasks={notionTasksFromHook}
+                notionDatabases={notionDatabasesFromHook}
+                selectedDatabaseId={selectedDatabaseId}
+                notionServerId={notionServerId}
+                isLoading={notionLoading}
+                error={notionError}
+                onDatabaseSelect={setSelectedDatabaseId}
+                onFetchTasks={fetchTasks}
+                onFetchDatabases={fetchDatabases}
+                onRefreshTasks={refreshTasks}
+                onCreateTask={createTask}
+                onUpdateTask={updateTask}
+                onImportTask={importFromNotion}
+              />
+            ) : filteredItems.length === 0 ? (
               <div className="text-center text-muted-foreground py-8">
                 <div className="mb-2">{getTabIcon(activeTab)}</div>
                 <p>No {getTabLabel(activeTab).toLowerCase()} yet</p>
@@ -452,6 +512,26 @@ export function RightSidebar({
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
+                      {item.type === "task" &&
+                        notionDatabasesFromHook.length > 0 && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // For now, use the first available database
+                              // In a real implementation, you'd show a database selector
+                              const firstDb = notionDatabasesFromHook[0];
+                              if (firstDb) {
+                                promoteToNotion(item.id, firstDb.id);
+                              }
+                            }}
+                            title="Promote to Notion"
+                          >
+                            <ArrowUp className="h-3 w-3" />
+                          </Button>
+                        )}
                       <Button
                         variant="ghost"
                         size="sm"
@@ -528,5 +608,367 @@ export function RightSidebar({
           document.body,
         )}
     </>
+  );
+}
+
+// Notion Tab Content Component
+interface NotionTabContentProps {
+  notionTasks: NotionTask[];
+  notionDatabases: NotionDatabase[];
+  selectedDatabaseId: string | null;
+  notionServerId: string | null;
+  isLoading: boolean;
+  error: string | null;
+  onDatabaseSelect: (id: string | null) => void;
+  onFetchTasks: (databaseId: string) => Promise<void>;
+  onFetchDatabases: () => Promise<void>;
+  onRefreshTasks: () => Promise<void>;
+  onCreateTask: (
+    databaseId: string,
+    task: Omit<NotionTask, "id" | "created_at">,
+  ) => Promise<NotionTask | null>;
+  onUpdateTask: (taskId: string, updates: Partial<NotionTask>) => Promise<void>;
+  onImportTask: (taskId: string) => Promise<void>;
+}
+
+function NotionTabContent({
+  notionTasks,
+  notionDatabases,
+  selectedDatabaseId,
+  notionServerId,
+  isLoading,
+  error,
+  onDatabaseSelect,
+  onFetchTasks,
+  onFetchDatabases,
+  onRefreshTasks,
+  onCreateTask,
+  onUpdateTask,
+  onImportTask,
+}: NotionTabContentProps) {
+  const [isCreatingTask, setIsCreatingTask] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskDescription, setNewTaskDescription] = useState("");
+  const [newTaskPriority, setNewTaskPriority] = useState<
+    "Low" | "Medium" | "High" | "Urgent"
+  >("Medium");
+
+  const handleDatabaseSelect = async (databaseId: string) => {
+    onDatabaseSelect(databaseId);
+    await onFetchTasks(databaseId);
+  };
+
+  const handleCreateTask = async () => {
+    if (!selectedDatabaseId || !newTaskTitle.trim()) return;
+
+    const newTask = await onCreateTask(selectedDatabaseId, {
+      title: newTaskTitle,
+      description: newTaskDescription,
+      priority: newTaskPriority,
+      status: "Not Started",
+      database_id: selectedDatabaseId,
+    });
+
+    if (newTask) {
+      setNewTaskTitle("");
+      setNewTaskDescription("");
+      setNewTaskPriority("Medium");
+      setIsCreatingTask(false);
+    }
+  };
+
+  const handleTaskStatusChange = async (
+    taskId: string,
+    newStatus: NotionTask["status"],
+  ) => {
+    await onUpdateTask(taskId, { status: newStatus });
+  };
+
+  const getPriorityColor = (priority: NotionTask["priority"]) => {
+    switch (priority) {
+      case "Urgent":
+        return "text-red-500";
+      case "High":
+        return "text-orange-500";
+      case "Medium":
+        return "text-yellow-500";
+      case "Low":
+        return "text-green-500";
+      default:
+        return "text-muted-foreground";
+    }
+  };
+
+  const getStatusColor = (status: NotionTask["status"]) => {
+    switch (status) {
+      case "Done":
+        return "text-green-500";
+      case "In Progress":
+        return "text-blue-500";
+      case "Blocked":
+        return "text-red-500";
+      case "Not Started":
+        return "text-muted-foreground";
+      default:
+        return "text-muted-foreground";
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Database Selection */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium">Database</label>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onFetchDatabases}
+            disabled={isLoading}
+          >
+            <RefreshCw className={cn("h-3 w-3", isLoading && "animate-spin")} />
+          </Button>
+        </div>
+        <Select
+          value={selectedDatabaseId || ""}
+          onValueChange={handleDatabaseSelect}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select a database" />
+          </SelectTrigger>
+          <SelectContent>
+            {notionDatabases.length === 0 ? (
+              <div className="p-2 text-sm text-muted-foreground">
+                No databases found. Click refresh to load.
+              </div>
+            ) : (
+              notionDatabases.map((db) => (
+                <SelectItem key={db.id} value={db.id}>
+                  <div className="flex items-center gap-2">
+                    <Database className="h-3 w-3" />
+                    {db.title}
+                  </div>
+                </SelectItem>
+              ))
+            )}
+          </SelectContent>
+        </Select>
+        {notionDatabases.length === 0 && (
+          <p className="text-xs text-muted-foreground">
+            Make sure your Notion MCP server is configured and running.
+          </p>
+        )}
+      </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <p className="text-sm text-destructive">{error}</p>
+        </div>
+      )}
+
+      {/* Debug Information */}
+      <div className="p-3 bg-muted/20 border border-border/20 rounded-lg text-xs">
+        <div className="font-medium mb-2">Debug Info:</div>
+        <div>Server ID: {notionServerId || "Not found"}</div>
+        <div>Databases: {notionDatabases.length}</div>
+        <div>Loading: {isLoading ? "Yes" : "No"}</div>
+        <div>Error: {error || "None"}</div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-2"
+          onClick={() => {
+            console.log("Manual debug - fetching databases...");
+            onFetchDatabases();
+          }}
+        >
+          Test Fetch
+        </Button>
+      </div>
+
+      {/* Create Task Section */}
+      {selectedDatabaseId && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium">Create Task</label>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsCreatingTask(!isCreatingTask)}
+            >
+              <Plus className="h-3 w-3 mr-1" />
+              {isCreatingTask ? "Cancel" : "New Task"}
+            </Button>
+          </div>
+
+          {isCreatingTask && (
+            <div className="space-y-3 p-3 border rounded-lg">
+              <Input
+                placeholder="Task title"
+                value={newTaskTitle}
+                onChange={(e) => setNewTaskTitle(e.target.value)}
+              />
+              <Textarea
+                placeholder="Description (optional)"
+                value={newTaskDescription}
+                onChange={(e) => setNewTaskDescription(e.target.value)}
+                rows={2}
+              />
+              <Select
+                value={newTaskPriority}
+                onValueChange={(value: any) => setNewTaskPriority(value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Low">Low Priority</SelectItem>
+                  <SelectItem value="Medium">Medium Priority</SelectItem>
+                  <SelectItem value="High">High Priority</SelectItem>
+                  <SelectItem value="Urgent">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={handleCreateTask}
+                  disabled={!newTaskTitle.trim() || isLoading}
+                >
+                  Create Task
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsCreatingTask(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tasks List */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium">Tasks</label>
+          {selectedDatabaseId && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onRefreshTasks}
+              disabled={isLoading}
+            >
+              <RefreshCw
+                className={cn("h-3 w-3", isLoading && "animate-spin")}
+              />
+            </Button>
+          )}
+        </div>
+
+        {!selectedDatabaseId ? (
+          <div className="text-center text-muted-foreground py-8">
+            <Database className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">Select a database to view tasks</p>
+          </div>
+        ) : notionTasks.length === 0 ? (
+          <div className="text-center text-muted-foreground py-8">
+            <CheckSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No tasks found</p>
+            <p className="text-xs">Create your first task above</p>
+          </div>
+        ) : (
+          notionTasks.map((task) => (
+            <div
+              key={task.id}
+              className="p-3 rounded-lg border bg-background hover:bg-muted/50 transition-colors"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      onClick={() => {
+                        const newStatus =
+                          task.status === "Done" ? "Not Started" : "Done";
+                        handleTaskStatusChange(task.id, newStatus);
+                      }}
+                    >
+                      <CheckSquare
+                        className={cn(
+                          "h-4 w-4",
+                          task.status === "Done"
+                            ? "text-green-500"
+                            : "text-muted-foreground",
+                        )}
+                      />
+                    </Button>
+                    <Badge
+                      variant="outline"
+                      className={cn("text-xs", getStatusColor(task.status))}
+                    >
+                      {task.status}
+                    </Badge>
+                    <Badge
+                      variant="outline"
+                      className={cn("text-xs", getPriorityColor(task.priority))}
+                    >
+                      {task.priority}
+                    </Badge>
+                  </div>
+                  <p
+                    className={cn(
+                      "text-sm font-medium",
+                      task.status === "Done" &&
+                        "line-through text-muted-foreground",
+                    )}
+                  >
+                    {task.title}
+                  </p>
+                  {task.description && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {task.description}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(task.created_at).toLocaleDateString()}
+                    </span>
+                    {task.due_date && (
+                      <span className="text-xs text-muted-foreground">
+                        Due: {new Date(task.due_date).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={() => onImportTask(task.id)}
+                    title="Import to local tasks"
+                  >
+                    <ArrowUp className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    title="Open in Notion"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
   );
 }
