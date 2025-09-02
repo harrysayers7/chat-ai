@@ -21,76 +21,131 @@ import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { Badge } from "../../ui/badge";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
-import { fetcher } from "lib/utils";
-import { handleErrorWithToast } from "../../ui/shared-toast";
-import useSWR from "swr";
-import { ChatThread } from "app-types/chat";
+import { turnKey } from "../utils";
 
-interface ChatHistoryItem {
-  id: string;
-  thread: ChatThread;
+interface ChatTurn {
+  index: number;
+  userMessage: string;
+  assistantMessage: string;
+  displayText: string;
   timestamp: number;
-  preview: string;
-  title: string;
+  isPinned?: boolean;
+  isStarred?: boolean;
 }
 
 interface ChatHistorySidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  onNavigateToThread: (threadId: string) => void;
+  turns: any[];
+  pinned: Record<string, boolean>;
+  starred: Record<string, boolean>;
+  onJumpToChat: (turnIndex: number) => void;
 }
 
 export function ChatHistorySidebar({
   isOpen,
   onClose,
-  onNavigateToThread,
+  turns,
+  pinned,
+  starred,
+  onJumpToChat,
 }: ChatHistorySidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [visibleItemsLimit, setVisibleItemsLimit] = useState(20);
+  const [summaries, setSummaries] = useState<Record<string, string>>({});
+  const [loadingSummaries, setLoadingSummaries] = useState<Set<string>>(
+    new Set(),
+  );
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const _router = useRouter();
 
-  // Fetch chat threads
-  const {
-    data: threadList,
-    isLoading,
-    error,
-  } = useSWR<ChatThread[]>("/api/thread", fetcher, {
-    onError: handleErrorWithToast,
-    fallbackData: [],
-  });
+  // Function to fetch AI summary for a turn
+  const fetchSummary = useCallback(
+    async (turnKey: string, userMessage: string) => {
+      if (summaries[turnKey] || loadingSummaries.has(turnKey)) {
+        return; // Already have summary or currently loading
+      }
 
-  // Process threads into chat history items
+      setLoadingSummaries((prev) => new Set(prev).add(turnKey));
+
+      try {
+        const response = await fetch("/api/summarize", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text: userMessage }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setSummaries((prev) => ({ ...prev, [turnKey]: data.summary }));
+        }
+      } catch (error) {
+        console.error("Failed to fetch summary:", error);
+      } finally {
+        setLoadingSummaries((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(turnKey);
+          return newSet;
+        });
+      }
+    },
+    [summaries, loadingSummaries],
+  );
+
+  // Process turns into chat history items
   const chatHistory = useMemo(() => {
-    if (!threadList) return [];
+    if (!turns) return [];
 
-    const items: ChatHistoryItem[] = threadList.map((thread) => {
-      const timestamp = new Date(
-        thread.lastMessageAt || thread.createdAt,
-      ).getTime();
-      const title = thread.title || "Untitled Chat";
+    const items: ChatTurn[] = turns.map((turn, index) => {
+      const key = turnKey(turn);
+      const timestamp = new Date(turn.timestamp || Date.now()).getTime();
 
-      // Create a preview from the last message or use title
-      let preview = title;
-      if (thread.lastMessage) {
-        preview =
-          thread.lastMessage.length > 50
-            ? thread.lastMessage.substring(0, 50) + "..."
-            : thread.lastMessage;
+      // Create a better display text for the turn
+      let displayText = "User message";
+      const userContent = turn.user?.content || "";
+      const assistantContent = turn.assistant?.content || "";
+
+      if (userContent) {
+        // Use AI summary if available, otherwise show truncated user message
+        if (summaries[key]) {
+          displayText = summaries[key];
+        } else {
+          displayText =
+            userContent.length > 50
+              ? userContent.substring(0, 50) + "..."
+              : userContent;
+        }
       }
 
       return {
-        id: thread.id,
-        thread,
+        index, // This is the original index in the turns array
+        userMessage: userContent || "User message",
+        assistantMessage: assistantContent || "Assistant response",
+        displayText,
         timestamp,
-        preview,
-        title,
+        isPinned: pinned[key] || false,
+        isStarred: starred[key] || false,
       };
     });
 
+    // Sort by timestamp but preserve the original index
     return items.sort((a, b) => b.timestamp - a.timestamp);
-  }, [threadList]);
+  }, [turns, pinned, starred, summaries]);
+
+  // Fetch summaries when sidebar opens
+  useEffect(() => {
+    if (isOpen && turns.length > 0) {
+      // Fetch summaries for the first few turns to start with
+      turns.slice(0, 5).forEach((turn) => {
+        const key = turnKey(turn);
+        const userContent = turn.user?.content || "";
+        if (userContent && !summaries[key] && !loadingSummaries.has(key)) {
+          fetchSummary(key, userContent);
+        }
+      });
+    }
+  }, [isOpen, turns, summaries, loadingSummaries, fetchSummary]);
 
   // Filter chat history based on search
   const filteredHistory = useMemo(() => {
@@ -99,8 +154,8 @@ export function ChatHistorySidebar({
     const query = searchQuery.toLowerCase();
     return chatHistory.filter(
       (item) =>
-        item.title.toLowerCase().includes(query) ||
-        item.preview.toLowerCase().includes(query),
+        item.userMessage.toLowerCase().includes(query) ||
+        item.assistantMessage.toLowerCase().includes(query),
     );
   }, [chatHistory, searchQuery]);
 
@@ -112,10 +167,10 @@ export function ChatHistorySidebar({
     const oneWeek = 7 * oneDay;
 
     const groups = {
-      recent: [] as ChatHistoryItem[],
-      today: [] as ChatHistoryItem[],
-      thisWeek: [] as ChatHistoryItem[],
-      older: [] as ChatHistoryItem[],
+      recent: [] as ChatTurn[],
+      today: [] as ChatTurn[],
+      thisWeek: [] as ChatTurn[],
+      older: [] as ChatTurn[],
     };
 
     filteredHistory.forEach((item) => {
@@ -171,13 +226,14 @@ export function ChatHistorySidebar({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  const handleNavigateToThread = useCallback(
-    (item: ChatHistoryItem) => {
-      // Navigate to the thread
-      onNavigateToThread(item.thread.id);
+  const handleJumpToTurn = useCallback(
+    (item: ChatTurn) => {
+      // The item.index is the original index in the unsorted turns array
+      // We need to pass this directly to onJumpToChat
+      onJumpToChat(item.index);
       onClose();
     },
-    [onNavigateToThread, onClose],
+    [onJumpToChat, onClose],
   );
 
   const handleSearchChange = useCallback(
@@ -196,17 +252,14 @@ export function ChatHistorySidebar({
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 bg-black/20 z-40" onClick={onClose} />
 
       {/* Sidebar Panel */}
       <div
         className={cn(
-          "fixed bottom-0 left-0 z-50 w-80 max-h-[70vh] bg-background/95 backdrop-blur-lg border border-border/30 rounded-t-2xl shadow-xl",
+          "fixed top-0 left-0 z-50 w-80 h-full bg-background border-r border-border/30 shadow-xl",
           "transform transition-all duration-300 ease-out flex flex-col",
-          isOpen ? "translate-y-0" : "translate-y-full",
+          isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         {/* Header */}
@@ -256,15 +309,6 @@ export function ChatHistorySidebar({
           ref={scrollContainerRef}
           className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0"
         >
-          {isLoading && (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin" />
-              <span className="ml-2 text-sm text-muted-foreground">
-                Loading chats...
-              </span>
-            </div>
-          )}
-
           {/* Recent */}
           {groupedHistory.recent.length > 0 && (
             <div>
@@ -275,9 +319,11 @@ export function ChatHistorySidebar({
               <div className="space-y-1">
                 {groupedHistory.recent.map((item) => (
                   <ChatHistoryItem
-                    key={item.id}
+                    key={item.index}
                     item={item}
-                    onNavigate={handleNavigateToThread}
+                    onNavigate={handleJumpToTurn}
+                    loadingSummaries={loadingSummaries}
+                    turns={turns}
                   />
                 ))}
                 {groupedHistory.hasMore.recent && (
@@ -303,9 +349,11 @@ export function ChatHistorySidebar({
               <div className="space-y-1">
                 {groupedHistory.today.map((item) => (
                   <ChatHistoryItem
-                    key={item.id}
+                    key={item.index}
                     item={item}
-                    onNavigate={handleNavigateToThread}
+                    onNavigate={handleJumpToTurn}
+                    loadingSummaries={loadingSummaries}
+                    turns={turns}
                   />
                 ))}
                 {groupedHistory.hasMore.today && (
@@ -331,9 +379,11 @@ export function ChatHistorySidebar({
               <div className="space-y-1">
                 {groupedHistory.thisWeek.map((item) => (
                   <ChatHistoryItem
-                    key={item.id}
+                    key={item.index}
                     item={item}
-                    onNavigate={handleNavigateToThread}
+                    onNavigate={handleJumpToTurn}
+                    loadingSummaries={loadingSummaries}
+                    turns={turns}
                   />
                 ))}
                 {groupedHistory.hasMore.thisWeek && (
@@ -359,9 +409,11 @@ export function ChatHistorySidebar({
               <div className="space-y-1">
                 {groupedHistory.older.map((item) => (
                   <ChatHistoryItem
-                    key={item.id}
+                    key={item.index}
                     item={item}
-                    onNavigate={handleNavigateToThread}
+                    onNavigate={handleJumpToTurn}
+                    loadingSummaries={loadingSummaries}
+                    turns={turns}
                   />
                 ))}
                 {groupedHistory.hasMore.older && (
@@ -392,9 +444,12 @@ export function ChatHistorySidebar({
 
         {/* Footer */}
         <div className="p-4 border-t border-border/20 text-xs text-muted-foreground text-center">
-          Press{" "}
-          <kbd className="px-1 py-0.5 bg-muted rounded text-xs">Ctrl+J</kbd> to
-          toggle
+          <div>
+            Press{" "}
+            <kbd className="px-1 py-0.5 bg-muted rounded text-xs">Ctrl+J</kbd>{" "}
+            to toggle
+          </div>
+          <div className="mt-1">Click to jump to conversation turns</div>
         </div>
       </div>
     </>
@@ -405,41 +460,103 @@ export function ChatHistorySidebar({
 function ChatHistoryItem({
   item,
   onNavigate,
+  loadingSummaries,
+  turns,
 }: {
-  item: ChatHistoryItem;
-  onNavigate: (item: ChatHistoryItem) => void;
+  item: ChatTurn;
+  onNavigate: (item: ChatTurn) => void;
+  loadingSummaries: Set<string>;
+  turns: any[];
 }) {
+  const [showPreview, setShowPreview] = useState(false);
+
   const handleNavigate = useCallback(() => {
     onNavigate(item);
   }, [item, onNavigate]);
 
+  const handleMouseEnter = useCallback(() => {
+    setShowPreview(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setShowPreview(false);
+  }, []);
+
   return (
-    <div
-      onClick={handleNavigate}
-      className="group flex items-center gap-3 p-2 rounded-lg hover:bg-background/60 transition-colors cursor-pointer"
-    >
-      {/* Icon */}
-      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted/40 flex items-center justify-center">
-        <MessageSquare className="w-4 h-4 text-muted-foreground" />
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-xs font-medium text-muted-foreground">
-            Chat
-          </span>
+    <div className="relative">
+      <div
+        onClick={handleNavigate}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className="group flex items-center gap-3 p-2 rounded-lg transition-colors cursor-pointer hover:bg-background/60"
+      >
+        {/* Icon */}
+        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted/40 flex items-center justify-center">
+          <MessageSquare className="w-4 h-4 text-muted-foreground" />
         </div>
-        <p className="text-sm text-foreground truncate font-medium">
-          {item.title}
-        </p>
-        <p className="text-xs text-muted-foreground truncate">{item.preview}</p>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-medium text-muted-foreground">
+              Turn {item.index + 1}
+            </span>
+            {item.isPinned && <Pin className="w-3 h-3 text-yellow-500" />}
+            {item.isStarred && <Star className="w-3 h-3 text-yellow-500" />}
+          </div>
+          <p className="text-sm text-foreground truncate font-medium">
+            {item.displayText}
+            {loadingSummaries.has(turnKey(turns[item.index])) && (
+              <span className="ml-2 text-xs text-muted-foreground">
+                Generating summary...
+              </span>
+            )}
+          </p>
+          <p className="text-xs text-muted-foreground truncate">
+            {item.assistantMessage.length > 50
+              ? item.assistantMessage.substring(0, 50) + "..."
+              : item.assistantMessage}
+          </p>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <ChevronRight className="w-3 h-3 text-muted-foreground" />
+        </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <ChevronRight className="w-3 h-3 text-muted-foreground" />
-      </div>
+      {/* Preview Tooltip */}
+      {showPreview && (
+        <div className="absolute right-full top-0 mr-2 w-80 bg-background border border-border/30 rounded-lg shadow-xl z-50 p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <MessageSquare className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium">Turn {item.index + 1}</span>
+          </div>
+
+          <div className="space-y-2">
+            <div>
+              <div className="text-xs font-medium text-muted-foreground mb-1">
+                User:
+              </div>
+              <div className="text-sm text-foreground">
+                {item.userMessage.length > 100
+                  ? item.userMessage.substring(0, 100) + "..."
+                  : item.userMessage}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs font-medium text-muted-foreground mb-1">
+                Assistant:
+              </div>
+              <div className="text-sm text-foreground">
+                {item.assistantMessage.length > 100
+                  ? item.assistantMessage.substring(0, 100) + "..."
+                  : item.assistantMessage}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

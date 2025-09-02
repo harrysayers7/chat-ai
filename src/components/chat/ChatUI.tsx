@@ -37,7 +37,7 @@ export function ChatUI({
   isLoading = false,
   onPoxyToolCall,
 }: ChatUIProps) {
-  const router = useRouter();
+  const _router = useRouter();
 
   // AI Explanation functionality
   const { isPopupVisible, popupPosition, selectedText, hidePopup } =
@@ -150,59 +150,6 @@ export function ChatUI({
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  // Jump to specific chat
-  const _handleJumpToChat = useCallback((turnIndex: number) => {
-    console.log("ChatUI handleJumpToChat called with turnIndex:", turnIndex);
-
-    // Find the target turn element using the refs
-    const targetElement = refs.current[turnIndex];
-
-    if (targetElement) {
-      console.log("Found target element for turn index:", turnIndex);
-
-      // Scroll the target element into view
-      targetElement.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-        inline: "nearest",
-      });
-
-      // Optional: Add a visual highlight effect
-      targetElement.style.transition = "background-color 0.3s ease";
-      targetElement.style.backgroundColor = "rgba(59, 130, 246, 0.1)"; // Light blue highlight
-
-      // Remove highlight after a delay
-      setTimeout(() => {
-        targetElement.style.backgroundColor = "";
-      }, 2000);
-    } else {
-      console.log("Could not find target element for turn index:", turnIndex);
-
-      // Fallback: scroll to top if element not found
-      setTimeout(() => {
-        const container =
-          document.querySelector(".flex-1.overflow-y-auto") ||
-          document
-            .querySelector('[data-master-collapse="trigger"]')
-            ?.closest(".flex-1.overflow-y-auto") ||
-          document.querySelector("main") ||
-          document.querySelector("body");
-
-        if (container) {
-          container.scrollTo({
-            top: 0,
-            behavior: "smooth",
-          });
-        } else {
-          window.scrollTo({
-            top: 0,
-            behavior: "smooth",
-          });
-        }
-      }, 100);
-    }
   }, []);
 
   // Convert messages to turns format
@@ -332,6 +279,132 @@ export function ChatUI({
 
     return filtered;
   }, [turns, starred, showOnlyStarred, searchQuery, contentFilters, dateRange]);
+
+  // Jump to specific chat
+  const handleJumpToChat = useCallback(
+    (originalTurnIndex: number) => {
+      console.log(
+        "ChatUI handleJumpToChat called with originalTurnIndex:",
+        originalTurnIndex,
+      );
+
+      // Find the turn in the original turns array
+      const targetTurn = turns[originalTurnIndex];
+      if (!targetTurn) {
+        console.log("Could not find turn at index:", originalTurnIndex);
+        return;
+      }
+
+      // Find the index of this turn in the filteredTurns array
+      const filteredIndex = filteredTurns.findIndex(
+        (turn) => turn === targetTurn,
+      );
+      if (filteredIndex === -1) {
+        console.log("Turn not found in filteredTurns array");
+        return;
+      }
+
+      console.log("Found turn in filteredTurns at index:", filteredIndex);
+
+      // First, ensure the "Older Chats" section is expanded
+      const masterCollapseTrigger = document.querySelector(
+        '[data-master-collapse="trigger"]',
+      ) as HTMLElement;
+      if (masterCollapseTrigger) {
+        const isExpanded =
+          masterCollapseTrigger.getAttribute("aria-expanded") === "true";
+        if (!isExpanded) {
+          console.log("Expanding Older Chats section");
+          masterCollapseTrigger.click();
+
+          // Wait longer for the section to fully expand and render
+          setTimeout(() => {
+            performJumpToTurn(filteredIndex);
+          }, 500); // Increased delay to ensure DOM is fully rendered
+          return;
+        }
+      }
+
+      // If already expanded, proceed immediately
+      performJumpToTurn(filteredIndex);
+
+      function performJumpToTurn(filteredIndex: number) {
+        // Try to find the target element multiple times with increasing delays
+        const findAndJump = (attempt: number = 0) => {
+          const targetElement = refs.current[filteredIndex];
+
+          if (targetElement) {
+            console.log(
+              "Found target element for filtered index:",
+              filteredIndex,
+            );
+
+            // Find the collapsible trigger for this specific turn
+            const turnTrigger = targetElement.querySelector(
+              '[data-collapsible="trigger"]',
+            ) as HTMLElement;
+            if (turnTrigger) {
+              const isTurnExpanded =
+                turnTrigger.getAttribute("aria-expanded") === "true";
+              if (!isTurnExpanded) {
+                console.log("Expanding turn:", filteredIndex);
+                turnTrigger.click();
+              }
+            }
+
+            // Wait for the turn to expand, then scroll to it
+            setTimeout(() => {
+              targetElement.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+                inline: "nearest",
+              });
+
+              // Add visual highlight effect
+              targetElement.style.transition = "background-color 0.3s ease";
+              targetElement.style.backgroundColor = "rgba(59, 130, 246, 0.1)";
+
+              // Remove highlight after a delay
+              setTimeout(() => {
+                targetElement.style.backgroundColor = "";
+              }, 2000);
+            }, 100);
+          } else if (attempt < 5) {
+            // Retry finding the element with increasing delays
+            console.log(
+              `Attempt ${attempt + 1}: Could not find target element, retrying...`,
+            );
+            setTimeout(() => findAndJump(attempt + 1), 200 * (attempt + 1));
+          } else {
+            console.log(
+              "Could not find target element after multiple attempts",
+            );
+
+            // Fallback: scroll to top
+            const container =
+              document.querySelector(".flex-1.overflow-y-auto") ||
+              document.querySelector("main") ||
+              document.querySelector("body");
+
+            if (container) {
+              container.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              });
+            } else {
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              });
+            }
+          }
+        };
+
+        findAndJump();
+      }
+    },
+    [turns, filteredTurns],
+  );
 
   const shouldOpen = useCallback(
     (idx: number, key: string) => {
@@ -582,9 +655,10 @@ export function ChatUI({
       <ChatHistorySidebar
         isOpen={isChatHistoryOpen}
         onClose={() => setIsChatHistoryOpen(false)}
-        onNavigateToThread={(threadId: string) => {
-          router.push(`/chat/${threadId}`);
-        }}
+        turns={turns}
+        pinned={pinned}
+        starred={starred}
+        onJumpToChat={handleJumpToChat}
       />
 
       {/* Chat History Trigger Button */}
