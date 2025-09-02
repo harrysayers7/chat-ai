@@ -5,13 +5,13 @@ alwaysApply: false
 ---
 
 # 🤖 Auto Patterns Summary
-Generated: 2025-09-01T20:21:44.549Z
+Generated: 2025-09-01T23:08:57.253Z
 
 
 ## ai-providers
 - **anthropic** 
   - `src/app/api/ai-explanation/route.ts:27`
-  - `src/app/api/chat/route.ts:193`
+  - `src/app/api/chat/route.ts:199`
   - `src/app/api/test-chat/route.ts:17`
   - `src/components/prompt-input.tsx:417`
   - `src/components/select-model.tsx:148`
@@ -71,10 +71,10 @@ Generated: 2025-09-01T20:21:44.549Z
   - `src/app/api/chat/actions.ts:131`
   - `src/app/api/chat/actions.ts:210`
   - `src/app/api/chat/openai-realtime/route.ts:25`
-  - `src/app/api/chat/openai-realtime/route.ts:96`
-  - `src/app/api/chat/route.ts:193`
-  - `src/app/api/chat/route.ts:237`
-  - `src/app/api/chat/temporary/route.ts:34`
+  - `src/app/api/chat/openai-realtime/route.ts:99`
+  - `src/app/api/chat/route.ts:199`
+  - `src/app/api/chat/route.ts:243`
+  - `src/app/api/chat/temporary/route.ts:35`
   - `src/app/api/chat/title/route.ts:44`
   - `src/app/api/test-chat/route.ts:14`
   - `src/app/api/test-chat/route.ts:15`
@@ -153,7 +153,7 @@ Generated: 2025-09-01T20:21:44.549Z
   - `src/app/api/bookmark/route.ts:55`
   - `src/app/api/chat/openai-realtime/route.ts:28`
   - `src/app/api/chat/route.ts:57`
-  - …and 34 more
+  - …and 35 more
 - **redis** 
   - `src/lib/cache/redis-cache.ts:1`
   - `src/lib/cache/redis-cache.ts:6`
@@ -251,7 +251,7 @@ Generated: 2025-09-01T20:21:44.549Z
   - `src/app/api/mcp/route.ts:1`
   - `src/app/api/mcp/server-customizations/[server]/route.ts:1`
   - `src/app/api/mcp/tool-customizations/[server]/[tool]/route.ts:1`
-  - …and 11 more
+  - …and 12 more
 - **possible-secret** — Potential secret in code
   - `src/lib/ai/azure-openai-compatible.test.ts:21`
   - `src/lib/ai/azure-openai-compatible.test.ts:30`
@@ -301,7 +301,7 @@ Generated: 2025-09-01T20:21:44.549Z
   - `src/components/workflow/edit-workflow-popup.tsx:63`
   - `src/components/workflow/edit-workflow-popup.tsx:64`
   - `src/components/workflow/edit-workflow-popup.tsx:66`
-  - …and 182 more
+  - …and 183 more
 
 ---
 ### Cursor Guardrails (suggestions)

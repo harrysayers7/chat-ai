@@ -81,6 +81,8 @@ export function CurrentMessageSection({
     <div className="border-t border-slate-600/40 pt-4 space-y-6">
       <div
         key={turnKey}
+        data-turn-idx={idx}
+        data-turn-key={turnKey}
         ref={(el) => {
           if (el) refs.current[idx] = el;
         }}

@@ -7,6 +7,7 @@ import React, {
   useCallback,
   useState,
 } from "react";
+import { useRouter } from "next/navigation";
 import { FloatingControls } from "./components/FloatingControls";
 import { PinnedChatsSection } from "./components/PinnedChatsSection";
 import { OlderChatsSection } from "./components/OlderChatsSection";
@@ -20,6 +21,8 @@ import { AnimatedFeedback } from "./components/AnimatedFeedback";
 import { SmoothTransition } from "./components/SmoothTransition";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { AIExplanationPopup } from "./components/AIExplanationPopup";
+import { ChatHistorySidebar } from "./components/ChatHistorySidebar";
+import { ChatHistoryTrigger } from "./components/ChatHistoryTrigger";
 import { useAIExplanation } from "./hooks/useAIExplanation";
 import {
   convertMessagesToTurns,
@@ -34,6 +37,8 @@ export function ChatUI({
   isLoading = false,
   onPoxyToolCall,
 }: ChatUIProps) {
+  const router = useRouter();
+
   // AI Explanation functionality
   const { isPopupVisible, popupPosition, selectedText, hidePopup } =
     useAIExplanation();
@@ -111,6 +116,9 @@ export function ChatUI({
     "success" | "error" | "info"
   >("success");
 
+  // Chat history sidebar state
+  const [isChatHistoryOpen, setIsChatHistoryOpen] = React.useState(false);
+
   // Scroll to bottom only when new messages are added (not on every mount)
   const hasScrolledToBottom = useRef(false);
 
@@ -130,6 +138,72 @@ export function ChatUI({
       return () => clearTimeout(timer);
     }
   }, [messages.length]);
+
+  // Keyboard shortcut for chat history
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === "j") {
+        e.preventDefault();
+        setIsChatHistoryOpen((prev) => !prev);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Jump to specific chat
+  const _handleJumpToChat = useCallback((turnIndex: number) => {
+    console.log("ChatUI handleJumpToChat called with turnIndex:", turnIndex);
+
+    // Find the target turn element using the refs
+    const targetElement = refs.current[turnIndex];
+
+    if (targetElement) {
+      console.log("Found target element for turn index:", turnIndex);
+
+      // Scroll the target element into view
+      targetElement.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "nearest",
+      });
+
+      // Optional: Add a visual highlight effect
+      targetElement.style.transition = "background-color 0.3s ease";
+      targetElement.style.backgroundColor = "rgba(59, 130, 246, 0.1)"; // Light blue highlight
+
+      // Remove highlight after a delay
+      setTimeout(() => {
+        targetElement.style.backgroundColor = "";
+      }, 2000);
+    } else {
+      console.log("Could not find target element for turn index:", turnIndex);
+
+      // Fallback: scroll to top if element not found
+      setTimeout(() => {
+        const container =
+          document.querySelector(".flex-1.overflow-y-auto") ||
+          document
+            .querySelector('[data-master-collapse="trigger"]')
+            ?.closest(".flex-1.overflow-y-auto") ||
+          document.querySelector("main") ||
+          document.querySelector("body");
+
+        if (container) {
+          container.scrollTo({
+            top: 0,
+            behavior: "smooth",
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth",
+          });
+        }
+      }, 100);
+    }
+  }, []);
 
   // Convert messages to turns format
   const turns = useMemo(() => convertMessagesToTurns(messages), [messages]);
@@ -294,20 +368,35 @@ export function ChatUI({
   }, [filteredTurns, pinned]);
 
   const collapseAll = useCallback(() => {
+    console.log("collapseAll called, refs count:", refs.current.length);
     // Use requestAnimationFrame for smoother performance
     requestAnimationFrame(() => {
       refs.current.forEach((el, idx) => {
+        if (!el) {
+          console.log("No element at index:", idx);
+          return;
+        }
+
         // Skip pinned chats - they should always stay expanded
         const key = filteredTurns[idx]
           ? turnKey(filteredTurns[idx])
           : String(idx);
-        if (pinned[key]) return;
+        if (pinned[key]) {
+          console.log("Skipping pinned chat:", key);
+          return;
+        }
 
         const trigger = el?.querySelector<HTMLElement>(
           '[data-collapsible="trigger"]',
         );
-        if (trigger && trigger.getAttribute("aria-expanded") === "true") {
-          trigger.click();
+        console.log("Found trigger for index", idx, ":", !!trigger);
+        if (trigger) {
+          const isExpanded = trigger.getAttribute("aria-expanded") === "true";
+          console.log("Turn", idx, "is expanded:", isExpanded);
+          if (isExpanded) {
+            console.log("Collapsing turn:", idx, key);
+            trigger.click();
+          }
         }
       });
     });
@@ -487,6 +576,22 @@ export function ChatUI({
         selectedText={selectedText}
         onClose={hidePopup}
         onExplain={handleExplain}
+      />
+
+      {/* Chat History Sidebar */}
+      <ChatHistorySidebar
+        isOpen={isChatHistoryOpen}
+        onClose={() => setIsChatHistoryOpen(false)}
+        onNavigateToThread={(threadId: string) => {
+          router.push(`/chat/${threadId}`);
+        }}
+      />
+
+      {/* Chat History Trigger Button */}
+      <ChatHistoryTrigger
+        isOpen={isChatHistoryOpen}
+        onToggle={() => setIsChatHistoryOpen((prev) => !prev)}
+        totalChats={turns.length}
       />
     </div>
   );

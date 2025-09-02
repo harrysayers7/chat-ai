@@ -111,7 +111,7 @@ export const TurnComponent = memo(function TurnComponent({
         className="overflow-hidden group mb-3"
       >
         <div className="w-full group">
-          <div className="flex items-center justify-between px-3 py-1.5 bg-background/40 rounded-2xl border border-border/30 hover:bg-background/50 transition-all duration-200 shadow-sm">
+          <div className="flex items-center justify-between px-3 py-0.5 bg-background/40 rounded-2xl border border-border/30 hover:bg-background/50 transition-all duration-200 shadow-sm">
             <div className="flex items-center gap-2 min-w-0 flex-1">
               {showCheckbox && onToggleSelect && (
                 <TurnCheckbox
@@ -133,19 +133,19 @@ export const TurnComponent = memo(function TurnComponent({
             <div className="flex items-center gap-1 shrink-0">
               <button
                 onClick={() => onTogglePin(turnKey)}
-                className={`p-2 rounded-md transition-all duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                className={`p-1 rounded-md transition-all duration-200 min-w-[32px] min-h-[32px] flex items-center justify-center ${
                   isPinned
                     ? "bg-red-500/20 hover:bg-red-500/30 active:bg-red-500/40 text-red-400 border border-red-400/30 hover:border-red-400/50"
                     : "bg-background/40 hover:bg-background/60 active:bg-background/70 text-muted-foreground border border-border/30 hover:border-border/50"
                 }`}
                 title={isPinned ? "Unpin" : "Pin"}
               >
-                <Pin className="w-3 h-3" />
+                <Pin className="w-2.5 h-2.5" />
               </button>
 
               <button
                 onClick={() => onToggleStar(turnKey)}
-                className={`p-2 rounded-md transition-all duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                className={`p-1 rounded-md transition-all duration-200 min-w-[32px] min-h-[32px] flex items-center justify-center ${
                   isStarred
                     ? "bg-yellow-500/20 hover:bg-yellow-500/30 active:bg-yellow-500/40 text-yellow-400 border border-yellow-400/30 hover:border-yellow-400/50"
                     : "bg-background/40 hover:bg-background/60 active:bg-background/70 text-muted-foreground border border-border/30 hover:border-border/50"
@@ -153,7 +153,7 @@ export const TurnComponent = memo(function TurnComponent({
                 title={isStarred ? "Unstar" : "Star"}
               >
                 <svg
-                  className="w-2.5 h-2.5"
+                  className="w-2 h-2"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
@@ -165,9 +165,9 @@ export const TurnComponent = memo(function TurnComponent({
 
               <CollapsibleTrigger
                 data-collapsible="trigger"
-                className="flex items-center justify-center p-2 rounded-md transition-all duration-200 min-w-[44px] min-h-[44px] bg-background/40 hover:bg-background/60 active:bg-background/70 border border-border/30 hover:border-border/50"
+                className="flex items-center justify-center p-1 rounded-md transition-all duration-200 min-w-[32px] min-h-[32px] bg-background/40 hover:bg-background/60 active:bg-background/70 border border-border/30 hover:border-border/50"
               >
-                <ChevronUp className="w-3 h-3 text-slate-400 transform transition-transform duration-200 group-data-[state=closed]:rotate-180" />
+                <ChevronUp className="w-2.5 h-2.5 text-slate-400 transform transition-transform duration-200 group-data-[state=closed]:rotate-180" />
               </CollapsibleTrigger>
             </div>
           </div>

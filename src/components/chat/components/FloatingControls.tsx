@@ -22,7 +22,6 @@ export function FloatingControls({
   const [isVisible, setIsVisible] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
-
   // Auto-hide controls when scrolling
   useEffect(() => {
     const handleScroll = () => {
@@ -53,30 +52,10 @@ export function FloatingControls({
   }, []);
 
   const handleToggleAll = () => {
-    // Check if most messages are collapsed or expanded
-    const expandedCount = filteredTurns.filter((_, idx) => {
-      const el = document.querySelector(`[data-turn-idx="${idx}"]`);
-      const trigger = el?.querySelector<HTMLElement>(
-        '[data-collapsible="trigger"]',
-      );
-      return trigger?.getAttribute("aria-expanded") === "true";
-    }).length;
-
-    console.log(
-      "Total turns:",
-      filteredTurns.length,
-      "Expanded:",
-      expandedCount,
-    );
-
-    // If more than half are expanded, collapse all; otherwise expand all
-    if (expandedCount > filteredTurns.length / 2) {
-      console.log("Collapsing all...");
-      onCollapseAll();
-    } else {
-      console.log("Expanding all...");
-      onExpandAll();
-    }
+    // Simple approach: always collapse all for now
+    // This avoids the complexity of state tracking and DOM queries
+    console.log("Toggle all clicked, calling onCollapseAll");
+    onCollapseAll();
   };
 
   const handleToggleOlderChats = () => {

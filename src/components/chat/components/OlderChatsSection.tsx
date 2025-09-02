@@ -49,6 +49,7 @@ export function OlderChatsSection({
                 <div
                   key={key}
                   data-turn-idx={idx}
+                  data-turn-key={key}
                   ref={(el) => {
                     if (el) refs.current[idx] = el;
                   }}
