@@ -96,6 +96,13 @@ const toggleRightSidebarShortcut: Shortcut = {
   },
 };
 
+const stopGenerationShortcut: Shortcut = {
+  description: "stopGeneration",
+  shortcut: {
+    key: "Escape",
+  },
+};
+
 export const Shortcuts = {
   openNewChat: openNewChatShortcut,
   openChatPreferences: openChatPreferencesShortcut,
@@ -107,6 +114,7 @@ export const Shortcuts = {
   deleteThread: deleteThreadShortcut,
   toolMode: toolModeShortcut,
   openShortcutsPopup: openShortcutsPopupShortcut,
+  stopGeneration: stopGenerationShortcut,
 };
 
 export const isShortcutEvent = (

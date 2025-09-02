@@ -46,6 +46,7 @@ import { useGenerateThreadTitle } from "@/hooks/queries/use-generate-thread-titl
 import dynamic from "next/dynamic";
 import { useMounted } from "@/hooks/use-mounted";
 import { getStorageManager } from "lib/browser-stroage";
+import { isShortcutEvent, Shortcuts } from "lib/keyboard-shortcuts";
 import { AnimatePresence, motion } from "framer-motion";
 import { PromptLibrarySidePanel } from "./prompt-library-side-panel";
 import { PromptEditor } from "./prompt-editor";
@@ -159,7 +160,7 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
     },
     sendExtraMessageFields: true,
     generateId: generateUUID,
-    experimental_throttle: 100,
+    experimental_throttle: 16, // 60fps instead of 10fps
     onFinish() {
       const messages = latestRef.current.messages;
       const prevThread = latestRef.current.threadList.find(
@@ -304,9 +305,16 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
     }
   }, []);
 
-  const handleKeyDown = useCallback((_e: KeyboardEvent) => {
-    // Handle keyboard shortcuts here if needed
-  }, []);
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    const isStopEvent = isShortcutEvent(e, Shortcuts.stopGeneration);
+    
+    if (isStopEvent && (isLoading || isPendingToolCall)) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      stop();
+    }
+  }, [isLoading, isPendingToolCall, stop]);
 
   const [_isScrollingToBottom, setIsScrollingToBottom] = useState(false);
 

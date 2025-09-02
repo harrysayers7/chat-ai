@@ -65,7 +65,7 @@ export function ChatBotTemporary() {
     stop,
   } = useChat({
     api: "/api/chat/temporary",
-    experimental_throttle: 100,
+    experimental_throttle: 16, // 60fps instead of 10fps
     body: {
       chatModel: temporaryChat.chatModel,
       instructions: temporaryChat.instructions,
@@ -119,12 +119,17 @@ export function ChatBotTemporary() {
         e.stopPropagation();
         e.stopImmediatePropagation();
         setIsInstructionsOpen((prev) => !prev);
+      } else if (isShortcutEvent(e, Shortcuts.stopGeneration) && isLoading) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        stop();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [temporaryChat.isOpen]);
+  }, [temporaryChat.isOpen, isLoading, stop]);
 
   return (
     <Drawer

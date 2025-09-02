@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       messages,
       maxSteps: 10,
       experimental_continueSteps: true,
-      experimental_transform: smoothStream({ chunking: "word" }),
+      experimental_transform: smoothStream({ chunking: "sentence" }), // Better for long code blocks
     }).toDataStreamResponse();
   } catch (error: any) {
     logger.error(error);
