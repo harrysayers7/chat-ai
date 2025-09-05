@@ -171,3 +171,32 @@ GitHub MCP Server running on stdio
 [better-chatbot] ℹ Chat API:  model: openai/gpt-4.1-mini
 [better-chatbot] ⚙ Chat API:  usage input: 15333, usage output: 22, usage total: 15355
  POST /api/chat 200 in 2586ms
+ ✓ Compiled in 380ms
+ GET /api/auth/get-session 200 in 307ms
+ GET /api/thread 200 in 330ms
+ GET /api/auth/get-session 200 in 180ms
+ GET /api/thread 200 in 187ms
+ GET /api/auth/get-session 200 in 130ms
+ GET /api/workflow/tools 200 in 33ms
+ GET /api/thread 200 in 116ms
+ GET /api/auth/get-session 200 in 143ms
+ GET /api/auth/get-session 200 in 215ms
+ GET /api/auth/get-session 200 in 108ms
+ GET /api/thread 200 in 114ms
+ GET /chat/d1d72e9b-dad4-4c76-83ee-583329ee10f3 200 in 721ms
+ GET /api/mcp/list 200 in 66ms
+ GET /api/chat/models 200 in 65ms
+ GET /api/workflow/tools 200 in 66ms
+[better-chatbot] ℹ Using MemoryCache for development
+[better-chatbot] ℹ [noti] MCP Client notion-mcp-server:  Disconnecting from MCP server
+[better-chatbot] ℹ [gith] MCP Client github-mcp:  Disconnecting from MCP server
+ POST /api/summarize 200 in 1118ms
+ POST /api/summarize 200 in 1140ms
+ POST /api/summarize 200 in 1753ms
+ POST /api/summarize 200 in 1799ms
+ POST /api/summarize 200 in 2253ms
+ GET /api/auth/get-session 200 in 1527ms
+ GET /api/thread 200 in 1528ms
+ GET /api/auth/get-session 200 in 87ms
+ GET /api/auth/get-session 200 in 77ms
+ GET /api/auth/get-session 200 in 97ms
