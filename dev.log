@@ -1,0 +1,173 @@
+
+> better-chatbot@1.20.2 dev /Users/harrysayers/GitHub Repos/chat-ai
+> next dev --turbopack -p 3030
+
+   ▲ Next.js 15.3.2 (Turbopack)
+   - Local:        http://localhost:3030
+   - Network:      http://192.168.68.58:3030
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ○ Compiling instrumentation Node.js ...
+ ✓ Compiled instrumentation Node.js in 756ms
+ ✓ Compiled instrumentation Edge in 29ms
+ ✓ Compiled middleware in 204ms
+⏳ Running PostgreSQL migrations...
+✅ PostgreSQL migrations completed in 127 ms
+[better-chatbot] ℹ [ef90] MCP Manager:  Initializing MCP clients manager
+
+[better-chatbot]  ERROR  [gpt-] MCP Client gpt-researcher:  spawn python ENOENT
+
+    at ChildProcess._handle.onexit (node:internal/child_process:286:19)
+    at onErrorNT (node:internal/child_process:484:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+
+node:internal/modules/cjs/loader:1413
+  throw err;
+  ^
+
+Error: Cannot find module '/Users/harrysayers/GitHub Repos/chat-ai/custom-mcp-server/memory-server.js'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1410:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1051:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1056:22)
+    at Module._load (node:internal/modules/cjs/loader:1219:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:238:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v24.7.0
+
+[better-chatbot]  ERROR  [memo] MCP Client memory-server:  MCP error -32000: Connection closed
+
+    at Client._onclose (/Users/harrysayers/GitHub%20Repos/chat-ai/.next/server/chunks/05d33_@modelcontextprotocol_sdk_dist_esm_33cb0ea6._.js:1119:23)
+    at _transport.onclose (/Users/harrysayers/GitHub%20Repos/chat-ai/.next/server/chunks/05d33_@modelcontextprotocol_sdk_dist_esm_33cb0ea6._.js:1089:18)
+    at ChildProcess.eval (/Users/harrysayers/GitHub%20Repos/chat-ai/.next/server/chunks/05d33_@modelcontextprotocol_sdk_dist_esm_33cb0ea6._.js:1870:77)
+    at ChildProcess.emit (node:events:508:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at Socket.<anonymous> (node:internal/child_process:457:11)
+    at Socket.emit (node:events:508:28)
+    at Pipe.<anonymous> (node:net:346:12)
+
+Notion MCP server running on stdio
+[better-chatbot] ℹ [noti] MCP Client notion-mcp-server:  Connected to MCP server in 0.16s
+[better-chatbot] ℹ [noti] MCP Client notion-mcp-server:  Updating tool info
+npm warn Unknown env config "verify-deps-before-run". This will stop working in the next major version of npm.
+GitHub MCP Server running on stdio
+[better-chatbot] ℹ [gith] MCP Client github-mcp:  Connected to MCP server in 3.94s
+[better-chatbot] ℹ [gith] MCP Client github-mcp:  Updating tool info
+ ✓ Ready in 6.6s
+ ○ Compiling / ...
+ ✓ Compiled / in 9.1s
+[better-chatbot] ℹ Using MemoryCache for development
+ HEAD / 200 in 9882ms
+ ○ Compiling /chat/[thread] ...
+ ✓ Compiled /chat/[thread] in 9s
+[better-chatbot] ℹ Using MemoryCache for development
+ GET /chat/db0aedab-0246-48b6-8747-2b36fc86db4a 200 in 10641ms
+ ○ Compiling /api/mcp/list ...
+ GET /api/chat/models 200 in 3228ms
+ GET /api/mcp/list 200 in 6415ms
+ ✓ Compiled /api/mcp/list in 7.4s
+ GET /api/workflow/tools 200 in 5145ms
+ GET /api/auth/get-session 200 in 7399ms
+ GET /api/thread 200 in 7545ms
+ GET /api/archive 200 in 7564ms
+ GET /api/auth/get-session 200 in 214ms
+ GET /api/auth/get-session 200 in 28ms
+ ✓ Compiled /favicon.ico in 454ms
+ GET /favicon.ico?favicon.5e5ed972.ico 200 in 807ms
+ ✓ Compiled in 504ms
+ ✓ Compiled /chat/[thread] in 59ms
+ GET /chat/db0aedab-0246-48b6-8747-2b36fc86db4a 200 in 565ms
+ GET /chat/db0aedab-0246-48b6-8747-2b36fc86db4a 200 in 241ms
+ GET /api/auth/get-session 200 in 148ms
+ GET /api/mcp/list 200 in 130ms
+ GET /api/thread 200 in 135ms
+ GET /api/archive 200 in 143ms
+ GET /api/auth/get-session 200 in 54ms
+ GET /favicon.ico?favicon.5e5ed972.ico 200 in 336ms
+[better-chatbot] ℹ Using MemoryCache for development
+ GET /api/workflow/tools 200 in 68ms
+ GET /api/auth/get-session 200 in 61ms
+ GET /chat/550e8400-e29b-41d4-a716-446655440001 200 in 169ms
+[better-chatbot] ℹ Using MemoryCache for development
+ GET /api/mcp/list 200 in 49ms
+ GET /api/auth/get-session 200 in 64ms
+ GET /api/workflow/tools 200 in 67ms
+ GET /chat/3f3880a7-40b8-4a84-8c92-026eb6fe90e2 200 in 89ms
+ GET /api/mcp/list 200 in 72ms
+ GET /api/workflow/tools 200 in 79ms
+[better-chatbot] ℹ Using MemoryCache for development
+ GET /api/auth/get-session 200 in 151ms
+ GET /api/thread 200 in 155ms
+ ○ Compiling /api/summarize ...
+ ✓ Compiled /api/summarize in 992ms
+ POST /api/summarize 200 in 2499ms
+ POST /api/summarize 200 in 2766ms
+ POST /api/summarize 200 in 3019ms
+ GET /api/auth/get-session 200 in 135ms
+ GET /api/thread 200 in 142ms
+ GET /api/auth/get-session 200 in 91ms
+ ○ Compiling /api/agent ...
+ ✓ Compiled /api/agent in 1228ms
+ GET /api/agent?filters=mine%2Cbookmarked&limit=50 200 in 1303ms
+ GET /api/auth/get-session 200 in 325ms
+ GET /api/thread 200 in 326ms
+ GET /api/auth/get-session 200 in 95ms
+ GET /api/auth/get-session 200 in 259ms
+ GET /api/thread 200 in 283ms
+ GET /api/auth/get-session 200 in 158ms
+ GET /api/thread 200 in 158ms
+ GET /api/auth/get-session 200 in 113ms
+ GET /api/auth/get-session 200 in 225ms
+ GET /api/thread 200 in 229ms
+ GET /api/auth/get-session 200 in 269ms
+ GET /api/thread 200 in 328ms
+ ○ Compiling /api/chat ...
+ ✓ Compiled /api/chat in 1494ms
+[better-chatbot] ℹ Chat API:  mcp-server count: 4, mcp-tools count :30
+[better-chatbot] ℹ Chat API:  tool mode: auto, mentions: 0, thinking: false
+[better-chatbot] ℹ Chat API:  allowedMcpTools: 53, allowedAppDefaultToolkit: 0
+[better-chatbot] ℹ Chat API:  binding tool count APP_DEFAULT: 0, MCP: 26, Workflow: 0
+[better-chatbot] ℹ Chat API:  model: openai/gpt-4.1-mini
+[better-chatbot] ⚙ Chat API:  usage input: 15311, usage output: 13, usage total: 15324
+ POST /api/chat 200 in 3472ms
+ ✓ Compiled in 481ms
+ ✓ Compiled in 421ms
+ GET /api/auth/get-session 200 in 340ms
+ GET /api/thread 200 in 332ms
+ GET /api/auth/get-session 200 in 65ms
+ ✓ Compiled in 903ms
+ ✓ Compiled in 1254ms
+ GET /chat/3f3880a7-40b8-4a84-8c92-026eb6fe90e2 200 in 1718ms
+[better-chatbot] ℹ Using MemoryCache for development
+ GET /api/mcp/list 200 in 644ms
+ GET /api/auth/get-session 200 in 733ms
+ GET /api/thread 200 in 695ms
+ GET /api/archive 200 in 721ms
+ GET /api/workflow/tools 200 in 1199ms
+ GET /api/chat/models 200 in 1211ms
+ GET /api/auth/get-session 200 in 1152ms
+ GET /favicon.ico?favicon.5e5ed972.ico 200 in 330ms
+ ✓ Compiled in 1600ms
+ GET /chat/3f3880a7-40b8-4a84-8c92-026eb6fe90e2 200 in 1011ms
+[better-chatbot] ℹ Using MemoryCache for development
+ GET /api/mcp/list 200 in 783ms
+ GET /api/chat/models 200 in 476ms
+ GET /api/auth/get-session 200 in 810ms
+ GET /api/thread 200 in 965ms
+ GET /api/archive 200 in 987ms
+ GET /api/workflow/tools 200 in 673ms
+ GET /api/auth/get-session 200 in 269ms
+ GET /favicon.ico?favicon.5e5ed972.ico 200 in 468ms
+[better-chatbot] ℹ Chat API:  mcp-server count: 4, mcp-tools count :30
+[better-chatbot] ℹ Chat API:  tool mode: auto, mentions: 0, thinking: false
+[better-chatbot] ℹ Chat API:  allowedMcpTools: 53, allowedAppDefaultToolkit: 0
+[better-chatbot] ℹ Chat API:  binding tool count APP_DEFAULT: 0, MCP: 26, Workflow: 0
+[better-chatbot] ℹ Chat API:  model: openai/gpt-4.1-mini
+[better-chatbot] ⚙ Chat API:  usage input: 15333, usage output: 22, usage total: 15355
+ POST /api/chat 200 in 2586ms

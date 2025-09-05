@@ -24,6 +24,7 @@ import { AIExplanationPopup } from "./components/AIExplanationPopup";
 import { ChatHistorySidebar } from "./components/ChatHistorySidebar";
 import { ChatHistoryTrigger } from "./components/ChatHistoryTrigger";
 import { useAIExplanation } from "./hooks/useAIExplanation";
+import { AssistantLoading } from "../ui/assistant-loading";
 import {
   convertMessagesToTurns,
   filterTurns,
@@ -625,6 +626,13 @@ export function ChatUI({
             refs={refs}
             idx={currentIdx}
           />
+        </SmoothTransition>
+      )}
+
+      {/* Loading indicator when assistant is responding */}
+      {isLoading && (
+        <SmoothTransition isVisible={true} direction="up" delay={100}>
+          <AssistantLoading />
         </SmoothTransition>
       )}
 

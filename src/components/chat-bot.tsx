@@ -305,16 +305,19 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
     }
   }, []);
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    const isStopEvent = isShortcutEvent(e, Shortcuts.stopGeneration);
-    
-    if (isStopEvent && (isLoading || isPendingToolCall)) {
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-      stop();
-    }
-  }, [isLoading, isPendingToolCall, stop]);
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      const isStopEvent = isShortcutEvent(e, Shortcuts.stopGeneration);
+
+      if (isStopEvent && (isLoading || isPendingToolCall)) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        stop();
+      }
+    },
+    [isLoading, isPendingToolCall, stop],
+  );
 
   const [_isScrollingToBottom, setIsScrollingToBottom] = useState(false);
 
@@ -528,6 +531,7 @@ export default function ChatBot({ threadId, initialMessages, slots }: Props) {
                     .map((part) => part.text)
                     .join(" "),
                 }))}
+                isLoading={isLoading}
                 onPoxyToolCall={
                   isPendingToolCall && !isExecutingProxyToolCall
                     ? () => proxyToolCall({ action: "manual", result: true })

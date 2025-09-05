@@ -419,7 +419,8 @@
     "openChatPreferences": "Open Chat Preferences",
     "deleteThread": "Delete Chat",
     "openShortcutsPopup": "Open Shortcuts Popup",
-    "toggleVoiceChat": "Toggle Voice Chat"
+    "toggleVoiceChat": "Toggle Voice Chat",
+    "stopGeneration": "Stop Generation"
   },
   "MCP": {
     "marketplace": "Marketplace",

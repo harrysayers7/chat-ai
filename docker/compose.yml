@@ -4,9 +4,10 @@ services:
       context: ..
       dockerfile: ./docker/Dockerfile
     ports:
-      - '3000:3000'
+      - '3001:3030'
     environment:
       - NO_HTTPS=1
+      - POSTGRES_URL=postgres://chat_ai_user:chat_ai_password@postgres:5432/chat_ai
     env_file:
       - .env
     dns:

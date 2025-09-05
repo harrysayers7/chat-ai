@@ -17,6 +17,7 @@ import {
 import PromptInput from "./prompt-input";
 import { ErrorMessage, PreviewMessage } from "./message";
 import { Settings2, X } from "lucide-react";
+import { AssistantLoading } from "./ui/assistant-loading";
 import { Separator } from "ui/separator";
 import { UIMessage } from "ai";
 import { useShallow } from "zustand/shallow";
@@ -330,6 +331,11 @@ function DrawerTemporaryContent({
         {showThink && (
           <div className="w-full mx-auto max-w-xl px-6">
             <Think />
+          </div>
+        )}
+        {isLoading && !showThink && (
+          <div className="w-full mx-auto max-w-xl px-6">
+            <AssistantLoading />
           </div>
         )}
         {error && <ErrorMessage error={error} />}
